@@ -4,9 +4,9 @@ dist/
 node_modules/
 
 # raw notes, exports and inventories the owner drops in for AI to read — never published
-_note/
-_source/
-cv/
+/_note/
+/_source/
+/cv/
 
 # os / editor
 .DS_Store
