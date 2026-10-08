@@ -1,0 +1,117 @@
+---
+/**
+ * @component TimelineList
+ * @group lists
+ * @summary Everything worth keeping, by year, newest first: each year a large outlined number beside its rows (TimelineRow), and chips above that filter by what it was — competitions, teaching, game, AI, tools, systems, coursework, retired.
+ * @use The /timeline page. The order comes from `timeline()` in src/lib/works.ts (year → month when known → title); the chips from TIMELINE_FILTERS in src/lib/vocab.ts.
+ * @avoid A grid of cards; hiding facts behind hover; a second copy of this list elsewhere (link here instead).
+ * @behavior The year whose rows cross the middle of the screen fills its number with the pale color (the same as the Work reel's current panel); on a wide screen the year holds beside its rows while they pass. Chips use the shared `.sel` grammar; filtering is instant, a year with nothing left hides, and the rows that stay re-enter with a short stagger (none with reduced motion). The chip is kept in the URL (#f=competitions).
+ * @example
+ * <TimelineList filter />
+ */
+import TimelineRow from './TimelineRow.astro';
+import { langOf, tx, t } from '../../lib/i18n';
+import { timeline, when, type Work } from '../../lib/works';
+import { TIMELINE_FILTERS } from '../../lib/vocab';
+export interface Props {
+  filter?: boolean;
+}
+const { filter = false } = Astro.props;
+const lang = langOf(Astro.url);
+const all = await timeline();
+const years = [...new Set(all.map((w) => when(w).y))];
+const byYear = (y: number) => all.filter((w) => when(w).y === y);
+const match = (f: (typeof TIMELINE_FILTERS)[number], w: Work) =>
+  f.key === 'all' || !!f.kinds?.includes(w.data.kind) || !!f.cats?.includes(w.data.cat as never) || !!f.tags?.some((x) => w.data.tags.includes(x)) || !!(w.data.status && f.statuses?.includes(w.data.status));
+const chips = TIMELINE_FILTERS.map((f) => ({ ...f, n: all.filter((w) => match(f, w)).length })).filter((f) => f.n > 0);
+const rules = JSON.stringify(Object.fromEntries(TIMELINE_FILTERS.map((f) => [f.key, { k: f.kinds ?? [], c: f.cats ?? [], t: f.tags ?? [], s: f.statuses ?? [] }])));
+const p2 = (n: number) => String(n).padStart(2, '0');
+---
+<div class="tline" data-rules={rules}>
+  {filter && (
+    <div class="tl-chips" role="group" aria-label={t('filter', lang)}>
+      {chips.map((f, i) => <button type="button" class="tl-chip sel" data-f={f.key} aria-pressed={i === 0 ? 'true' : 'false'}>{tx(f.label, lang)} <span class="num">[{p2(f.n)}]</span></button>)}
+    </div>
+  )}
+  {years.map((y) => (
+    <section class="tl-y" data-year={y} aria-labelledby={`y-${y}`}>
+      <h2 class="tl-yn disp num" id={`y-${y}`}>{y}<span class="tl-yc num">[{p2(byYear(y).length)}]</span></h2>
+      <ol class="tl-rows">{byYear(y).map((w) => <TimelineRow work={w.id} />)}</ol>
+    </section>
+  ))}
+</div>
+
+<style>
+  /* lets the opened row panels animate to their own height (TimelineRow) */
+  .tline { interpolate-size: allow-keywords; }
+  .tl-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(28px, 4vw, 48px); }
+  .tl-chip { --sel-inset: -1px; background: color-mix(in srgb, var(--surface) 70%, transparent); border: 1px solid var(--rule); padding: 8px 12px; cursor: pointer;
+    font: 500 12px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); border-radius: 2px; }
+  :global(:root[lang='th']) .tl-chip, :global(:root[lang='ja']) .tl-chip { font: 500 13px/1 var(--f-body); letter-spacing: 0; }
+  .tl-chip .num { opacity: 0.7; margin-left: 2px; }
+  .tl-chip:hover { border-color: var(--ink2); color: var(--ink); }
+  .tl-chip[aria-pressed='true'] { color: var(--bg); border-color: transparent; }
+
+  .tl-y { display: grid; grid-template-columns: clamp(180px, 22vw, 300px) minmax(0, 1fr); gap: 0 clamp(20px, 3vw, 48px); align-items: start; border-top: 1px solid var(--ink); }
+  .tl-y + .tl-y { margin-top: clamp(40px, 6vw, 80px); }
+  .tl-y[hidden] { display: none; }
+  .tl-yn { position: sticky; top: calc(var(--hdr-h) + 16px); padding-top: 14px; display: flex; align-items: flex-start; gap: 6px;
+    font-size: clamp(64px, 8.4vw, 132px); line-height: 0.86; letter-spacing: -0.02em;
+    color: transparent; -webkit-text-stroke: 1px var(--ink3); transition: color var(--t-enter) var(--e-enter), -webkit-text-stroke-color var(--t-enter); }
+  .tl-y.is-cur .tl-yn { color: color-mix(in srgb, var(--ctxp) 70%, transparent); -webkit-text-stroke-color: var(--ctxs); }
+  .tl-yc { font: 500 12px/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink3); -webkit-text-stroke: 0; margin-top: 0.6em; }
+  .tl-rows { margin: 0; padding: 0; list-style: none; }
+  .tl-rows :global(.tr:first-child) { border-top: 0; }
+  .tl-rows :global(.tr:last-child) { border-bottom: 0; }
+  /* below 1200px the rows need the width: the year goes above its rows instead of beside them */
+  @media (max-width: 1199px) {
+    .tl-y { grid-template-columns: minmax(0, 1fr); }
+    .tl-yn { position: static; font-size: clamp(56px, 12vw, 104px); padding-block: 12px 8px; }
+  }
+</style>
+
+<script>
+  import { onPage, reducedMotion } from '../../scripts/lifecycle';
+  onPage(() => {
+    const list = document.querySelector<HTMLElement>('.tline');
+    if (!list) return;
+    const years = [...list.querySelectorAll<HTMLElement>('.tl-y')];
+    // the year across the middle of the screen is the current one
+    const io = new IntersectionObserver((es) => es.forEach((e) => e.target.classList.toggle('is-cur', e.isIntersecting)), { rootMargin: '-50% 0px -50% 0px' });
+    years.forEach((y) => io.observe(y));
+
+    const chips = list.querySelector('.tl-chips');
+    let off = () => {};
+    if (chips) {
+      const rules = JSON.parse(list.dataset.rules || '{}') as Record<string, { k: string[]; c: string[]; t: string[]; s: string[] }>;
+      const rows = [...list.querySelectorAll<HTMLElement>('.tr')];
+      const apply = (key: string, animate: boolean) => {
+        const r = rules[key] ?? rules.all;
+        if (!rules[key]) key = 'all';
+        chips.querySelectorAll('.tl-chip').forEach((c) => c.setAttribute('aria-pressed', String((c as HTMLElement).dataset.f === key)));
+        let i = 0;
+        for (const row of rows) {
+          const tags = (row.dataset.tags || '').split(' ');
+          const ok = key === 'all' || r.k.includes(row.dataset.kind || '') || r.c.includes(row.dataset.cat || '') || r.t.some((x) => tags.includes(x)) || r.s.includes(row.dataset.status || '');
+          row.hidden = !ok;
+          if (ok && animate && !reducedMotion()) row.animate([{ opacity: 0, transform: 'translateX(-12px)' }, { opacity: 1, transform: 'none' }], { duration: 500, delay: Math.min(i++, 12) * 35, easing: 'cubic-bezier(0.22,1,0.36,1)', fill: 'backwards' });
+        }
+        years.forEach((y) => { y.hidden = !y.querySelector('.tr:not([hidden])'); });
+      };
+      const fromHash = () => location.hash.match(/f=([\w-]+)/)?.[1] ?? 'all';
+      apply(fromHash(), false);
+      const click = (e: Event) => {
+        const c = (e.target as Element).closest<HTMLElement>('.tl-chip'); if (!c) return;
+        const k = c.dataset.f || 'all';
+        history.replaceState(history.state, '', k === 'all' ? location.pathname : `#f=${k}`);
+        apply(k, true);
+      };
+      chips.addEventListener('click', click);
+      off = () => chips.removeEventListener('click', click);
+    }
+    // arriving with #<id> (a link to one entry): open it if it opens in place
+    const target = location.hash && !location.hash.startsWith('#f=') ? document.getElementById(location.hash.slice(1)) : null;
+    target?.querySelector('details')?.setAttribute('open', '');
+    return () => { io.disconnect(); off(); };
+  });
+</script>

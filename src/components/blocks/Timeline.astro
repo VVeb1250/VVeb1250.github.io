@@ -1,0 +1,62 @@
+---
+/**
+ * @component Timeline
+ * @group blocks
+ * @summary Dated events in order — releases, milestones, the path of a contribution. Vertical by default; `horizontal` for up to 6 short entries on wide screens.
+ * @use Versions (0.1.0 → 1.2.0), a hackathon's rounds, when something was used. Dates must be real (YYYY-MM-DD or YYYY-MM).
+ * @avoid Vague dates ("recently"), filler events, more than ~10 entries (split or summarize).
+ * @example
+ * <Timeline items={[
+ *   { date: '2026-08-11', label: '0.1.0', note: { en: 'First npm release.' } },
+ *   { date: '2026-08-12', label: { en: 'First use' }, note: { en: 'In the MSU final: .whipui/project-dna.json in the team repo.' } },
+ *   { date: '2026-09-14', label: '1.2.0', status: 'ACTIVE' }
+ * ]} />
+ */
+import StatusTag from '../primitives/StatusTag.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import type { Status } from '../../lib/vocab';
+export interface Props {
+  items: { date: string; label: L; note?: L; status?: Status; href?: string }[];
+  layout?: 'vertical' | 'horizontal';
+  title?: L;
+}
+const { items, layout = 'vertical', title } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<div class:list={['tl', layout]}>
+  {title && <h3 class="eyebrow l10n">{tx(title, lang)}</h3>}
+  <ol>
+    {items.map((i) => (
+      <li>
+        <time class="num" datetime={i.date}>{i.date}</time>
+        <span class="dot" aria-hidden="true"></span>
+        <div class="body">
+          <span class="lbl">{i.href ? <a href={i.href}>{tx(i.label, lang)}</a> : tx(i.label, lang)}{i.status && <StatusTag status={i.status} />}</span>
+          {i.note && <p>{tx(i.note, lang)}</p>}
+        </div>
+      </li>
+    ))}
+  </ol>
+</div>
+
+<style>
+  .tl { display: grid; gap: 14px; }
+  ol { list-style: none; margin: 0; padding: 0; }
+  time { font: 500 12px/1.6 var(--f-mono); color: var(--ink2); }
+  .lbl { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-weight: 600; }
+  .lbl a { text-decoration-color: var(--ctxs); text-underline-offset: 3px; }
+  p { color: var(--ink2); font-size: 15px; }
+  .dot { width: 9px; height: 9px; background: var(--ctxs); }
+  /* vertical */
+  .vertical li { display: grid; grid-template-columns: 110px 9px minmax(0, 1fr); gap: 0 16px; position: relative; padding-bottom: 20px; }
+  .vertical li::before { content: ''; position: absolute; left: calc(110px + 16px + 4px); top: 14px; bottom: 0; width: 1px; background: var(--rule); }
+  .vertical li:last-child::before { display: none; }
+  .vertical .dot { margin-top: 7px; }
+  @media (max-width: 520px) { .vertical li { grid-template-columns: 9px minmax(0, 1fr); } .vertical time { grid-column: 2; } .vertical .dot { grid-row: 1; grid-column: 1; } .vertical .body { grid-column: 2; } .vertical li::before { left: 4px; } }
+  /* horizontal */
+  .horizontal ol { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 0; }
+  .horizontal li { display: grid; gap: 8px; align-content: start; position: relative; padding-right: 16px; }
+  .horizontal li::before { content: ''; position: absolute; left: 0; right: 0; top: calc(1.6em + 12px); height: 1px; background: var(--rule); }
+  .horizontal .dot { position: relative; margin-top: 8px; }
+  @media (max-width: 760px) { .horizontal ol { grid-auto-flow: row; } .horizontal li::before { display: none; } }
+</style>

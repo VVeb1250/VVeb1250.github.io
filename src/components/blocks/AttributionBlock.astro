@@ -1,0 +1,50 @@
+---
+/**
+ * @component AttributionBlock
+ * @group blocks
+ * @summary Who did what — me, teammates, AI, upstream maintainers, the course — said plainly in a few rows. Text and dividers, not a card.
+ * @use On a work's own page, once, wherever more than one party touched the result (teammates, AI, upstream code, course tools). Put it after the work is shown, before the outcome. Say plainly what AI implemented and what the owner directed, judged and integrated. Home and the Work reel name the role in a few words instead (Story §0.3).
+ * @avoid Hiding AI's part; overstating it into a disclaimer; percentages nobody measured.
+ * @example
+ * <AttributionBlock rows={[
+ *   { who: 'me', did: { en: 'Problem, direction, integration of the real toolchain, what counted as done.' } },
+ *   { who: 'ai', did: { en: 'Most of the implementation, under my steering.' } },
+ *   { who: 'course', did: { en: 'C16.EXE and the Z80 ET-Board simulator (the real tools the workspace runs).' } }
+ * ]} />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+import { ACTOR_LABEL, type Actor } from '../../lib/vocab';
+export interface Props {
+  rows: { who: Actor | L; did: L; note?: L }[];
+  /** Heading, default "Who did what". */
+  title?: L;
+}
+const { rows, title } = Astro.props;
+const lang = langOf(Astro.url);
+const heading = title ? tx(title, lang) : tx({ en: 'Who did what', th: 'ใครทำอะไร', ja: '誰が何をしたか' }, lang);
+const who = (w: Actor | L) => (typeof w === 'string' && w in ACTOR_LABEL ? tx(ACTOR_LABEL[w as Actor], lang) : tx(w as L, lang));
+---
+<section class="attr" aria-label={heading}>
+  <h3 class="eyebrow l10n">{heading}</h3>
+  <dl>
+    {rows.map((r) => (
+      <div class:list={['row', { me: r.who === 'me' }]}>
+        <dt class="eyebrow l10n">{who(r.who)}</dt>
+        <dd><span>{tx(r.did, lang)}</span>{r.note && <small>{tx(r.note, lang)}</small>}</dd>
+      </div>
+    ))}
+  </dl>
+</section>
+
+<style>
+  .attr { display: grid; gap: 12px; max-width: 72ch; }
+  dl { margin: 0; }
+  .row { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-top: 1px solid var(--rule); }
+  .row:last-child { border-bottom: 1px solid var(--rule); }
+  dt { line-height: 1.9; }
+  .me dt { color: var(--ink); }
+  .me dt::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--ctxs); margin-right: 8px; vertical-align: middle; }
+  dd { margin: 0; display: grid; gap: 2px; font-size: 16px; }
+  small { font-size: 13px; color: var(--ink2); }
+  @media (max-width: 520px) { .row { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+</style>

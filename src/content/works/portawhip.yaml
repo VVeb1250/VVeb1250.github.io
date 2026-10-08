@@ -1,0 +1,15 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §4.2.
+title: "portawhip"
+cat: tool
+year: 2026
+date: "2026-08"
+type: HARNESS
+status: RETIRED
+line:
+  en: "A portable agent harness. 108 commits and 7 releases, retired on 12 August 2026."
+  th: "agent harness แบบพกพา มี 108 commit และ 7 release ปลดระวางเมื่อ 12 ส.ค. 2026"
+  ja: "持ち運べるエージェントハーネス。108コミット、7リリース。2026年8月12日に引退。"
+tags: [lab]
+links:
+  - { kind: github, url: "https://github.com/VVeb1250/portawhip", label: GitHub (archived) }
+sources: [portfolio-facts §4.2, GitHub repo checked 2026-09-30]

@@ -1,0 +1,14 @@
+# Timeline row only; it opens the 2025 part of the ICPC page. Facts: _note/portfolio-facts.md §6.3.
+title: ICPC Thailand
+kind: competition
+cat: self
+theme: icpc25
+year: 2025
+type: COMPETITIVE PROGRAMMING · NATIONAL
+opens: /timeline/icpc/#y2025
+line:
+  en: Back at the national contest with team Egg E Egg Egg. No award this time.
+  ja: "チーム Egg E Egg Egg で全国大会に再び出場。今回は受賞できませんでした。"
+  th: "กลับมาแข่งระดับชาติอีกครั้งกับทีม Egg E Egg Egg รอบนี้ไม่ได้รับรางวัล"
+tags: [team]
+sources: [portfolio-facts §6.3, "media-candidates/icpc/2025-badge-story.heic"]

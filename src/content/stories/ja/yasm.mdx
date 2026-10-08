@@ -1,0 +1,41 @@
+---
+work: yasm
+recipe: tool-in-use
+summary: Assembly YASM Helper — VS Code で YASM と NASM をサポートし、独自の language server を備えます。Roncho 氏の TASM 拡張から発展しました。
+---
+
+{/* Facts §2.5. Built on Roncho's TASM extension (credit stays prominent). Capture captions say what each shows. */}
+
+<ProjectHeader work="yasm" layout="split" roles={['方向性', 'Language server']}>
+  <MediaFrame slot="media" src="yasm/preview.webp" alt={{ en: 'VS Code editor with YASM highlighting and the status bar showing YASM ok', ja: 'YASM のハイライトと、ステータスバーに「YASM ok」と表示された VS Code のエディタ' }} frame="screen" width="wide" eager
+    caption={{ en: 'YASM highlighting, and the status bar reporting “YASM ok”.', ja: 'YASM のハイライトと、ステータスバーの「YASM ok」表示。' }} />
+</ProjectHeader>
+
+<ProjectContext label={{ en: 'Why', ja: '理由' }} lead={{ en: 'Writing YASM felt bare and harder than it needed to be.', ja: 'YASM を書くと、物足りず、必要以上に手間がかかると感じていました。' }}>
+  <p>自分の作業の進め方に合う YASM 拡張がなかったため、Roncho 氏の TASM 拡張を拡張しました。機能が増え、ほぼ新しい拡張と呼べる規模になりました。</p>
+</ProjectContext>
+
+<SplitScroll steps={[
+  { title: { en: 'Autocomplete', ja: 'オートコンプリート' }, text: { en: 'Suggestions while writing, inside the assembly file.', ja: '書きながら、アセンブリファイル内で候補を表示します。' },
+    src: 'yasm/autocomplete.webp', alt: { en: 'Autocomplete list in a YASM file', ja: 'YASM ファイルのオートコンプリート候補一覧' }, source: { en: 'VS Code' } },
+  { title: { en: 'Hover' }, text: { en: 'Hovering a label shows its documentation comment.', ja: 'ラベルにカーソルを合わせると、ドキュメントコメントを表示します。' },
+    src: 'yasm/hover.webp', alt: { en: 'Hover card showing a label’s documentation comment', ja: 'ラベルのドキュメントコメントを表示するホバーカード' }, source: { en: 'VS Code' } }
+]} />
+
+## できること
+
+Autocomplete · hover · go to definition · cross-file extern · references · rename · symbols · signature help · folding · diagnostics · ビルドと実行 · デバッガ連携 · コンパイラチェック · 複数ファイルのワークスペース · 単独で動く language server `assembly-yasm-lsp`
+
+<div class="readouts">
+  <Readout value={155} unit={{ en: 'installs', ja: '件' }} label={{ en: 'on the VS Code Marketplace', ja: 'VS Code Marketplace' }} source={{ en: 'Marketplace · 26 Sep 2026', ja: 'Marketplace · 2026年9月26日' }} />
+  <Readout value={28} unit={{ en: 'releases', ja: 'リリース' }} label={{ en: '22 Feb – 2 Apr 2026', ja: '2026年2月22日〜4月2日' }} source={{ en: 'GitHub' }} />
+</div>
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Decided which language features should exist, added the standalone language server, and maintain it.', ja: 'どの言語機能を用意するかを決め、単独で動く language server を追加して保守しています。' } },
+  { who: 'ai', did: { en: 'Implemented much of it, under my direction.', ja: 'その多くを、私の指示のもとで実装しました。' } },
+  { who: 'upstream', did: { en: 'Built on Roncho’s TASM extension — the foundation of the codebase.', ja: 'Roncho 氏の TASM 拡張の上に構築しています。コードベースの土台です。' } }
+]} />
+
+<OutcomeBlock outcome={{ en: 'Complete. Used by me and friends; fixed when something breaks.', ja: '完成しています。私と友人が使い、不具合があれば修正します。' }}
+  current={{ en: '155 Marketplace installs (26 Sep 2026) — installs, not active users.', ja: 'Marketplace でのインストール155件（2026年9月26日時点）。インストール数であり、アクティブユーザー数ではありません。' }} />

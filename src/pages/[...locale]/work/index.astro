@@ -1,0 +1,171 @@
+---
+/**
+ * /work — the showcase. The works side by side on one track (WorkReel), each in its own composition, then the making
+ * material (sheets, frames, captures) and the way into the Timeline. Facts: every line comes from the work's YAML or
+ * from wording already checked against _note/portfolio-facts.md on the work pages. Voice: Story §0.3 — plain, no slogans.
+ */
+import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import PageShell from '../../../layouts/PageShell.astro';
+import WorkReel from '../../../components/blocks/WorkReel.astro';
+import FrameStepper from '../../../components/media/FrameStepper.astro';
+import VideoEmbed from '../../../components/media/VideoEmbed.astro';
+import GoLink from '../../../components/primitives/GoLink.astro';
+import SectionHeader from '../../../components/shell/SectionHeader.astro';
+import ReelVaja from '../../../components/showcase/ReelVaja.astro';
+import ReelZ80 from '../../../components/showcase/ReelZ80.astro';
+import ReelOSS from '../../../components/showcase/ReelOSS.astro';
+import ReelMSU from '../../../components/showcase/ReelMSU.astro';
+import ReelMemory from '../../../components/showcase/ReelMemory.astro';
+import ReelWhipUI from '../../../components/showcase/ReelWhipUI.astro';
+import ReelYASM from '../../../components/showcase/ReelYASM.astro';
+import ReelPrep from '../../../components/showcase/ReelPrep.astro';
+import ReelDrawing from '../../../components/showcase/ReelDrawing.astro';
+import { localePaths, langOf, tx, href } from '../../../lib/i18n';
+import { img, lqStyle } from '../../../lib/media';
+import { work, allWorks, workHref, ctxOf } from '../../../lib/works';
+import { SHOWCASE, type ShowcaseId } from '../../../lib/site';
+
+export const getStaticPaths = () => localePaths();
+const lang = langOf(Astro.url);
+const T = { en: 'Work', th: 'ผลงาน', ja: '作品' };
+
+// one panel component per showcase work (src/components/showcase/); the order is SHOWCASE in src/lib/site.ts
+const PANELS = {
+  vaja: ReelVaja, z80: ReelZ80, oss: ReelOSS, msu: ReelMSU, memory: ReelMemory, whipui: ReelWhipUI, yasm: ReelYASM, z80prep: ReelPrep, drawing: ReelDrawing
+} satisfies Record<ShowcaseId, unknown>;
+const INDEX = await Promise.all(SHOWCASE.map(async (id, i) => {
+  const w = await work(id), d = w.data;
+  return { id, n: String(i + 1).padStart(2, '0'), title: d.title, type: d.type, year: d.year, cat: d.cat, ctx: ctxOf(w) };
+}));
+// the making material is each work's own: its project color (the index list keeps the kind's color)
+const ctx: Record<string, string> = Object.fromEntries(INDEX.map((i) => [i.id, i.ctx]));
+const total = (await allWorks()).length;
+
+// the making material: sheets, frames, captures (captions from the work pages)
+const making = await Promise.all([
+  { key: 'vaja/sheet-forest.webp', work: 'vaja', cls: 'mk-sheet', cap: { en: 'Forest map-art sheet · the pieces a scene is built from', th: 'ชีต map-art ป่า · ชิ้นส่วนที่ประกอบเป็นฉาก', ja: '森のマップアートのシート · シーンを組み立てるピース' }, alt: { en: 'Forest map-art sheet: ground strips, grass, rocks, stone slabs, plants, branches, trunks and trees, each on its own', th: 'ชีต map-art ป่า: แถบพื้น หญ้า หิน แผ่นหิน ต้นไม้ กิ่งไม้ ลำต้น และต้นไม้ แยกกันแต่ละชิ้น', ja: '森のマップアートのシート：地面の帯、草、岩、石板、植物、枝、幹、木が、それぞれ単独で並ぶ' }, sizes: '(max-width: 1023px) 92vw, 32vw' },
+  { key: 'vaja/scene-westbrook.webp', work: 'vaja', cls: 'mk-scene', cap: { en: 'Westbrook Stonescape · a scene composed from the map art', th: 'Westbrook Stonescape · ฉากที่ประกอบจาก map art', ja: 'Westbrook Stonescape · マップアートから組み立てたシーン' }, alt: { en: 'Westbrook Stonescape scene from Journey of Vaja', th: 'ฉาก Westbrook Stonescape จาก Journey of Vaja', ja: 'Journey of Vaja の Westbrook Stonescape のシーン' }, sizes: '(max-width: 1023px) 92vw, 38vw' },
+  { key: 'drawing/13_nov_24.webp', work: 'drawing', cls: 'mk-study', cap: { en: 'Character redraws and handwritten notes', th: 'วาดตัวละครใหม่และโน้ตลายมือ', ja: 'キャラクターの描き直しと手書きのメモ' }, alt: { en: 'Character redraws with red handwritten observations beside them', th: 'วาดตัวละครใหม่ มีบันทึกลายมือสีแดงอยู่ข้างๆ', ja: '赤い手書きの観察メモが横にある、キャラクターの描き直し' }, sizes: '(max-width: 1023px) 92vw, 440px' },
+  { key: 'z80/live-compile-to-simulator.webp', work: 'z80', cls: 'mk-z80', cap: { en: 'Z80 Workspace · source, C16 “No Errors” and the machine code in memory at 2000h', th: 'Z80 Workspace · ซอร์ส C16 “No Errors” และโค้ด machine ในหน่วยความจำที่ 2000h', ja: 'Z80 Workspace · ソース、C16 の「No Errors」、2000h のメモリ上の機械語' }, alt: { en: 'Z80 Workspace with source, the C16 console and the simulator memory view', th: 'Z80 Workspace มีซอร์ส console ของ C16 และมุมมองหน่วยความจำของ simulator', ja: 'ソース、C16 のコンソール、シミュレータのメモリ表示がある Z80 Workspace' }, sizes: '(max-width: 1023px) 92vw, 62vw' },
+  { key: 'yasm/preview.webp', work: 'yasm', cls: 'mk-yasm', cap: { en: 'Assembly YASM Helper · YASM highlighting, status bar “YASM ok”', th: 'Assembly YASM Helper · YASM highlighting และ status bar “YASM ok”', ja: 'Assembly YASM Helper · YASM のハイライトと「YASM ok」のステータスバー' }, alt: { en: 'VS Code editor with YASM highlighting and the status bar showing YASM ok', th: 'VS Code ที่มี YASM highlighting และ status bar ขึ้น YASM ok', ja: 'YASM のハイライトと、ステータスバーに「YASM ok」と表示された VS Code のエディタ' }, sizes: '(max-width: 1023px) 92vw, 32vw' }
+].map(async (s) => {
+  const m = img(s.key);
+  const big = await getImage({ src: m, width: Math.min(2000, m.width), format: 'webp' });
+  return { ...s, m, big: big.src, lq: await lqStyle(m) };
+}));
+const w = (m: ImageMetadata, list: number[]) => list.filter((x) => x <= m.width).concat(m.width < list[0] ? [m.width] : []);
+---
+<PageShell title={tx(T, lang)} nav="work" description="Journey of Vaja, Z80 Workspace, open-source fixes, the MSU hackathon win and more.">
+  <div class="wrap">
+    <header class="wk-top" data-mark={tx(T, lang)}>
+      <h1 class="disp wk-t" data-mark-trigger>{tx(T, lang)}<span class="wk-count num">[{String(SHOWCASE.length).padStart(2, '0')}]</span></h1>
+      <ol class="wk-index">
+        {INDEX.map((i) => (
+          <li data-cat={i.cat}>
+            <a href={`#w-${i.id}`}>
+              <span class="num wi-n">{i.n}</span>
+              <span class="wi-t">{i.title}</span>
+              <span class="eyebrow wi-y">{i.type} · {i.year}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </header>
+  </div>
+
+  <WorkReel>
+    {SHOWCASE.map((id) => { const Panel = PANELS[id]; return <Panel />; })}
+  </WorkReel>
+
+  <div class="wrap">
+    <section id="making" class="mk" data-mark={tx({ en: 'Making', th: 'งานที่ทำ', ja: '制作' }, lang)}>
+      <SectionHeader title={{ en: 'Sheets, frames, captures', th: 'ชิ้นส่วน เฟรม และภาพจากหน้าจอ', ja: 'シート・フレーム・キャプチャ' }} />
+      <p class="mk-hint">{tx({ en: 'Open an image in a new tab to see it large.', th: 'กดรูปเพื่อเปิดในแท็บใหม่และดูแบบใหญ่', ja: '画像を新しいタブで大きく表示します。' }, lang)}</p>
+      {['vaja', 'drawing', 'tools'].map((group) => (
+        <section class={`mk-group mk-${group}`} aria-labelledby={`mk-${group}-title`}>
+          <header class="mk-heading">
+            <h3 id={`mk-${group}-title`}>{group === 'vaja' ? 'Journey of Vaja' : group === 'drawing' ? 'Drawing' : tx({ en: 'Tools', th: 'เครื่องมือ', ja: 'ツール' }, lang)}</h3>
+            {group !== 'tools' && <a class="mk-project" href={workHref(group, lang)} data-vt="deeper"><GoLink label={{ en: group === 'drawing' ? 'Open sketchbook' : 'Open project', th: group === 'drawing' ? 'เปิดสมุดสเก็ตช์' : 'เปิดดูงาน', ja: group === 'drawing' ? 'スケッチブックを開く' : '作品を開く' }} /></a>}
+          </header>
+          <div class="mk-material">
+            {making.filter((s) => group === 'tools' ? ['z80', 'yasm'].includes(s.work) : s.work === group).map((s) => (
+              <figure class={`mk-i ${s.cls}`} data-cat={ctx[s.work]}>
+                <a class="mk-image" href={s.big} target="_blank" rel="noopener" aria-label={`${tx({ en: 'Open image in a new tab', th: 'เปิดรูปในแท็บใหม่', ja: '新しいタブで画像を開く' }, lang)}: ${tx(s.alt, lang)}`}>
+                  <Image src={s.m} alt={tx(s.alt, lang)} style={s.lq} data-lq widths={w(s.m, [480, 800, 1200, 1600])} sizes={s.sizes} loading="lazy" />
+                </a>
+                <figcaption>{tx(s.cap, lang)}</figcaption>
+                {group === 'tools' && <a class="mk-project" href={workHref(s.work, lang)} data-vt="deeper"><GoLink label={{ en: s.work === 'z80' ? 'Open Z80 Workspace' : 'Open YASM Helper', th: s.work === 'z80' ? 'เปิด Z80 Workspace' : 'เปิด YASM Helper', ja: s.work === 'z80' ? 'Z80 Workspace を開く' : 'YASM Helper を開く' }} /></a>}
+              </figure>
+            ))}
+            {group === 'vaja' && (
+              <figure class="mk-i mk-run" data-cat={ctx.vaja}>
+                <FrameStepper strips={[{ src: 'vaja/strip-run.webp', frames: 8, name: 'Vaja · run', fps: 12 }]} />
+                <figcaption>{tx({ en: 'Run cycle · 8 frames from the rig, exported at 12 fps', th: 'Run cycle · 8 เฟรมจาก rig ส่งออกที่ 12 fps', ja: 'Run cycle · リグから書き出した8フレーム、12 fps' }, lang)}</figcaption>
+              </figure>
+            )}
+            {group === 'drawing' && (
+              <figure class="mk-i mk-process" data-cat={ctx.drawing}>
+                <VideoEmbed src="drawing/standing-process.mp4" poster="drawing/standing.webp" label={{ en: 'Drawing timelapse of the full-length character in a black and white dress', th: 'ไทม์แลปส์การวาดตัวละครเต็มตัว ชุดเดรสขาวดำ', ja: '白黒のドレスの全身のキャラクターを描くタイムラプス' }} />
+                <figcaption>{tx({ en: 'Drawing timelapse · the character in a black and white dress', th: 'ไทม์แลปส์การวาด · ตัวละครชุดเดรสขาวดำ', ja: 'タイムラプス · 白黒のドレスのキャラクター' }, lang)}</figcaption>
+              </figure>
+            )}
+          </div>
+        </section>
+      ))}
+    </section>
+
+    <a class="wk-archive" href={href('/timeline/', lang)}>
+      <span class="eyebrow">{tx({ en: 'Everything by year — with competitions and teaching', th: 'ทุกอย่างตามปี — รวมการแข่งขันและการสอน', ja: '年ごとのすべて — 大会と指導も' }, lang)}</span>
+      <span class="disp wa-t">{tx({ en: 'Timeline', th: 'ไทม์ไลน์', ja: '年表' }, lang)} <span class="num wa-n">[{total}]</span></span>
+      <GoLink lineOnly />
+    </a>
+  </div>
+</PageShell>
+
+<style>
+  /* ---------- top: the word, and the index of what follows ---------- */
+  .wk-top { padding-block: clamp(40px, 6vw, 88px) clamp(40px, 5vw, 64px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 32px clamp(32px, 6vw, 96px); align-items: end; }
+  .wk-t { font-size: clamp(88px, 17vw, 248px); line-height: 0.82; letter-spacing: -0.02em; display: flex; align-items: flex-start; gap: 0.08em; }
+  .wk-count { font: 500 clamp(14px, 1.3vw, 18px)/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink3); margin-top: 0.4em; }
+  .wk-index { list-style: none; border-top: 1px solid var(--ink); }
+  .wk-index a { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 9px 4px; border-bottom: 1px solid var(--rule); text-decoration: none; color: inherit; position: relative; }
+  .wi-n { font: 500 12px/1 var(--f-mono); color: var(--ink3); }
+  .wi-t { font-family: var(--f-disp); font-stretch: var(--disp-stretch); font-weight: 600; font-size: 20px; line-height: 1.1; }
+  .wi-y { color: var(--ink3); }
+  .wk-index a::before { content: ''; position: absolute; left: 0; top: 0; bottom: -1px; width: 3px; background: var(--ctxs); transform: scaleY(0); transform-origin: 50% 100%; transition: transform var(--t-line) var(--e-enter); }
+  .wk-index a:hover::before, .wk-index a:focus-visible::before { transform: scaleY(1); }
+  .wk-index a:hover .wi-n { color: var(--ctxs); }
+  @media (max-width: 900px) { .wk-top { grid-template-columns: minmax(0, 1fr); } .wi-y { display: none; } }
+
+  /* ---------- making: sheets, frames, captures ---------- */
+  .mk { margin-top: var(--space-section); }
+  .mk-hint { margin-top: 12px; font: 500 11px/1.5 var(--f-mono); color: var(--ink3); }
+  .mk-group { margin-top: clamp(32px, 5vw, 64px); }
+  .mk-group + .mk-group { margin-top: var(--space-block); }
+  .mk-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px 24px; flex-wrap: wrap; border-top: 1px solid var(--rule); padding-top: 14px; margin-bottom: 24px; }
+  .mk-heading h3 { font: 500 13px/1.5 var(--f-mono); color: var(--ink2); }
+  .mk-project { display: inline-flex; align-items: center; width: fit-content; min-height: 44px; padding-block: 8px; text-decoration: none; }
+  .mk-material { display: grid; gap: clamp(20px, 3vw, 40px); align-items: start; }
+  .mk-vaja .mk-material { grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(0, 3fr); }
+  .mk-drawing .mk-material { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 900px; margin-inline: auto; }
+  .mk-tools .mk-material { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+  .mk-i { min-width: 0; margin: 0; display: grid; gap: 8px; }
+  .mk-image { display: block; cursor: zoom-in; outline-offset: 5px; }
+  .mk-image:hover :global(img), .mk-image:focus-visible :global(img) { border-color: var(--ctxs); }
+  .mk-i :global(img) { display: block; width: 100%; height: auto; border: 1px solid var(--rule); background: var(--surface); }
+  .mk-i :global(video) { border: 1px solid var(--rule); }
+  .mk-i figcaption { font: 500 11px/1.45 var(--f-mono); color: var(--ink3); max-width: 52ch; }
+  @media (max-width: 1023px) {
+    .mk-vaja .mk-material, .mk-drawing .mk-material, .mk-tools .mk-material { grid-template-columns: minmax(0, 1fr); }
+    .mk-run { max-width: 340px; }
+    .mk-drawing .mk-material { max-width: 440px; }
+  }
+
+  /* ---------- the way into the Timeline ---------- */
+  .wk-archive { margin-top: var(--space-section); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px 24px; padding-block: 28px 12px; border-top: 1px solid var(--ink); color: inherit; text-decoration: none; }
+  .wk-archive .eyebrow { grid-column: 1 / -1; }
+  .wa-t { font-size: clamp(56px, 9vw, 140px); line-height: 0.9; }
+  .wa-n { font: 500 clamp(14px, 1.3vw, 18px)/1 var(--f-mono); color: var(--ink3); vertical-align: top; }
+  .wk-archive:hover .wa-t { color: var(--acc); }
+</style>

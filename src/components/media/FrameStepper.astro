@@ -1,0 +1,83 @@
+---
+/**
+ * @component FrameStepper
+ * @group media
+ * @summary Real animation frames from a sprite strip, stepped one at a time (← →) or played at the clip's own fps. Several strips sit side by side.
+ * @use Game/character animation, UI motion studies — anything where the frames themselves are the evidence.
+ * @avoid Re-drawing frames that are not from the build; GIFs (heavier and cannot be paused).
+ * @behavior Buttons: previous, next, play/pause (a `.sel` toggle: the charcoal block sweeps in while playing), plus arrow keys when a panel has focus. Plays only while on screen; reduced motion: never autoplays.
+ * @example
+ * <FrameStepper strips={[
+ *   { src: 'vaja/strip-attack1-padded.webp', frames: 10, name: 'Vaja · attack1', fps: 12, start: 7 },
+ *   { src: 'vaja/strip-run.webp', frames: 8, name: 'Vaja · run', fps: 12 }
+ * ]} />
+ */
+import { getImage } from 'astro:assets';
+import { langOf, t } from '../../lib/i18n';
+import { img } from '../../lib/media';
+export interface Props {
+  strips: { src: string; frames: number; name: string; fps?: number; start?: number }[];
+}
+const { strips } = Astro.props;
+const lang = langOf(Astro.url);
+const data = await Promise.all(strips.map(async (s) => {
+  const m = img(s.src);
+  const url = (await getImage({ src: m, format: 'webp', width: Math.min(m.width, 4800) })).src;
+  return { ...s, url, ar: `${m.width / s.frames}/${m.height}`, start: Math.min(s.start ?? 0, s.frames - 1) };
+}));
+---
+<div class="stps">
+  {data.map((s) => (
+    <div class="stp" data-n={s.frames} data-i={s.start} data-fps={s.fps ?? 12} tabindex="0" role="group" aria-label={s.name}>
+      <div class="stp-v" role="img" aria-label={`${s.name}`} style={`background-image:url(${s.url});aspect-ratio:${s.ar};--n:${s.frames};--i:${s.start}`}></div>
+      <div class="stp-c">
+        <button type="button" data-d="-1" aria-label="previous frame">←</button>
+        <button type="button" class="sel" data-play aria-pressed="false">{t('play', lang)}</button>
+        <button type="button" data-d="1" aria-label="next frame">→</button>
+        <span class="num stp-count"><b>{String(s.start + 1).padStart(2, '0')}</b> / {String(s.frames).padStart(2, '0')}</span>
+      </div>
+      <p class="stp-n">{s.name} · {s.fps ?? 12} fps</p>
+    </div>
+  ))}
+</div>
+
+<style>
+  .stps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .stp { display: grid; gap: 8px; align-content: end; background: var(--sunk); border: 1px solid var(--rule); padding: 10px; outline-offset: 2px; }
+  .stp-v { width: 100%; background-repeat: no-repeat; background-size: calc(var(--n) * 100%) 100%; background-position-x: calc(var(--i) / (var(--n) - 1) * 100%); image-rendering: auto; }
+  .stp-c { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  button { background: none; border: 1px solid var(--rule); min-width: 32px; height: 30px; padding: 0 8px; cursor: pointer; border-radius: 2px; color: var(--ink); font: 500 12px/1 var(--f-mono); }
+  button:hover { border-color: var(--ink2); }
+  button.sel { --sel-inset: -1px; }
+  button[aria-pressed='true'] { color: var(--bg); border-color: transparent; } /* the block comes from .sel */
+  .stp-count { font: 500 12px/1 var(--f-mono); color: var(--ink2); margin-left: 4px; }
+  .stp-count b { color: var(--ink); }
+  .stp-n { font: 500 11px/1.3 var(--f-mono); letter-spacing: 0.04em; color: var(--ink2); }
+</style>
+
+<script>
+  import { onPage, reducedMotion } from '../../scripts/lifecycle';
+  onPage(() => {
+    const panels = [...document.querySelectorAll<HTMLElement>('.stp')];
+    const timers = new Map<HTMLElement, number>();
+    const set = (p: HTMLElement, i: number) => {
+      const n = +p.dataset.n!; const k = ((i % n) + n) % n; p.dataset.i = String(k);
+      p.querySelector<HTMLElement>('.stp-v')!.style.setProperty('--i', String(k));
+      p.querySelector('.stp-count b')!.textContent = String(k + 1).padStart(2, '0');
+    };
+    const stop = (p: HTMLElement) => { clearInterval(timers.get(p)); timers.delete(p); p.querySelector('[data-play]')?.setAttribute('aria-pressed', 'false'); };
+    const play = (p: HTMLElement) => { if (reducedMotion()) return; stop(p); timers.set(p, window.setInterval(() => set(p, +p.dataset.i! + 1), 1000 / +(p.dataset.fps || 12))); p.querySelector('[data-play]')?.setAttribute('aria-pressed', 'true'); };
+    const click = (e: Event) => {
+      const b = (e.target as Element).closest('button'); const p = b?.closest<HTMLElement>('.stp'); if (!b || !p) return;
+      if (b.hasAttribute('data-play')) { timers.has(p) ? stop(p) : play(p); return; }
+      stop(p); set(p, +p.dataset.i! + +(b.getAttribute('data-d') || 0));
+    };
+    const key = (e: KeyboardEvent) => {
+      const p = (e.target as Element).closest<HTMLElement>('.stp'); if (!p || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+      e.preventDefault(); stop(p); set(p, +p.dataset.i! + (e.key === 'ArrowRight' ? 1 : -1));
+    };
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (!e.isIntersecting) stop(e.target as HTMLElement); }));
+    panels.forEach((p) => { p.addEventListener('click', click); p.addEventListener('keydown', key); io.observe(p); });
+    return () => { io.disconnect(); panels.forEach((p) => { stop(p); p.removeEventListener('click', click); p.removeEventListener('keydown', key); }); };
+  });
+</script>

@@ -1,0 +1,63 @@
+---
+/**
+ * @component ContactCard
+ * @group home
+ * @summary The end of the road for a reader who wants to reach the owner: what the owner is looking for (one line, their words), the email with a copy button, the real profile links, and an optional CV download.
+ * @use Once, at the end of About (and optionally the end of Home). Values come from src/lib/site.ts — edit them there, not here.
+ * @avoid Contact forms (static site, no backend); social icons for accounts that are not used; "hire me" slogans; a CV link without a real file in public/.
+ * @props-note `cv` is a path under public/, e.g. '/cv/teethawat-kumying.pdf' — leave it out until the file exists.
+ * @example
+ * <ContactCard looking={{ en: 'A game dev or AI engineering internship.' }} />
+ */
+import CopyText from '../primitives/CopyText.astro';
+import { SITE } from '../../lib/site';
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  /** What the owner is looking for, in their words. */
+  looking?: L;
+  /** Path to a CV file under public/. */
+  cv?: string;
+  title?: L;
+}
+const { looking, cv, title } = Astro.props;
+const lang = langOf(Astro.url);
+const T = {
+  title: { en: 'Contact', th: 'ติดต่อ', ja: '連絡先' },
+  looking: { en: 'Looking for', th: 'กำลังหา', ja: '募集' },
+  mail: { en: 'Email', th: 'อีเมล', ja: 'メール' },
+  cv: { en: 'Download CV', th: 'ดาวน์โหลด CV', ja: '履歴書をダウンロード' }
+};
+---
+<section class="cc" data-cat="self">
+  <h2 class="cc-t disp">{tx(title ?? T.title, lang)}</h2>
+  {looking && (
+    <p class="cc-look"><span class="eyebrow l10n">{tx(T.looking, lang)}</span><span>{tx(looking, lang)}</span></p>
+  )}
+  <div class="cc-mail">
+    <span class="eyebrow l10n">{tx(T.mail, lang)}</span>
+    <a class="cc-addr" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    <CopyText text={SITE.email} />
+  </div>
+  <ul class="cc-links">
+    {SITE.links.map((l) => (
+      <li><a href={l.url} rel="me noopener"><span class="num">{l.label}</span><span class="cc-note">{l.note}</span><span aria-hidden="true">↗</span></a></li>
+    ))}
+    {cv && <li><a href={cv} download><span class="num">CV</span><span class="cc-note">{tx(T.cv, lang)}</span><span aria-hidden="true">↓</span></a></li>}
+  </ul>
+</section>
+
+<style>
+  .cc { display: grid; gap: 20px; padding: clamp(24px, 4vw, 44px); border: 1px solid var(--rule); background: color-mix(in srgb, var(--surface) 72%, transparent); position: relative; }
+  .cc::before { content: ''; position: absolute; left: -1px; top: -1px; width: 56px; height: 3px; background: var(--acc); }
+  .cc-t { font-size: clamp(34px, 4.4vw, 56px); line-height: 1; }
+  .cc-look { display: grid; gap: 4px; font-size: clamp(18px, 1.8vw, 22px); max-width: 40ch; }
+  .cc-mail { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+  .cc-mail .eyebrow { flex-basis: 100%; }
+  .cc-addr { font: 500 clamp(16px, 1.6vw, 20px)/1.2 var(--f-mono); color: var(--ink); text-decoration: none; }
+  .cc-addr:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--acc); }
+  .cc-links { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--rule); }
+  .cc-links a { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--rule); color: var(--ink); text-decoration: none; transition: padding-left var(--t-cursor) var(--e-enter); }
+  .cc-links a:hover, .cc-links a:focus-visible { padding-left: 8px; }
+  .cc-links .num { font: 500 12px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .cc-note { color: var(--ink2); font-size: 15px; }
+</style>

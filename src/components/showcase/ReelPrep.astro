@@ -1,0 +1,29 @@
+---
+/**
+ * @component ReelPrep
+ * @group showcase
+ * @summary z80-exam-prep on the Work reel: the lessons page itself.
+ * @use Inside WorkReel, once.
+ * @avoid Inventing a usage number.
+ * @behavior Static.
+ * @example
+ * <ReelPrep />
+ */
+import { Image } from 'astro:assets';
+import ReelPanel from './ReelPanel.astro';
+import { langOf, tx } from '../../lib/i18n';
+import { img, lqStyle } from '../../lib/media';
+const lang = langOf(Astro.url);
+const m = img('z80/exam-prep.webp');
+const lq = await lqStyle(m);
+---
+<ReelPanel work="z80prep">
+  <figure class="v-prep">
+    <Image src={m} alt={tx({ en: 'z80-exam-prep start page with chapter 0 and the first exercises', th: 'หน้าเริ่มต้นของ z80-exam-prep มีบท 0 และแบบฝึกแรกๆ', ja: 'z80-exam-prep のスタートページ。0章と最初の演習' }, lang)} style={lq} data-lq widths={[800, 1200, 1600]} sizes="(max-width: 1023px) 90vw, 720px" loading="lazy" />
+  </figure>
+</ReelPanel>
+
+<style>
+  .v-prep { margin: 0; }
+  .v-prep :global(img) { display: block; width: auto; max-width: 100%; height: auto; max-height: var(--rp-vh, none); border: 1px solid var(--rule); margin-left: auto; }
+</style>

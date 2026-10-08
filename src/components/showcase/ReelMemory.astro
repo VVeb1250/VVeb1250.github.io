@@ -1,0 +1,32 @@
+---
+/**
+ * @component ReelMemory
+ * @group showcase
+ * @summary Memory Base on the Work reel: still an experiment — the system sketch (labelled a sketch) and where it stands, with a way to the notes.
+ * @use Inside WorkReel, once. The sketch is MEMORY_SKETCH in src/lib/facts.ts, shared with the notes page.
+ * @avoid Presenting the sketch as the final architecture or as a result; any superiority claim.
+ * @behavior Static; the diagram scrolls sideways inside itself on narrow screens (FlowDiagram).
+ * @example
+ * <ReelMemory />
+ */
+import ReelPanel from './ReelPanel.astro';
+import FlowDiagram from '../media/FlowDiagram.astro';
+import { langOf, tx } from '../../lib/i18n';
+import { work, metaLabel } from '../../lib/works';
+import { MEMORY_SKETCH } from '../../lib/facts';
+const lang = langOf(Astro.url);
+const d = (await work('memory')).data;
+---
+<ReelPanel work="memory">
+  <dl class="meta" slot="txt">{d.meta.map((m) => <div><dt class="eyebrow">{metaLabel(m.k, lang)}</dt><dd>{tx(m.v, lang)}</dd></div>)}</dl>
+  <div class="v-mem">
+    <FlowDiagram n="01" caption={MEMORY_SKETCH.caption} note={MEMORY_SKETCH.note} nodes={MEMORY_SKETCH.nodes} edges={MEMORY_SKETCH.edges} />
+  </div>
+</ReelPanel>
+
+<style>
+  .meta { display: grid; gap: 6px; font-size: 14px; }
+  .meta div { display: flex; gap: 12px; align-items: baseline; }
+  dd { margin: 0; }
+  .v-mem { width: 100%; }
+</style>

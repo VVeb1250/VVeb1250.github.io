@@ -1,0 +1,115 @@
+---
+/**
+ * @component ScrollStepper
+ * @group blocks
+ * @summary sen's pinned stepper: one subject held on screen while scrolling picks its states one by one — `[02] – [03]`, a dot row with a ring on the selected state, "Selected: Westbrook". Each change is the site's image swap (src/scripts/wipe.ts): a block in the work's signal color sweeps over the state on show, the next state sweeps in as the block leaves (~0.4s).
+ * @use Several real states of the same subject that are worth comparing in place: a game's scenes, versions of a UI, before → after → final, build states. 2–6 states, same image size.
+ * @avoid Unrelated images (use MediaFrame); two pinned blocks back to back (put a normal block between them); images of different sizes (they would be cropped to the first one's frame).
+ * @behavior The section is ~60% of a screen tall per state; the stage sticks under the header while it runs. The sweep follows the scroll: scrolling down it runs left → right, scrolling up right → left — going back replays the change instead of cutting, and a fast scroll cuts a running sweep short cleanly. Reduced motion: states switch instantly. Works with touch scrolling (no direction change, no scroll-jacking).
+ * @example
+ * <ScrollStepper label={{ en: 'Scene' }} states={[
+ *   { src: 'vaja/scene-westbrook.webp', label: 'Westbrook Stonescape', alt: { en: 'Westbrook Stonescape scene' } },
+ *   { src: 'vaja/scene-celestia.webp', label: 'Celestia Crystal Cavern', alt: { en: 'Celestia Crystal Cavern scene' } }
+ * ]} />
+ */
+import { getImage } from 'astro:assets';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { img, lqStyle } from '../../lib/media';
+export interface Props {
+  states: { src: string; label: L; alt: L; note?: L }[];
+  /** Word before the state name, default "Selected". */
+  label?: L;
+}
+const { states, label } = Astro.props;
+const lang = langOf(Astro.url);
+const data = await Promise.all(states.map(async (s) => {
+  const m = img(s.src);
+  const out = await getImage({ src: m, format: 'webp', width: Math.min(1800, m.width) });
+  return { url: out.src, lq: await lqStyle(m), w: m.width, h: m.height, label: tx(s.label, lang), alt: tx(s.alt, lang), note: s.note ? tx(s.note, lang) : '' };
+}));
+const ar = `${data[0].w}/${data[0].h}`;
+const arNum = (data[0].w / data[0].h).toFixed(4);
+const p = (n: number) => String(n).padStart(2, '0');
+const word = label ? tx(label, lang) : tx({ en: 'Selected', th: 'ที่เลือก', ja: '選択中' }, lang);
+---
+<section class="sst" style={`--n:${states.length}`} data-labels={JSON.stringify(data.map((d) => d.label))} data-notes={JSON.stringify(data.map((d) => d.note))}>
+  <div class="sst-pin">
+    <div class="sst-stage" style={`aspect-ratio:${ar};--ar:${arNum}`}>
+      {data.map((d, i) => (
+        <img class:list={['sst-img', { on: i === 0 }]} style={d.lq} data-lq data-i={i} src={d.url} width={d.w} height={d.h} alt={d.alt} aria-hidden={i === 0 ? undefined : 'true'} loading={i === 0 ? undefined : 'lazy'} decoding="async" />
+      ))}
+    </div>
+    <div class="sst-meta">
+      <p class="sst-sel"><span class="eyebrow l10n">{word}</span> <b class="sst-name">{data[0].label}</b></p>
+      <p class="sst-note">{data[0].note}</p>
+      <div class="sst-right">
+        <span class="sst-dots" aria-hidden="true">{data.map((_, i) => <i class:list={{ on: i === 0 }}></i>)}</span>
+        <span class="eyebrow num sst-count">[{p(1)}] – [{p(states.length)}]</span>
+      </div>
+    </div>
+    <ol class="sr-only">{data.map((d) => <li>{d.label}{d.note && ` — ${d.note}`}</li>)}</ol>
+  </div>
+</section>
+
+<style>
+  .sst { position: relative; height: calc(100svh + (var(--n) - 1) * 60svh); }
+  .sst-pin { position: sticky; top: calc(var(--hdr-h) + 16px); display: grid; gap: 14px; }
+  .sst-stage { position: relative; overflow: hidden; background: var(--sunk); max-height: calc(100svh - var(--hdr-h) - 120px); margin-inline: auto; width: min(100%, calc((100svh - var(--hdr-h) - 120px) * var(--ar))); }
+  .sst-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+  .sst-img.on { opacity: 1; }
+  .sst-meta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: baseline; }
+  .sst-sel { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+  .sst-name { font-weight: 600; font-size: 18px; }
+  .sst-note { grid-column: 1; font-size: 14px; color: var(--ink2); min-height: 1.4em; }
+  .sst-right { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 16px; align-items: center; }
+  .sst-dots { display: flex; gap: 8px; }
+  .sst-dots i { width: 8px; height: 8px; background: var(--ink3); border-radius: 50%; box-shadow: 0 0 0 0 var(--ctxs); transition: box-shadow var(--t-cursor) var(--e-enter), background-color var(--t-cursor); }
+  .sst-dots i.on { background: var(--ink); box-shadow: 0 0 0 3px var(--bg), 0 0 0 4.5px var(--ctxs); }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/lifecycle';
+  import { onScroll } from '../../scripts/scroll';
+  import { blockSwap } from '../../scripts/wipe';
+  onPage(() => {
+    const roots = [...document.querySelectorAll<HTMLElement>('.sst')];
+    if (!roots.length) return;
+    const cur = new Map<HTMLElement, number>();
+    const hdr = () => document.querySelector<HTMLElement>('.site-hdr')?.offsetHeight ?? 69;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const indexOf = (root: HTMLElement, N: number) => {
+      const run = Math.max(1, root.offsetHeight - root.querySelector<HTMLElement>('.sst-pin')!.offsetHeight - 16);
+      const p = Math.min(0.999, Math.max(0, (hdr() + 16 - root.getBoundingClientRect().top) / run));
+      return Math.min(N - 1, Math.floor(p * N));
+    };
+    const label = (root: HTMLElement, i: number, N: number) => {
+      const labels = JSON.parse(root.dataset.labels || '[]'), notes = JSON.parse(root.dataset.notes || '[]');
+      root.querySelector('.sst-name')!.textContent = labels[i];
+      root.querySelector('.sst-note')!.textContent = notes[i];
+      root.querySelectorAll('.sst-dots i').forEach((d, k) => d.classList.toggle('on', k === i));
+      root.querySelector('.sst-count')!.textContent = `[${pad(i + 1)}] – [${pad(N)}]`;
+    };
+    const only = (imgs: HTMLElement[], el: HTMLElement) => imgs.forEach((m) => { m.classList.toggle('on', m === el); if (m === el) m.removeAttribute('aria-hidden'); else m.setAttribute('aria-hidden', 'true'); });
+    // start on the state that matches the current scroll position, without a sweep (e.g. after a reload mid-way)
+    for (const root of roots) {
+      const imgs = [...root.querySelectorAll<HTMLElement>('.sst-img')];
+      const i = indexOf(root, imgs.length);
+      cur.set(root, i);
+      only(imgs, imgs[i]);
+      label(root, i, imgs.length);
+    }
+    return onScroll((_, vh) => {
+      for (const root of roots) {
+        const r = root.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) continue;
+        const imgs = [...root.querySelectorAll<HTMLElement>('.sst-img')];
+        const N = imgs.length, i = indexOf(root, N), was = cur.get(root)!;
+        if (i === was) continue;
+        cur.set(root, i);
+        label(root, i, N);
+        const to = imgs[i];
+        blockSwap(root.querySelector<HTMLElement>('.sst-stage')!, i > was ? 1 : -1, () => { only(imgs, to); return to; }, { from: imgs[was], ready: (to as HTMLImageElement).decode?.() });
+      }
+    });
+  });
+</script>

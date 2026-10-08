@@ -1,0 +1,60 @@
+---
+work: cesca
+recipe: free
+summary: CESCa — 高校生が大学の内容を学び、プロジェクトを作る合宿。#20（Game Design、2025年）と #21（Networking、2026年）で、ボランティアとして学術スタッフ / TA を務めました。
+---
+
+import '../../../styles/stories/cesca.css';
+
+{/* Facts §6.5, §6.6. #21's role is self-reported (weaker external evidence than #20): say what he did, no title beyond
+    "academic staff / TA". Photos: the camp's photographers (their marks stay on the pictures), chosen by the owner
+    2026-10-07; the owner blurs the students' faces in the originals and runs `npm run media` (scripts/media-map.json).
+    Owner's folders: 2024 = #20 (April 2025), 2025 = #21 (April 2026), by the camp marks on the pictures.
+    The two camps are one page; the Timeline's #21 row opens #n21. Captions never say who is who.
+    Colors: #20 in cesca20 (the page), #21 in cesca21 (its section). */}
+
+<ProjectHeader work="cesca" layout="stack" roles={['学術スタッフ / TA', 'ボランティア']}>
+  <MediaFrame slot="media" src="cesca/n20-candles.webp" alt={{ en: 'Campers and staff holding hands in a circle around candles that spell CESCa #20, seen from above', ja: 'キャンプ参加者とスタッフが、CESCa #20 の文字を描くロウソクを囲んで手をつないでいる、上からの写真' }} width="full" eager
+    caption={{ en: 'CESCa #20 · the candles', ja: 'CESCa #20 · ロウソク' }} source={{ en: 'Photo: CESCa #20', ja: '写真：CESCa #20' }} />
+</ProjectHeader>
+
+<ProjectContext label={{ en: 'What it is', ja: '合宿について' }} lead={{ en: 'High-school students come to learn university topics and build projects.', ja: '高校生が大学の内容を学び、プロジェクトを作ります。' }}>
+  <p>運営スタッフは約80〜120人です。私は両年とも、ボランティアとして学術側の一員でした。</p>
+</ProjectContext>
+
+<section id="n20" class="cesca-n">
+  <div class="cesca-txt">
+    <span class="cesca-no disp num">#20</span>
+    <p class="cesca-meta">2025年 · Game Design</p>
+    <ul>
+      <li>生徒のプロジェクトを指導しました。</li>
+      <li>スライドや資料を作成し、ほかの人の作業も手伝いました。</li>
+      <li>年下の生徒の相談役を務めました。</li>
+      <li>学習内容の設計の一部に関わりました。</li>
+    </ul>
+  </div>
+  <div class="cesca-ph three">
+    <MediaFrame src="cesca/n20-lab-a.webp" alt={{ en: 'A staff member leaning in to look at a camper’s screen in the computer lab', ja: 'コンピュータ室で、参加者の画面をのぞき込むスタッフ' }} width="wide" source={{ en: 'Photo: CESCa #20', ja: '写真：CESCa #20' }} />
+    <MediaFrame src="cesca/n20-lab-b.webp" alt={{ en: 'Staff and campers looking at a game project on an iMac in the lab', ja: 'ラボの iMac でゲームのプロジェクトを見るスタッフと参加者' }} width="wide" source={{ en: 'Photo: CESCa #20', ja: '写真：CESCa #20' }} />
+    <MediaFrame src="cesca/n20-lab-c.webp" alt={{ en: 'A staff member standing behind a camper at a computer during an evening session', ja: '夕方のセッションで、パソコンに向かう参加者の後ろに立つスタッフ' }} width="wide" source={{ en: 'Photo: CESCa #20', ja: '写真：CESCa #20' }} />
+  </div>
+</section>
+
+<section id="n21" class="cesca-n" data-cat="cesca21">
+  <div class="cesca-txt">
+    <span class="cesca-no disp num">#21</span>
+    <p class="cesca-meta">2026年 · Networking</p>
+    <ul>
+      <li>プロジェクトと学習活動を指導しました。</li>
+      <li>スライドや資料を作成し、ほかの人の作業も手伝いました。</li>
+      <li>年下の生徒の相談役を務めました。</li>
+      <li>学習内容の設計の一部に関わりました。</li>
+    </ul>
+  </div>
+  <div class="cesca-ph two">
+    <MediaFrame src="cesca/n21-lab-a.webp" alt={{ en: 'Staff pointing at a row of iMacs with network cables while campers type; an IP address and subnet mask on the screen behind', ja: 'ネットワークケーブルがつながったiMacの列を指さすスタッフ。参加者が入力している後ろの画面には、IPアドレスとサブネットマスクが表示されている' }} width="wide" source={{ en: 'Photo: CESCa #21', ja: '写真：CESCa #21' }} />
+    <MediaFrame src="cesca/n21-lab-b.webp" alt={{ en: 'A staff member explaining something at a camper’s computer in the lab', ja: 'コンピュータ室で、参加者のパソコンの前で説明するスタッフ' }} width="wide" source={{ en: 'Photo: CESCa #21', ja: '写真：CESCa #21' }} />
+  </div>
+</section>
+
+<OutcomeBlock outcome={{ en: 'Academic staff / TA at two camps: Game Design at #20, Networking at #21.', ja: '2つの合宿で学術スタッフ / TA：#20 は Game Design、#21 は Networking。' }} />

@@ -1,0 +1,55 @@
+---
+work: icpc
+recipe: free
+summary: ICPC Thailand（全国大会）。2024年はチーム Eeg E Eeg Eeg で出場し、問題 G を最初に解きました（56チーム中19位）。2025年はチーム Egg E Egg Egg で出場しました。
+---
+
+import '../../../styles/stories/icpc.css';
+
+{/* Facts §6.3, §6.4; the 2024 scoreboard (checked 2026-10-01). Dates and venue of 2024 are on the event poster in the
+    owner's photo; KMITL hosted 2025 (badge, media-candidates README). Do not generalise G to "first solve overall".
+    The two years are one page; the Timeline's 2025 row opens #y2025. */}
+
+<ProjectHeader work="icpc" layout="stack" roles={['問題を読む', '方針を立てる', 'コーディング']}>
+  <MediaFrame slot="media" src="icpc/first-to-solve-2024.webp" alt={{ en: 'Team Eeg E Eeg Eeg on stage holding the First to Solve board at ICPC Thailand 2024', ja: 'ICPC Thailand 2024 のステージで First to Solve の板を掲げるチーム Eeg E Eeg Eeg' }} width="full" eager ratio="16/9" focus="50% 62%"
+    caption={{ en: 'First to Solve · problem G · ICPC Thailand National Competition 2024', ja: 'First to Solve · 問題G · ICPC Thailand National Competition 2024' }} />
+</ProjectHeader>
+
+<div id="y2024" class="icpc-year">
+  <div class="icpc-y-head">
+    <span class="icpc-y disp num">2024</span>
+    <p>チーム Eeg E Eeg Eeg · コンケン大学 · チュラロンコン大学 · 9月7〜8日</p>
+  </div>
+  <div class="readouts">
+    <Readout value={12} unit={{ en: 'minutes', ja: '分' }} label={{ en: 'problem G, first try — the earliest of the 40 teams that solved it (the next: 17)', ja: '問題G、初回で正解。正解した40チームの中で最速（次点は17分）' }} source={{ en: 'Scoreboard 2024' }} size="lg" />
+    <Readout value={19} unit={{ en: 'of 56 teams', ja: '/ 56チーム' }} label={{ en: 'final place', ja: '最終順位' }} source={{ en: 'Scoreboard 2024' }} />
+    <Readout value={3} unit={{ en: 'solved', ja: '問正解' }} label={{ en: 'B · G · K' }} source={{ en: 'Scoreboard 2024' }} />
+  </div>
+  <div class="icpc-2024">
+    <MediaFrame src="icpc/team-banner-2024.webp" alt={{ en: 'Contestants in front of the ICPC Thailand 2024 banner at Chula Engineering', ja: 'チュラロンコン大学工学部で、ICPC Thailand 2024 の横断幕の前に立つ参加者' }} width="wide" caption={{ en: 'In front of the banner, Chula Engineering, 2024', ja: '横断幕の前、チュラロンコン大学工学部、2024年' }} />
+    <div>
+      <p>私たちは、問題 G を最初に解いたチームでした。12分、初回で正解しました。同じコンケン大学の KKU48 は30分で解きました。</p>
+      <EvidenceLink href="https://icpc-chula.github.io/scoreboard-archive/2024/" label="Final standings 2024" kind="page" shows={{ en: 'Eeg E Eeg Eeg · 19th · B, G, K', ja: 'Eeg E Eeg Eeg · 19位 · B, G, K' }} />
+    </div>
+  </div>
+</div>
+
+## 私の担当
+
+主にコードを書く前の作業を担当しました。問題文を読み、一部を翻訳し、解法の方向性を考え、実装の速いチームメイトに説明しました。コードも一部書いています。
+
+<div id="y2025" class="icpc-year" data-cat="icpc25">
+  <div class="icpc-y-head">
+    <span class="icpc-y disp num">2025</span>
+    <p>チーム Egg E Egg Egg · KMITL</p>
+  </div>
+  <div class="icpc-2025">
+    <div>
+      <p>この年は別のチーム名で出場しました。実装を最も得意としたチームメイトが出場しなかったため、2024年より結果は振るいませんでした。受賞はありません。</p>
+    </div>
+    <MediaFrame src="icpc/badge-2025.webp" alt={{ en: 'Contestant badge, ICPC Thailand National Contest 2025: Teethawat Kumying, Khon Kaen University, team Egg E Egg Egg', ja: 'ICPC Thailand National Contest 2025 の参加者バッジ：Teethawat Kumying、コンケン大学、チーム Egg E Egg Egg' }} width="text" caption={{ en: 'Contestant badge · 2025', ja: '参加者バッジ · 2025年' }} />
+  </div>
+</div>
+
+<OutcomeBlock outcome={{ en: '2024: first to solve problem G; 19th of 56. 2025: took part, no award.', ja: '2024年：問題Gを最初に解く、56チーム中19位。2025年：出場、受賞なし。' }}
+  evidence={[{ label: 'Final standings 2024', href: 'https://icpc-chula.github.io/scoreboard-archive/2024/', kind: 'page', shows: 'Eeg E Eeg Eeg' }]} />

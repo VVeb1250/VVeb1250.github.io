@@ -1,0 +1,30 @@
+title: Assembly YASM Helper
+cat: dev
+theme: yasm
+year: 2026
+date: "2026-02"
+type: DEV TOOL · VS CODE
+status: COMPLETED
+idx: "07"
+page: true
+line:
+  en: Language support for YASM and NASM in VS Code, with a standalone language server.
+  th: "รองรับ YASM กับ NASM ใน VS Code พร้อม language server ที่ใช้งานแยกต่างหากได้"
+  ja: VS CodeでのYASM・NASMの言語サポート。単体で動く言語サーバー付き。
+fact: { en: 155 installs · 28 releases, th: ติดตั้ง 155 ครั้ง · 28 release, ja: 155インストール · 28リリース }
+meta:
+  - { k: origin, v: { en: Extended from Roncho’s TASM extension, th: ต่อยอดจาก extension TASM ของ Roncho, ja: RonchoのTASM拡張を拡張 } }
+  - { k: installs, v: { en: 155 on the Marketplace · 26 Sep 2026, th: 155 บน Marketplace · 26 ก.ย. 2026, ja: Marketplaceで155 · 2026年9月26日 } }
+  - { k: commits, v: { en: 103 of 104 · 28 releases, th: 103 จาก 104 · 28 release, ja: 104中103 · 28リリース } }
+  - { k: built, v: 2026-02-22 → 04-02 }
+cover:
+  src: ../../assets/works/yasm/preview.webp
+  alt: { en: VS Code editor with YASM highlighting and the status bar showing YASM ok, th: VS Code ที่มี YASM highlighting และ status bar ขึ้น YASM ok, ja: YASMのハイライトと「YASM ok」のステータスバーがあるVS Code }
+  plate: center
+  frame: screen
+related: [z80]
+tags: [solo]
+links:
+  - { kind: marketplace, url: "https://marketplace.visualstudio.com/items?itemName=VVeb1250.assembly-yasm-helper", label: Marketplace }
+  - { kind: github, url: "https://github.com/VVeb1250/assembly-yasm-helper", label: GitHub }
+sources: [portfolio-facts §2.5, VS Code Marketplace 2026-09-26, GitHub repo checked 2026-09-30]

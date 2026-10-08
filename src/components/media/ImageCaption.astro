@@ -1,0 +1,39 @@
+---
+/**
+ * @component ImageCaption
+ * @group media
+ * @summary The caption under a piece of media: optional number marker, a bold title, one or two sentences, and a mono source line.
+ * @use Inside MediaFrame (it renders one for you from title/caption/source), or under a custom figure.
+ * @avoid Captions that repeat the title; unsourced numbers.
+ * @example
+ * <ImageCaption n={2} title={{ en: 'Gameplay · 51 s' }} text={{ en: 'Cut from a recorded build.' }} source="Recorded build, 2025-03" />
+ */
+import Mark from '../primitives/Mark.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  n?: number;
+  title?: L;
+  text?: L;
+  source?: L;
+}
+const { n, title, text, source } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<figcaption class:list={['cap', { numbered: n != null }]}>
+  {n != null && <Mark n={n} />}
+  <div class="cap-t">
+    {title && <b>{tx(title, lang)}</b>}
+    {text && <span>{tx(text, lang)}</span>}
+    <slot />
+    {source && <small class="num">{tx(source, lang)}</small>}
+  </div>
+</figcaption>
+
+<style>
+  .cap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px 10px; align-items: start; font-size: 14px; color: var(--ink2); }
+  .numbered { grid-template-columns: auto minmax(0, 1fr); }
+  .numbered :global(.mk) { margin-top: 1px; }
+  .cap-t { display: grid; gap: 2px; }
+  b { color: var(--ink); font-weight: 600; font-size: 15px; }
+  small { font: 500 11px/1.5 var(--f-mono); color: var(--ink3); letter-spacing: 0.02em; }
+</style>

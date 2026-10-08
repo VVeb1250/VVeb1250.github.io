@@ -1,0 +1,106 @@
+---
+/* Kit-only: color, type and motion tokens, read from the generated src/lib/tokens.json and base.css values. */
+import tokens from '../../lib/tokens.json';
+import { CAT_LABEL } from '../../lib/vocab';
+import { langOf, tx } from '../../lib/i18n';
+const lang = langOf(Astro.url);
+const T: any = tokens;
+const cats = Object.keys(T.cats) as (keyof typeof CAT_LABEL)[];
+const identity = ['acc', 'band', 'band-m', 'wash', 'spark', 'scroll-cursor'];
+const neutrals = ['bg', 'surface', 'sunk', 'rule', 'ink3', 'ink2', 'ink'];
+const MOTION = [
+  ['--t-exit', '60ms', '--e-exit', 'Leaving: everything disappears fast'],
+  ['--t-enter', '500ms', '--e-enter', 'Arriving: 50% at ~65ms, 90% at ~185ms'],
+  ['--t-line', '300ms', '--e-enter', 'A line drawing (transition bar, process fill)'],
+  ['--t-thicken', '140ms', '--e-enter', 'Line thickens into the 40px label bar'],
+  ['--t-open', '250ms', '--e-open', 'The plane opening from the bar'],
+  ['--t-cursor', '240ms', '--e-enter', 'Cursors and selection bars following you'],
+  ['--t-push', '460ms', '--e-enter', 'Push between works (↑ ↓) and sideways between tabs: the new content settles (the old one leaves in 150ms, --e-exit)'],
+  ['--t-enter × 0.76', '380ms', '--e-glide', 'Light ↔ dark: the plane covering the page, then leaving it (each half, even speed)'],
+  ['--t-roll', '500ms', '--e-enter', 'Odometer / label roll'],
+  ['--t-stagger', '35ms', '', 'Delay between items entering together']
+];
+---
+<div class="tk">
+  <section>
+    <h3 class="eyebrow">Identity (H = {T.H}, Azure) · site chrome only</h3>
+    <div class="sw-row">
+      {identity.map((k) => <div class="sw"><i style={`background:var(--${k})`}></i><b>{k}</b><span class="num">{T.modes.light[k].hex} / {T.modes.dark[k].hex}</span></div>)}
+    </div>
+    <h3 class="eyebrow">Neutrals</h3>
+    <div class="sw-row">
+      {neutrals.map((k) => <div class="sw"><i style={`background:var(--${k})`}></i><b>{k}</b><span class="num">{T.modes.light[k].hex} / {T.modes.dark[k].hex}</span></div>)}
+    </div>
+  </section>
+  <section>
+    <h3 class="eyebrow">Kinds of work · deep → mid → pale make a plate; signal (-s) marks state inside that work's area</h3>
+    <div class="fam">
+      {cats.map((c) => (
+        <div class="f" data-cat={c}>
+          <span class="f-plate"><i style={`background:var(--${c})`}></i><i style={`background:var(--${c}-m)`}></i><i style={`background:var(--${c}-p)`}></i><i style={`background:var(--${c}-s)`}></i></span>
+          <b>{tx(CAT_LABEL[c], lang)} <code>{c}</code></b>
+          <span class="f-mood">{T.cats[c].mood}</span>
+        </div>
+      ))}
+    </div>
+    <details><summary>Contrast checks ({T.checks.length}, all pass)</summary><pre class="num">{T.checks.join('\n')}</pre></details>
+  </section>
+  <section>
+    <h3 class="eyebrow">Type</h3>
+    <div class="type">
+      <p class="disp t-d">Saira 78% · display</p>
+      <p class="disp t-d" lang="th">ไบ จัมจุรี · หัวข้อไทย</p>
+      <p class="t-b">IBM Plex Sans · body text that people actually read, 16–18px.</p>
+      <p class="t-b" lang="th">IBM Plex Sans Thai · เนื้อความภาษาไทย อ่านสบาย ระยะบรรทัดกว้างขึ้น</p>
+      <p class="t-b" lang="ja">IBM Plex Sans JP · 読みやすい本文、行間は少し広め。</p>
+      <p class="eyebrow">IBM Plex Mono · eyebrow · labels, dates, types</p>
+    </div>
+  </section>
+  <section>
+    <h3 class="eyebrow">Motion (measured from Endfield, 30fps) — click a row to play</h3>
+    <ul class="mo">
+      {MOTION.map(([t, v, e, what]) => (
+        <li><button type="button" class="mo-b" style={`--d:${t.includes('×') ? `calc(var(${t.split(' ')[0]}) * ${t.split('× ')[1]})` : `var(${t})`};--e:${e ? `var(${e})` : 'linear'}`}><span class="mo-track"><i></i></span></button><code>{t}</code><span class="num">{v}</span><code>{e}</code><span class="muted">{what}</span></li>
+      ))}
+    </ul>
+  </section>
+</div>
+
+<style>
+  .tk { display: grid; gap: 40px; }
+  section { display: grid; gap: 14px; }
+  .sw-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sw { display: grid; grid-template-columns: 36px auto; gap: 2px 10px; align-items: center; padding: 6px 10px 6px 6px; border: 1px solid var(--rule); background: var(--surface); }
+  .sw i { grid-row: span 2; width: 36px; height: 36px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent); }
+  .sw b { font: 600 13px/1.2 var(--f-mono); }
+  .sw span { font: 400 11px/1.2 var(--f-mono); color: var(--ink2); }
+  .fam { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  .f { display: grid; gap: 6px; }
+  .f-plate { display: grid; grid-template-columns: 3fr 3fr 3fr 1.2fr; height: 44px; }
+  .f b { font-size: 14px; } .f code { font: 400 11px var(--f-mono); color: var(--ink3); }
+  .f-mood { font-size: 13px; color: var(--ink2); }
+  details { border: 1px solid var(--rule); }
+  summary { cursor: pointer; padding: 8px 12px; font: 500 12px var(--f-mono); color: var(--ink2); }
+  pre { margin: 0; padding: 12px; max-height: 260px; overflow: auto; font: 400 11px/1.5 var(--f-mono); color: var(--ink2); }
+  .type { display: grid; gap: 10px; }
+  .t-d { font-size: clamp(30px, 4vw, 48px); line-height: 1.1; }
+  .t-b { font-size: 18px; }
+  .mo { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .mo li { display: grid; grid-template-columns: 160px 110px 60px 110px minmax(0, 1fr); gap: 12px; align-items: center; font-size: 13px; }
+  .mo code { font: 400 12px var(--f-mono); }
+  .mo-b { background: none; border: 1px solid var(--rule); padding: 6px; cursor: pointer; }
+  .mo-track { display: block; position: relative; height: 10px; }
+  .mo-track i { position: absolute; left: 0; top: 0; width: 10px; height: 10px; background: var(--acc); }
+  .mo-b.go .mo-track i { animation: mo var(--d) var(--e) forwards; }
+  @keyframes mo { to { left: calc(100% - 10px); } }
+  @media (max-width: 760px) { .mo li { grid-template-columns: 110px minmax(0, 1fr); } .mo li > :nth-child(n + 3) { grid-column: 2; } }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/lifecycle';
+  onPage(() => {
+    const click = (e: Event) => { const b = (e.target as Element).closest<HTMLElement>('.mo-b'); if (!b) return; b.classList.remove('go'); void b.offsetWidth; b.classList.add('go'); };
+    document.addEventListener('click', click);
+    return () => document.removeEventListener('click', click);
+  });
+</script>

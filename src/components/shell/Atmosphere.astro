@@ -1,0 +1,308 @@
+---
+/**
+ * @component Atmosphere
+ * @group shell
+ * @summary The misty ground behind every page: soft gradient + two tiled cloud layers + a tint whose color follows the kind of work in view.
+ * @use Once per page. PageShell already includes it — you normally never place it yourself.
+ * @avoid Adding grain, blobs or extra glow layers (default-deny list). Never put content inside it.
+ * @behavior The tint is identity wash by default. It changes where a composition opts in with `data-fog`, on a page whose PageShell has `fog`, or when a list dispatches `atmo:cat` on document (detail: a category, or null for the page's own — SelectedWork does this for the project in the middle of the screen). A 700ms crossfade changes the tint. On mouse devices, the whole atmosphere drifts at 0.025 × scroll distance as one opaque canvas (after a page change it glides to the new position instead of jumping), and the canvas always reaches the bottom of the screen — even mid-fade, or back on a long page; touch and reduced motion keep it still. Static CSS layers remain visible until the canvas is ready.
+ * @example
+ * <section data-cat="game" data-fog>…</section>   (opt-in: only where the work's color should reach the background)
+ */
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+<div class="atmo" aria-hidden="true" transition:persist="atmo" style={`--cloud-a-light:url(${base}textures/cloud-a-light.webp);--cloud-a-dark:url(${base}textures/cloud-a-dark.webp);--cloud-b-light:url(${base}textures/cloud-b-light-self.webp);--cloud-b-dark:url(${base}textures/cloud-b-dark-self.webp)`}>
+  <div class="atmo-base"></div>
+  <div class="atmo-tint"></div>
+  <div class="atmo-cloud b"><div class="cloud-tile current"></div><div class="cloud-tile next"></div></div>
+  <div class="atmo-cloud a"></div>
+</div>
+
+<style is:global>
+  @property --fog-c { syntax: '<color>'; inherits: true; initial-value: transparent; }
+  .atmo { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; --fog-c: var(--wash); transition: --fog-c var(--t-fog) var(--e-enter); }
+  .atmo > div { position: absolute; left: 0; right: 0; top: 0; }
+  .atmo-base { bottom: 0; background: radial-gradient(90% 70% at 0% 0%, var(--atmo1) 0%, transparent 70%), linear-gradient(162deg, var(--atmo1) 0%, var(--atmo2) 48%, var(--atmo3) 100%); }
+  .atmo-tint { bottom: 0; opacity: var(--tint-a); background: radial-gradient(85% 70% at 0% 0%, var(--fog-c) 0%, transparent 72%); }
+  .atmo-cloud.a { bottom: 0; background: var(--cloud-a-light) 0 0 / 1200px 900px repeat; opacity: var(--cloud-a); }
+  .atmo-cloud.b { bottom: 0; opacity: var(--cloud-b); }
+  .cloud-tile { position: absolute; inset: 0; background: var(--cloud-b-light) 0 0 / 1800px 1350px repeat; }
+  .cloud-tile.next { opacity: 0; }
+  .atmo.canvas-ready > :is(.atmo-base, .atmo-tint, .atmo-cloud) { display: none; }
+  .atmo-sheet { will-change: transform; }
+  .atmo-sheet canvas { position: absolute; top: 0; left: 0; display: block; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .atmo-cloud.a { background-image: var(--cloud-a-dark); } :root:not([data-theme="light"]) .cloud-tile { background-image: var(--cloud-b-dark); } }
+  :root[data-theme="dark"] .atmo-cloud.a { background-image: var(--cloud-a-dark); }
+  :root[data-theme="dark"] .cloud-tile { background-image: var(--cloud-b-dark); }
+  @media (prefers-reduced-motion: reduce) { .atmo { transition: none; } }
+</style>
+
+<script>
+  import { onPage, finePointer, reducedMotion, cssMs } from '../../scripts/lifecycle';
+  import { onScroll } from '../../scripts/scroll';
+  import { CATS, THEMES } from '../../lib/vocab';
+
+  const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+  const cats = new Set<string>([...CATS, ...THEMES]);
+  const fogFor = (cat: string) => cat === 'self' ? 'var(--wash)' : `var(--${cat}-p)`;
+  const mode = () => document.documentElement.getAttribute('data-theme') === 'dark' ||
+    (document.documentElement.getAttribute('data-theme') !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  const images = new Map<string, Promise<HTMLImageElement>>();
+  const decoded = new Map<string, HTMLImageElement>();
+  function image(path: string): Promise<HTMLImageElement> {
+    let loaded = images.get(path);
+    if (!loaded) {
+      const el = new Image();
+      el.src = path;
+      loaded = el.decode().then(() => { decoded.set(path, el); return el; }).catch((error) => { images.delete(path); throw error; });
+      images.set(path, loaded);
+    }
+    return loaded;
+  }
+  const texture = (cat: string, theme: string) => [`${base}textures/cloud-a-${theme}.webp`, `${base}textures/cloud-b-${theme}-${cat}.webp`];
+  const warmed = new Set<string>();
+  function warm(theme: string) {
+    if (warmed.has(theme)) return;
+    warmed.add(theme);
+    const run = () => ['self', ...cats].forEach((cat) => texture(cat, theme).forEach((path) => void image(path).catch(() => {})));
+    if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 3000 }); else setTimeout(run, 1200);
+  }
+
+  // CSS tokens are generated as hex; registered --fog-c may resolve to rgb().
+  function channels(color: string): [number, number, number] {
+    const hex = color.trim().match(/^#([\da-f]{6})$/i);
+    if (hex) return [0, 2, 4].map((i) => parseInt(hex[1].slice(i, i + 2), 16)) as [number, number, number];
+    const parts = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+    return (parts?.length === 3 ? parts : [0, 0, 0]) as [number, number, number];
+  }
+  const rgba = (rgb: [number, number, number], alpha: number) => `rgba(${rgb.join(',')},${alpha})`;
+
+  // One opaque canvas: gradient, tint, both cloud layers. `height` = the viewport plus however far the sheet may drift.
+  function draw(atmo: HTMLElement, cat: string, theme: string, height: number, drifting: boolean, a: HTMLImageElement, b: HTMLImageElement): HTMLCanvasElement {
+    const css = getComputedStyle(atmo);
+    const root = getComputedStyle(document.documentElement);
+    const token = (name: string) => root.getPropertyValue(name).trim();
+    const width = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const canvas = document.createElement('canvas');
+    canvas.className = 'atmo-canvas';
+    canvas.width = Math.ceil(width * dpr);
+    canvas.height = Math.ceil(height * dpr);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    const ctx = canvas.getContext('2d', { alpha: false });
+    if (!ctx) throw new Error('Atmosphere canvas unavailable');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const angle = 162 * Math.PI / 180;
+    const dx = Math.sin(angle), dy = -Math.cos(angle);
+    // Keep the gradient's original viewport geometry; the overscan continues its last color.
+    const length = Math.abs(width * dx) + Math.abs(viewportHeight * dy);
+    const linear = ctx.createLinearGradient(width / 2 - dx * length / 2, viewportHeight / 2 - dy * length / 2,
+      width / 2 + dx * length / 2, viewportHeight / 2 + dy * length / 2);
+    linear.addColorStop(0, token('--atmo1'));
+    linear.addColorStop(0.48, token('--atmo2'));
+    linear.addColorStop(1, token('--atmo3'));
+    ctx.fillStyle = linear;
+    ctx.fillRect(0, 0, width, height);
+
+    const radial = (rx: number, ry: number, rgb: [number, number, number], alpha: number, end: number) => {
+      const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      gradient.addColorStop(0, rgba(rgb, alpha));
+      gradient.addColorStop(end, rgba(rgb, 0));
+      gradient.addColorStop(1, rgba(rgb, 0));
+      ctx.save();
+      ctx.scale(rx, ry);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width / rx, height / ry);
+      ctx.restore();
+    };
+    radial(width * 0.9, viewportHeight * 0.7, channels(token('--atmo1')), 1, 0.7);
+    radial(width * 0.85, viewportHeight * 0.7, channels(token(cat === 'self' ? '--wash' : `--${cat}-p`)),
+      Number(css.getPropertyValue('--tint-a')), 0.72);
+
+    const tile = (img: HTMLImageElement, opacity: number, w: number, h: number) => {
+      ctx.globalAlpha = opacity;
+      for (let y = 0; y < height; y += h) for (let x = 0; x < width; x += w) ctx.drawImage(img, x, y, w, h);
+      ctx.globalAlpha = 1;
+    };
+    tile(b, Number(css.getPropertyValue('--cloud-b')), 1800, 1350);
+    tile(a, Number(css.getPropertyValue('--cloud-a')), 1200, 900);
+    canvas.dataset.key = `${theme}:${cat}:${width}:${height}:${dpr}:${drifting}`;
+    canvas.dataset.theme = theme;
+    canvas.dataset.cat = cat;
+    return canvas;
+  }
+  // the same canvas, now if its textures are already decoded (no frame without fog), else once they are
+  function paintNow(atmo: HTMLElement, cat: string, theme: string, height: number, drifting: boolean): HTMLCanvasElement | null {
+    const [a, b] = texture(cat, theme).map((path) => decoded.get(path));
+    return a && b ? draw(atmo, cat, theme, height, drifting, a, b) : null;
+  }
+  async function paint(atmo: HTMLElement, cat: string, theme: string, height: number, drifting: boolean): Promise<HTMLCanvasElement> {
+    const [a, b] = await Promise.all(texture(cat, theme).map(image));
+    return draw(atmo, cat, theme, height, drifting, a, b);
+  }
+
+  onPage(() => {
+    const atmo = document.querySelector<HTMLElement>('.atmo');
+    if (!atmo) return;
+    let sheet = atmo.querySelector<HTMLElement>('.atmo-sheet');
+    if (!sheet) { sheet = document.createElement('div'); sheet.className = 'atmo-sheet'; atmo.append(sheet); }
+    const plane = sheet;
+    let current = [...plane.querySelectorAll<HTMLCanvasElement>('canvas')].sort((x, y) =>
+      Number(getComputedStyle(y).opacity) - Number(getComputedStyle(x).opacity))[0] ?? null;
+    plane.querySelectorAll('canvas').forEach((canvas) => { if (canvas !== current) canvas.remove(); });
+    if (current) { current.style.transition = 'none'; current.style.opacity = '1'; }
+    let activeCat = 'self', generation = 0, alive = true;
+    let fadeTimer: number | undefined, resizeTimer: number | undefined;
+    const drifting = finePointer() && !reducedMotion();
+    const canvases = () => [...plane.querySelectorAll<HTMLCanvasElement>('canvas')];
+    const tall = (c: HTMLCanvasElement) => parseFloat(c.style.height) || 0;
+    // how far the sheet may move up: never past the bottom of its shortest canvas, so the bottom of the screen
+    // never shows bare page while a taller canvas is on its way
+    let reach = Infinity;
+    const measure = () => { const list = canvases(); reach = list.length ? Math.max(0, Math.min(...list.map(tall)) - innerHeight) : Infinity; };
+    const sheetY = () => { const t = getComputedStyle(plane).transform; return t && t !== 'none' ? new DOMMatrix(t).m42 : 0; };
+    const at = (y: number) => drifting ? `translate3d(0,${-Math.min(y * 0.025, reach).toFixed(2)}px,0)` : 'none';
+    // a page change lands at another scroll position (the bottom of one work → the top of the next moved the fog
+    // ~200px in one frame): the persisted sheet glides to its new place instead; scrolling meanwhile takes over
+    let glide: Animation | null = null, glideY = NaN;
+    const move = (y: number) => {
+      if (glide && y !== glideY) { glide.cancel(); glide = null; }
+      plane.style.transform = at(y);
+    };
+    const was = plane.style.transform;
+
+    // the canvases left under a fade must reach as far as the new one, or a band of bare page shows below them
+    const lift = (stack: HTMLCanvasElement[], height: number, theme: string) => {
+      for (const c of stack) if (tall(c) < height) {
+        const taller = paintNow(atmo, c.dataset.cat!, theme, height, drifting);
+        if (taller) { taller.style.opacity = c.style.opacity; c.replaceWith(taller); }
+      }
+    };
+    let fadeEnd = 0;
+    const finish = () => {
+      fadeTimer = undefined;
+      canvases().forEach((old) => { if (old !== current) old.remove(); });
+      if (current) plane.style.height = current.style.height;
+      measure();
+    };
+    const show = (canvas: HTMLCanvasElement, resize: boolean) => {
+      const theme = canvas.dataset.theme!, height = tall(canvas);
+      const previous = current;
+      const fading = fadeTimer !== undefined;
+      const same = !!previous && previous.dataset.cat === canvas.dataset.cat && previous.dataset.theme === theme;
+      if (!previous || reducedMotion() || previous.dataset.theme !== theme || ((same || resize) && !fading)) {
+        // at once: the first paint, a light ↔ dark switch, reduced motion, or the same look repainted (taller, wider)
+        if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = undefined; }
+        canvas.style.opacity = '1';
+        plane.append(canvas);
+        current = canvas;
+        canvases().forEach((old) => { if (old !== canvas) old.remove(); });
+      } else if (same) {
+        // the canvas fading in, repainted: it takes its place and finishes the same fade
+        canvas.style.transition = 'none';
+        canvas.style.opacity = getComputedStyle(previous!).opacity;
+        lift(canvases().filter((c) => c !== previous), height, theme);
+        previous!.replaceWith(canvas);
+        current = canvas;
+        void canvas.offsetWidth;
+        canvas.style.transition = `opacity ${Math.max(0, Math.round(fadeEnd - performance.now()))}ms var(--e-enter)`;
+        canvas.style.opacity = '1';
+      } else {
+        // another color: fade over what is there. A fade still running stops where it is (no jump to full first).
+        if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = undefined; }
+        for (const c of canvases()) { const o = getComputedStyle(c).opacity; c.style.transition = 'none'; c.style.opacity = o; }
+        let stack = canvases();
+        while (stack.length > 2) { stack[0].remove(); stack = stack.slice(1); stack[0].style.opacity = '1'; }
+        lift(stack, height, theme);
+        canvas.style.opacity = '0';
+        plane.append(canvas);
+        current = canvas;
+        void canvas.offsetWidth;
+        canvas.style.transition = 'opacity var(--t-fog) var(--e-enter)';
+        canvas.style.opacity = '1';
+        const ms = cssMs('--t-fog');
+        fadeEnd = performance.now() + ms;
+        fadeTimer = window.setTimeout(finish, ms + 50);
+      }
+      plane.style.height = `${Math.max(...canvases().map(tall))}px`;
+      plane.style.display = '';
+      atmo.classList.add('canvas-ready');
+      measure();
+      move(window.scrollY);
+    };
+
+    const request = (value?: string | null, resize = false) => {
+      const cat = value && cats.has(value) ? value : 'self';
+      activeCat = cat;
+      atmo.style.setProperty('--fog-c', fogFor(cat));
+      const theme = mode();
+      // tall enough for the whole drift of this page, and for where the sheet stands now (mid-glide after a page change)
+      const height = innerHeight + (drifting ? Math.ceil(Math.max(Math.max(0, document.documentElement.scrollHeight - innerHeight) * 0.025, -sheetY())) : 0);
+      const key = `${theme}:${cat}:${innerWidth}:${height}:${Math.min(devicePixelRatio || 1, 2)}:${drifting}`;
+      if (current?.dataset.key === key) return;
+      const id = ++generation;
+      const ready = paintNow(atmo, cat, theme, height, drifting);
+      if (ready) { show(ready, resize); return; }
+      void paint(atmo, cat, theme, height, drifting).then((canvas) => {
+        if (alive && id === generation) show(canvas, resize);
+      }).catch((error) => {
+        if (alive && id === generation) { atmo.classList.remove('canvas-ready'); plane.style.display = 'none'; }
+        console.error('[Atmosphere]', error);
+      });
+    };
+    const main = document.querySelector('main');
+    const pageCat = main?.hasAttribute('data-fog') ? main.getAttribute('data-cat') : null;
+    measure();
+    request(pageCat);
+    const now = at(window.scrollY);
+    if (drifting && was && was !== 'none' && was !== now) {
+      glideY = window.scrollY;
+      plane.style.transform = now;
+      glide = plane.animate([{ transform: was }, { transform: now }], { duration: cssMs('--t-fog'), easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+      glide.finished.then(() => { glide = null; }, () => {});
+    }
+    const offScroll = drifting ? onScroll(move) : () => {};
+    warm(mode());
+    const offs: Array<() => void> = [];
+    const theme = () => { request(activeCat); warm(mode()); };
+    document.addEventListener('themechange', theme);
+    const scheme = matchMedia('(prefers-color-scheme: dark)');
+    scheme.addEventListener('change', theme);
+    offs.push(() => { document.removeEventListener('themechange', theme); scheme.removeEventListener('change', theme); });
+
+    // a list that knows which project is current (SelectedWork) sets the fog directly; null = back to the page's own
+    const byEvent = (e: Event) => request((e as CustomEvent<string | null>).detail ?? pageCat);
+    document.addEventListener('atmo:cat', byEvent);
+    offs.push(() => document.removeEventListener('atmo:cat', byEvent));
+
+    const zones = [...document.querySelectorAll<HTMLElement>('[data-fog]')];
+    if (zones.length && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) if (e.isIntersecting) request((e.target as HTMLElement).closest('[data-cat]')?.getAttribute('data-cat'));
+      }, { rootMargin: '-48% 0px -48% 0px' });
+      zones.forEach((z) => io.observe(z));
+      offs.push(() => io.disconnect());
+    }
+
+    const resize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => request(activeCat, true), 80);
+    };
+    const ro = new ResizeObserver(resize);
+    if (main) ro.observe(main);
+    addEventListener('resize', resize, { passive: true });
+    return () => {
+      alive = false;
+      generation++;
+      if (fadeTimer) clearTimeout(fadeTimer);
+      if (resizeTimer) clearTimeout(resizeTimer);
+      offScroll();
+      ro.disconnect();
+      removeEventListener('resize', resize);
+      offs.forEach((off) => off());
+    };
+  });
+</script>

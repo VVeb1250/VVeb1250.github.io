@@ -1,0 +1,37 @@
+---
+/**
+ * @component ReelMSU
+ * @group showcase
+ * @summary MSU Informatics Hackathon 2026 on the Work reel: the result as one word, the track, and the four parts of the product that were the owner's.
+ * @use Inside WorkReel, once. Values from MSU in src/lib/facts.ts.
+ * @avoid Making the win the reason for its place; naming parts the team decided together as his (the product and OCR architecture were team decisions).
+ * @behavior Static. The word scales with its column (container units), so it never runs into the next panel.
+ * @example
+ * <ReelMSU />
+ */
+import ReelPanel from './ReelPanel.astro';
+import { langOf, tx } from '../../lib/i18n';
+import { MSU } from '../../lib/facts';
+const lang = langOf(Astro.url);
+---
+<ReelPanel work="msu" fact={MSU.when}>
+  <div class="v-msu">
+    <p class="w disp">{tx({ en: 'Winner', th: 'ชนะเลิศ', ja: '優勝' }, lang)}</p>
+    <p class="track">{tx(MSU.track, lang)}</p>
+    <div class="parts">
+      <p class="eyebrow">{tx({ en: 'My part', th: 'ส่วนที่ทำ', ja: '担当' }, lang)}</p>
+      <ul>{MSU.parts.map((p, i) => <li><span class="num">{String(i + 1).padStart(2, '0')}</span>{tx(p, lang)}</li>)}</ul>
+    </div>
+  </div>
+</ReelPanel>
+
+<style>
+  .v-msu { display: grid; gap: 10px; align-content: center; container-type: inline-size; }
+  .w { font-size: min(26cqi, 240px); line-height: 0.8; letter-spacing: -0.02em; text-transform: uppercase; color: var(--ctxs); }
+  .track { font-size: clamp(18px, 1.6vw, 24px); font-weight: 600; }
+  .parts { margin-top: clamp(16px, 3vw, 40px); padding-top: 16px; border-top: 1px solid var(--rule); display: grid; gap: 10px; max-width: 560px; }
+  ul { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px; }
+  li { display: flex; gap: 10px; align-items: baseline; font-size: 16px; }
+  li .num { font: 500 11px/1 var(--f-mono); color: var(--ctxs); }
+  @media (max-width: 600px) { ul { grid-template-columns: minmax(0, 1fr); } }
+</style>

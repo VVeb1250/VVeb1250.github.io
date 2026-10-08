@@ -1,0 +1,14 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §3.6.
+title: "z80-exam-prep"
+cat: dev
+theme: z80
+year: 2026
+type: LEARNING
+line:
+  en: "Interactive Z80 lessons: chapter 0 and exercises 1–6."
+  th: "บทเรียน Z80 แบบโต้ตอบ: บท 0 และข้อ 1–6"
+  ja: "インタラクティブなZ80教材:0章と演習1–6。"
+tags: [solo]
+links:
+  - { kind: github, url: "https://github.com/VVeb1250/z80-exam-prep", label: GitHub }
+sources: [portfolio-facts §3.6, GitHub repo checked 2026-09-30]

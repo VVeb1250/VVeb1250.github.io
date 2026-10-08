@@ -1,0 +1,68 @@
+---
+/**
+ * @component EvidenceRow
+ * @group lists
+ * @summary Supporting evidence as one dense row: the work, the situation it put you in (team, deadline, startup), the constraint you did not control, and the result — with roles and a link to the proof.
+ * @use A compact list of team works that do not need a full page (MSU, ROP, Study Planner). Wrap rows in <ul class="rows">.
+ * @avoid Ranking by prize; three different designs for three rows — the row is the same because the information is the same.
+ * @props-note `share` shows the owner's part as a Readout (e.g. commits written of the team's total) — the proportion bar makes "how much was mine" scannable. Only real, sourced counts.
+ * @example
+ * <ul class="rows">
+ *   <EvidenceRow work="planner" situation={{ en: 'Team of 7 · course project' }} result={{ en: 'Deployed on Vercel for questionnaire feedback.' }} roles={['Primary backend']}
+ *     share={{ value: 39, total: 80, unit: { en: 'commits' }, label: { en: 'mine, of the team repo' }, source: 'team repo' }} />
+ * </ul>
+ */
+import RoleTag from '../primitives/RoleTag.astro';
+import EvidenceLink from '../primitives/EvidenceLink.astro';
+import Readout from '../primitives/Readout.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { work, workHref } from '../../lib/works';
+export interface Props {
+  work: string;
+  /** The situation: who you worked with and under what pressure. */
+  situation: L;
+  constraint?: L;
+  /** The result in words. Optional when `share` already says it (e.g. "39 of 80 commits" is the share). */
+  result?: L;
+  /** The owner's roles in it. */
+  roles?: string[];
+  evidence?: { label: string; href?: string; shows?: L; kind?: 'pr' | 'release' | 'commit' | 'page' | 'video' | 'file' | 'private' }[];
+  /** The owner's share as a real count, e.g. { value: 39, total: 80, unit: 'commits', source: 'team repo' }. */
+  share?: { value: number; total: number; unit: L; label?: L; source: L };
+  base?: string;
+}
+const { work: id, situation, constraint, result, roles = [], evidence = [], share, base } = Astro.props;
+const lang = langOf(Astro.url);
+const w = await work(id);
+const d = w.data;
+const href = d.page ? workHref(id, lang, base) : undefined;
+---
+<li class="evr" data-cat={d.cat} data-work={id}>
+  <div class="evr-t">
+    <span class="eyebrow num">{d.year}</span>
+    {href ? <a class="disp" href={href} data-vt="deeper" data-vt-cat={d.cat}>{d.title}</a> : <b class="disp">{d.title}</b>}
+    <span class="evr-sit">{tx(situation, lang)}</span>
+  </div>
+  <div class="evr-c">{constraint && <><span class="eyebrow l10n">{tx({ en: 'Constraint', th: 'ข้อจำกัด', ja: '制約' }, lang)}</span><p>{tx(constraint, lang)}</p></>}</div>
+  <div class="evr-r">
+    {(result || share) && <span class="eyebrow l10n">{tx({ en: 'Result', th: 'ผลลัพธ์', ja: '結果' }, lang)}</span>}
+    {result && <p class="evr-res">{tx(result, lang)}</p>}
+    {share && <Readout size="sm" {...share} />}
+    {roles.length > 0 && <span class="evr-roles">{roles.map((r) => <RoleTag me>{r}</RoleTag>)}</span>}
+    {evidence.map((e) => <EvidenceLink {...e} />)}
+  </div>
+</li>
+
+<style>
+  .evr { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px clamp(20px, 3vw, 40px); padding: 22px 0; border-top: 1px solid var(--rule); }
+  :global(.rows) > .evr:last-child { border-bottom: 1px solid var(--rule); }
+  .evr-t { display: grid; gap: 6px; align-content: start; }
+  .evr-t .disp { font-size: clamp(22px, 2.4vw, 28px); line-height: 1.1; color: var(--ink); text-decoration: none; }
+  .evr-t a.disp:hover { text-decoration: underline; text-decoration-color: var(--ctxs); text-underline-offset: 4px; }
+  .evr-sit { color: var(--ink2); font-size: 15px; }
+  .evr-c, .evr-r { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; align-content: start; }
+  .evr-c p { font-size: 15px; }
+  .evr-res { font-weight: 600; }
+  .evr-roles { display: flex; flex-wrap: wrap; gap: 6px; }
+  @media (max-width: 820px) { .evr { grid-template-columns: minmax(0, 1fr); } }
+</style>

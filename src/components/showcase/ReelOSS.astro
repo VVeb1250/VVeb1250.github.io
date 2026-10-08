@@ -1,0 +1,46 @@
+---
+/**
+ * @component ReelOSS
+ * @group showcase
+ * @summary OSS Contributions on the Work reel: the references are the picture — #102 and #28 merged, #878 open with its root cause — each with one plain line and a link to the real thread.
+ * @use Inside WorkReel, once. The list comes from OSS_REFS in src/lib/facts.ts (shared with Home).
+ * @avoid A trophy wall, heatmap or star counts; calling #878 a fix.
+ * @behavior Each row is a link to GitHub (new tab); its number takes the signal color on hover. The panel's title and "Open project" lead to the full story.
+ * @example
+ * <ReelOSS />
+ */
+import ReelPanel from './ReelPanel.astro';
+import { langOf, tx } from '../../lib/i18n';
+import { oss } from '../../lib/facts';
+const lang = langOf(Astro.url);
+const refs = ['#102', '#28', '#878'].map(oss);
+---
+<ReelPanel work="oss">
+  <ol class="v-oss">
+    {refs.map((p) => (
+      <li class:list={{ merged: p.merged }}>
+        <a href={p.url} target="_blank" rel="noopener">
+          <span class="ref disp num">{p.ref}</span>
+          <span class="repo">{p.repo} <span aria-hidden="true">↗</span></span>
+          <span class="state eyebrow">{tx(p.state, lang)}</span>
+          <span class="text">{tx(p.short, lang)}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</ReelPanel>
+
+<style>
+  .v-oss { list-style: none; border-top: 1px solid var(--ink); }
+  a { display: grid; grid-template-columns: minmax(150px, auto) minmax(0, 1fr); column-gap: clamp(20px, 3vw, 44px); row-gap: 4px; padding: clamp(14px, 2vw, 24px) 4px; border-bottom: 1px solid var(--rule); color: inherit; text-decoration: none; cursor: pointer; }
+  .ref { grid-row: 1 / span 3; font-size: clamp(56px, 6.4vw, 108px); line-height: 0.9; color: var(--ink3); transition: color var(--t-line) var(--e-enter); }
+  .merged .ref { color: var(--ink); }
+  .repo { font-weight: 600; font-size: 17px; }
+  .repo span { color: var(--ink3); font-weight: 400; }
+  .state { color: var(--ink2); }
+  .merged .state { color: var(--ctxs); }
+  .text { color: var(--ink2); font-size: 15px; max-width: 48ch; }
+  a:hover .ref, a:focus-visible .ref { color: var(--ctxs); }
+  a:hover .repo { text-decoration: underline; text-decoration-color: var(--ctxs); text-underline-offset: 3px; }
+  @media (max-width: 1023px) { a { grid-template-columns: minmax(0, 1fr); } .ref { grid-row: auto; } }
+</style>

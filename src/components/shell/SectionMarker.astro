@@ -1,0 +1,98 @@
+---
+/**
+ * @component SectionMarker
+ * @group shell
+ * @summary A vertical label that sticks to the top-left corner once a section's own horizontal title has scrolled under the header, with a progress line for that section.
+ * @use Once per page (PageShell renders it). Any element with `data-mark="Label"` becomes a stop; its title is the child with `data-mark-trigger` (else its first h1/h2). <Section> and <ProjectHeader> set these for you.
+ * @avoid Marking small blocks — only sections at least ~1 screen tall. Hidden below 760px (the gutter is too narrow).
+ * @behavior Appears with a top-down wipe (500ms enter), disappears in 60ms, swaps label with exit → wipe. Progress fill uses the section's context color (identity blue, or the work's kind inside a work).
+ * @example
+ * <section data-mark="Work"><h2 data-mark-trigger>Featured work</h2>…</section>
+ */
+---
+<div class="smark" aria-hidden="true"><div class="smark-in"><span class="smark-l"></span><span class="smark-tr"><i></i></span></div></div>
+
+<style is:global>
+  .smark { position: fixed; left: 0; right: 0; top: calc(var(--hdr-h) + 22px); z-index: 39; pointer-events: none; }
+  .smark-in {
+    max-width: var(--maxw); margin: 0 auto; padding-left: 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+    clip-path: inset(0 0 100% 0); opacity: 0; transition: clip-path var(--t-exit) var(--e-exit), opacity var(--t-exit) var(--e-exit);
+  }
+  .smark.on .smark-in { clip-path: inset(0 0 0 0); opacity: 1; transition: clip-path var(--t-roll) var(--e-enter), opacity 0s; }
+  .smark-l { font: 500 11px/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); writing-mode: vertical-rl; white-space: nowrap; max-height: 42vh; overflow: hidden; text-overflow: ellipsis; }
+  :root[lang='ja'] .smark-l { font: 500 12px/1 var(--f-body); letter-spacing: 0.3em; }
+  :root[lang='th'] .smark-l { font: 500 12px/1 var(--f-body); letter-spacing: 0.06em; }
+  .smark-tr { position: relative; width: 2px; height: 56px; margin-left: 4.5px; background: repeating-linear-gradient(180deg, var(--ink3) 0 2px, transparent 2px 6px); }
+  .smark-tr i { position: absolute; inset: 0; transform-origin: 50% 0; transform: scaleY(0); background: var(--ctxs); will-change: transform; contain: paint; }
+  @media (max-width: 760px) { .smark { display: none; } }
+</style>
+
+<script>
+  import { onPage, reducedMotion } from '../../scripts/lifecycle';
+  import { onScroll } from '../../scripts/scroll';
+
+  onPage(() => {
+    const mk = document.querySelector<HTMLElement>('.smark');
+    const label = mk?.querySelector<HTMLElement>('.smark-l');
+    const fill = mk?.querySelector<HTMLElement>('.smark-tr i');
+    if (!mk || !label || !fill || matchMedia('(max-width: 760px)').matches) return;
+    mk.classList.remove('on');
+    const stops = [...document.querySelectorAll<HTMLElement>('main [data-mark]')].map((sec) => ({
+      sec, label: sec.dataset.mark || '',
+      trig: sec.querySelector<HTMLElement>('[data-mark-trigger]') ?? sec.querySelector<HTMLElement>('h1, h2'),
+      cat: sec.closest('[data-cat]')?.getAttribute('data-cat') ?? 'self',
+      triggerBottom: 0, sectionTop: 0, sectionBottom: 0, sectionHeight: 0, visible: false
+    }));
+    if (!stops.length) return;
+    let key: string | null = null;
+    const header = document.querySelector<HTMLElement>('.site-hdr');
+    let top = 61;
+    const refreshBounds = () => {
+      top = header?.offsetHeight ?? 61;
+      const y = window.scrollY;
+      for (const s of stops) {
+        s.visible = !!s.trig && !!s.sec.offsetParent;
+        if (!s.visible) continue;
+        const tr = s.trig!.getBoundingClientRect(), sr = s.sec.getBoundingClientRect();
+        s.triggerBottom = tr.bottom + y;
+        s.sectionTop = sr.top + y;
+        s.sectionBottom = sr.bottom + y;
+        s.sectionHeight = sr.height;
+      }
+    };
+    refreshBounds();
+    const ro = new ResizeObserver(refreshBounds);
+    const main = document.querySelector('main');
+    if (main) ro.observe(main);
+    if (header) ro.observe(header);
+    stops.forEach((s) => ro.observe(s.sec));
+    addEventListener('resize', refreshBounds, { passive: true });
+
+    const off = onScroll((y) => {
+      let hit: (typeof stops)[number] | null = null, p = 0;
+      for (const s of stops) {
+        if (!s.visible) continue;
+        if (s.triggerBottom - y <= top && s.sectionBottom - y > top + 120) {
+          hit = s;
+          p = Math.min(1, Math.max(0, (top - (s.sectionTop - y)) / Math.max(1, s.sectionHeight - 120)));
+        }
+      }
+      if (hit) fill.style.transform = `scaleY(${p.toFixed(3)})`;
+      const next = hit ? hit.label : null;
+      if (next === key) return;
+      const swap = key !== null && next !== null && mk.classList.contains('on');
+      key = next;
+      if (!hit) { mk.classList.remove('on'); return; }
+      const h = hit;
+      const put = () => { label.textContent = h.label; mk.dataset.cat = h.cat; };
+      if (!swap || reducedMotion()) { label.getAnimations().forEach((a) => a.cancel()); put(); mk.classList.add('on'); return; }
+      label.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 60, easing: 'cubic-bezier(0.4,0,1,1)', fill: 'both' }).finished.then(() => {
+        if (key !== h.label) return;
+        put();
+        label.getAnimations().forEach((a) => a.cancel());
+        label.animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 500, easing: 'cubic-bezier(0.22,1,0.36,1)' });
+      }).catch(() => {});
+    });
+    return () => { off(); ro.disconnect(); removeEventListener('resize', refreshBounds); mk.classList.remove('on'); };
+  });
+</script>

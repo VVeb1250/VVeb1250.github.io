@@ -1,0 +1,78 @@
+---
+work: oss
+recipe: build-log
+summary: Two merged fixes in other people's tools, a root-caused bug report, and design feedback — each starting from something I actually used that broke.
+---
+
+import '../../../styles/stories/oss.css';
+import { oss } from '../../../lib/facts';
+
+{/* Opens with the three references (the same facts as the Work reel and Home: OSS_REFS in src/lib/facts.ts), then one
+    part per repo; the PR cards carry the detail, so the prose stays short. Merged code and reported bugs never read the same.
+    Sources: Facts §5, AgentsMesh #98/#99/#102, ai-config-sync-manager #28, context-mode #878. */}
+<ProjectHeader work="oss" layout="text" roles={['Bug reports', 'Code contributions', 'Maintainer collaboration']} />
+
+<RefBoard items={[['#102', '#agentsmesh'], ['#28', '#windows'], ['#878', '#context-mode']].map(([ref, to]) => { const r = oss(ref); return { ref: r.ref, repo: r.repo, state: r.state, merged: r.merged, text: r.short, to }; })} />
+
+<div class="oss-main">
+  <aside>
+    <ConstraintBlock label={{ en: 'Maintainer constraint' }}
+      statement={{ en: 'The maintainer kept check on its fast checksum path.' }}
+      why={{ en: 'So the stale-output detection had to be a read-only follow-up.' }} source="AgentsMesh PR #99 → #102" />
+    <EvidenceLink href="https://github.com/sampleXbro/agentsmesh/pull/99#issuecomment-5019299345" label="Maintainer discussion" kind="pr" shows={{ en: 'Design constraint and follow-up' }} />
+  </aside>
+  <Section id="agentsmesh" title="AgentsMesh" mark="AgentsMesh" tight>
+  <p><code>check</code> still passed after I edited the generated <code>AGENTS.md</code>. Issue #98 reproduces it: <code>check</code> hashed the canonical files but not the generated output.</p>
+  <EvidenceLink href="https://github.com/sampleXbro/agentsmesh/issues/98" label="Issue #98" kind="issue" shows="Reproduction and expected behavior" />
+
+  <p>PR #99 proposed a fix. The maintainer already had a checksum-based one in progress and kept it, because it kept <code>check</code> fast; they asked for the read-only stale-output part of mine as a follow-up. #99 closed without merging.</p>
+  <PRCard repo="sampleXbro/agentsmesh" number={99} state="closed" href="https://github.com/sampleXbro/agentsmesh/pull/99"
+    title="fix(check): detect generated-output drift"
+    problem="Generated-output drift passed the documented fast check."
+    change="Proposed detecting output drift, including stale files; the maintainer chose a checksum-based base fix and requested the stale-output piece separately." />
+
+  <p>PR #102 is that follow-up: it finds stale generated outputs without running generation, and reports them through the core, API, CLI and MCP check paths. The maintainer made corrections and merged it.</p>
+  <PRCard repo="sampleXbro/agentsmesh" number={102} state="merged" date="2026-07-21" href="https://github.com/sampleXbro/agentsmesh/pull/102"
+    title="fix(check): detect stale generated outputs" issues={['#98', '#99']}
+    problem="Files left in managed output locations could be absent from the lock’s output map without being reported as stale."
+    change="Added read-only stale-output detection and exposed its result across the check surfaces, without running the generation pipeline." />
+</Section>
+</div>
+
+<div class="oss-other">
+  <Section id="windows" tight title="Windows backup paths" mark="Windows fix">
+  <p>On Windows, an absolute drive path could put an ai-config-sync-manager backup outside its backup root. PR #28 sanitizes the target path, keeps the POSIX layout and adds regression tests.</p>
+  <PRCard repo="slash9494/ai-config-sync-manager" number={28} state="merged" date="2026-07-09" href="https://github.com/slash9494/ai-config-sync-manager/pull/28"
+    title="fix: sanitize Windows backup paths"
+    problem="An absolute Windows project path broke backup placement during sync."
+    change="Sanitized absolute backup targets, preserved POSIX layout, and added regression coverage." />
+</Section>
+  <Section id="context-mode" tight title="context-mode: a root cause, not a fix" mark="Root cause">
+  <p>Single oversized Markdown paragraphs slipped past the 4 KiB chunk bound. Issue #878 has a minimal reproduction, SQLite evidence, the root cause with its source locations, a proposed fix and a regression matrix. Other users later reproduced much larger chunks on newer versions.</p>
+  <p>The issue is still open; a linked pull request, #1091, is open and not merged.</p>
+  <EvidenceLink href="https://github.com/mksglu/context-mode/issues/878" label="Issue #878" kind="issue" shows="open · reproduction, root cause, proposed fix" />
+</Section>
+</div>
+
+<details class="oss-traces">
+  <summary>Smaller traces · reports and proposals</summary>
+  <Section title="Smaller traces" mark="Traces">
+  <p><b>rulesync #2253</b> — a feature request: let <code>fetch</code> read Claude Code and Codex plugin manifests. The maintainer re-validated the gap against the code, then folded plugin ingestion into a broader plugin-root importer (#382) and closed this one as not planned. No code of mine merged.</p>
+  <EvidenceLink href="https://github.com/dyoshikawa/rulesync/issues/2253" label="rulesync #2253" kind="issue" shows="closed · not planned (moved into #382)" />
+  <p><b>ICM #313</b> — the SQLite store corrupted under concurrent writes on Windows. I wrote down the recovery that worked (<code>.recover</code>, rebuilding the full-text index, an integrity check, an atomic swap) and proposed WAL with a busy timeout, a doctor / repair command, backups and a JSONL export. The maintainer closed it as completed on 26 August 2026 through a release; I have not checked which of the proposals landed.</p>
+  <EvidenceLink href="https://github.com/rtk-ai/icm/issues/313" label="ICM #313" kind="issue" shows="closed · completed by the maintainer" />
+</Section>
+</details>
+
+<AttributionBlock rows={[
+  { who: 'me', did: 'Found the problems in use, reproduced and root-caused them, set the direction, reviewed the code and tests, and steered the follow-up through maintainer review.' },
+  { who: 'ai', did: 'Helped write code and tests for the AgentsMesh and ai-config-sync-manager pull requests, under my direction and review.' },
+  { who: 'upstream', did: 'The AgentsMesh maintainer chose the base checksum design, requested the follow-up, made corrections and merged it. The ai-config-sync-manager maintainer reviewed and merged PR #28. The rulesync and ICM maintainers decided what to do with the reports.' }
+]} />
+
+<OutcomeBlock outcome="AgentsMesh PR #102 and ai-config-sync-manager PR #28 merged. AgentsMesh PR #99 closed after the maintainer chose another base design. context-mode #878 is an open, root-caused report; rulesync #2253 and ICM #313 were reports and proposals, not code."
+  evidence={[
+    { label: 'AgentsMesh #102', href: 'https://github.com/sampleXbro/agentsmesh/pull/102', kind: 'pr', shows: 'merged' },
+    { label: 'ai-config-sync-manager #28', href: 'https://github.com/slash9494/ai-config-sync-manager/pull/28', kind: 'pr', shows: 'merged' },
+    { label: 'context-mode #878', href: 'https://github.com/mksglu/context-mode/issues/878', kind: 'issue', shows: 'open' }
+  ]} />

@@ -1,0 +1,83 @@
+---
+/**
+ * @component ProcessLine
+ * @group blocks
+ * @summary The working pattern as a line of steps — IDEA / FRICTION → WOULD THIS WORK? → BUILD → USE / TEST → KEEP / CHANGE / KILL → KEEP THE TRACE — with how far a given work actually got and what was decided. Custom steps are allowed (e.g. an OSS contribution: real usage → problem → investigation → maintainer constraints → merged).
+ * @use Home ("how I work", no `reached`), and on a work to show where it stands. Notes under steps must be real facts about that work.
+ * @avoid Marking steps as reached that were not; decorating with icons; using it for things that are not a sequence.
+ * @behavior The filled part of the line draws once (300ms per step, stagger 35ms) when it scrolls into view. Vertical under 720px.
+ * @example
+ * <ProcessLine reached="decide" verdict="keep" notes={{
+ *   idea: { en: 'The course workflow was cumbersome.' },
+ *   build: { en: '9 days, 59 of 64 commits.' },
+ *   use: { en: 'Used in 2 labs.' }
+ * }} />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+import { PROCESS, VERDICT_LABEL, type Verdict } from '../../lib/vocab';
+export interface Props {
+  /** Custom steps; default is the owner's working pattern (src/lib/vocab.ts PROCESS). */
+  steps?: { key: string; label: L }[];
+  /** Key of the last step this work reached. Omit to show the pattern itself (nothing filled). */
+  reached?: string;
+  /** Decision shown on the 'decide' step. */
+  verdict?: Verdict;
+  /** Short real notes per step key. */
+  notes?: Record<string, L>;
+  title?: L;
+  compact?: boolean;
+}
+const { steps = PROCESS, reached, verdict, notes = {}, title, compact = false } = Astro.props;
+const lang = langOf(Astro.url);
+const at = reached ? steps.findIndex((s) => s.key === reached) : -1;
+---
+<div class:list={['pl', { compact }]} style={`--n:${steps.length};--at:${at}`}>
+  {title && <h3 class="eyebrow l10n">{tx(title, lang)}</h3>}
+  <ol data-reveal="fade">
+    {steps.map((s, i) => (
+      <li data-state={at < 0 ? 'plain' : i < at ? 'done' : i === at ? 'current' : 'todo'} aria-current={i === at ? 'step' : undefined} style={`--k:${i}`}>
+        <span class="dot" aria-hidden="true"></span>
+        <span class="lbl">{tx(s.label, lang)}{s.key === 'decide' && verdict && <b class:list={['vd', verdict]}>{tx(VERDICT_LABEL[verdict], lang)}</b>}</span>
+        {!compact && notes[s.key] && <span class="note">{tx(notes[s.key], lang)}</span>}
+      </li>
+    ))}
+  </ol>
+</div>
+
+<style>
+  .pl { display: grid; gap: 14px; }
+  ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); position: relative; }
+  li { position: relative; display: grid; gap: 8px; align-content: start; padding: 22px 14px 0 0; }
+  /* the rail */
+  li::before { content: ''; position: absolute; left: 0; right: 0; top: 5px; height: 1px; background: repeating-linear-gradient(90deg, var(--ink3) 0 2px, transparent 2px 6px); }
+  li:last-child::before { right: auto; width: 12px; }
+  /* the filled part: grows once when revealed */
+  li::after { content: ''; position: absolute; left: 0; top: 4px; height: 3px; width: 0; background: var(--ctxs); transition: width var(--t-line) var(--e-enter); transition-delay: calc(var(--k) * (var(--t-line) * 0.6)); }
+  :global(.is-in) > li[data-state='done']::after { width: 100%; }
+  :global(:root:not(.js)) li[data-state='done']::after { width: 100%; }
+  .dot { position: absolute; left: 0; top: 0; width: 11px; height: 11px; background: var(--bg); border: 1.5px solid var(--ink3); }
+  li[data-state='plain'] .dot { border-color: var(--ink); }
+  li[data-state='done'] .dot { background: var(--ctxs); border-color: var(--ctxs); }
+  li[data-state='current'] .dot { background: var(--ink); border-color: var(--ink); transform: scale(1.3); }
+  .lbl { font: 500 11px/1.4 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+  :global(:root[lang='th']) .lbl, :global(:root[lang='ja']) .lbl { font: 500 13px/1.4 var(--f-body); letter-spacing: 0; }
+  li[data-state='plain'] .lbl, li[data-state='done'] .lbl, li[data-state='current'] .lbl { color: var(--ink); }
+  li[data-state='current'] .lbl { font-weight: 600; }
+  li[data-state='todo'] .lbl { color: var(--ink3); }
+  .vd { font: 600 11px/1 var(--f-mono); letter-spacing: 0.1em; padding: 3px 5px; border: 1.5px solid var(--ink); color: var(--ink); }
+  .vd.keep { background: var(--ink); color: var(--bg); }
+  .vd.kill { text-decoration: line-through; }
+  .vd.open { border-style: dashed; }
+  .note { font-size: 14px; color: var(--ink2); line-height: 1.5; }
+  .compact li { padding-top: 18px; }
+  @media (max-width: 720px) {
+    ol { grid-template-columns: minmax(0, 1fr); }
+    li { padding: 0 0 18px 26px; }
+    li::before { left: 5px; right: auto; top: 0; bottom: 0; width: 1px; height: auto; background: repeating-linear-gradient(180deg, var(--ink3) 0 2px, transparent 2px 6px); }
+    li:last-child::before { bottom: auto; height: 12px; width: 1px; }
+    li::after { left: 4px; top: 0; width: 3px; height: 0; transition-property: height; }
+    :global(.is-in) > li[data-state='done']::after { width: 3px; height: 100%; }
+    .compact li { padding-top: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { li::after { transition: none; } }
+</style>

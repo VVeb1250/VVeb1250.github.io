@@ -1,0 +1,25 @@
+---
+/**
+ * @component RoleTag
+ * @group primitives
+ * @summary A small outlined tag naming a role or a kind of contribution ("Project head", "Art", "Rigging", "Integration").
+ * @use In ContributionBlock, EvidenceRow, ProjectHeader — to scan who-did-what quickly. `me` marks roles the owner held.
+ * @avoid Skill clouds, tech-logo walls, more than ~5 tags in a row.
+ * @example
+ * <RoleTag me>Project head</RoleTag> <RoleTag>Story (team)</RoleTag>
+ */
+export interface Props {
+  /** The owner held this role: solid ink. Default: outlined. */
+  me?: boolean;
+}
+const { me = false } = Astro.props;
+---
+<span class:list={['rt', { me }]}><slot /></span>
+
+<style>
+  .rt { display: inline-flex; align-items: center; font: 500 11px/1.3 var(--f-mono); letter-spacing: 0.04em; padding: 4px 7px; border: 1px solid var(--rule); color: var(--ink2); vertical-align: middle; max-width: 100%; }
+  /* no nowrap: in a row of tags each tag still moves to the next line whole (flex-wrap breaks on max-content); only a
+     role longer than its column wraps inside its own box instead of pushing the page wider */
+  :global(:root[lang='th']) .rt, :global(:root[lang='ja']) .rt { font: 500 12px/1 var(--f-body); letter-spacing: 0; }
+  .me { border-color: var(--ink); color: var(--ink); }
+</style>

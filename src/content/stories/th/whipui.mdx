@@ -1,0 +1,38 @@
+---
+work: whipui
+recipe: free
+summary: WhipUI — skill 2 ตัวใน package เดียวสำหรับ coding agent WhipUI สร้างตาม spec ส่วน WhipDesign เปลี่ยน brief หยาบๆ ให้เป็นงาน UX และภาพ
+---
+
+{/* Facts §2.4. The package's own tagline, the split, where it stands. No measured quality claim. Moved from the old Notes page (/lab). */}
+
+<ProjectHeader work="whipui" layout="text" />
+
+<div class="pair">
+  <div>
+    <h3>WhipDesign</h3>
+    <p>อ่าน brief ว่าต้องมีหน้าไหม ควรมีอะไรในหน้า คอนเซปต์ เจตนาของ UX ทิศทางของ art และ asset รวมถึง motion</p>
+  </div>
+  <div>
+    <h3>WhipUI</h3>
+    <p>ดำเนินการตามนั้น ด้วย routing, ลายนิ้วมือของดีไซน์ (Project DNA), โหลด skill เฉพาะทางเมื่อจำเป็น และวิจารณ์จากหน้าที่ render แล้ว</p>
+  </div>
+</div>
+
+## ติดตั้ง
+
+ติดตั้งลงในโปรเจกต์ ไม่ได้ติดตั้งในการตั้งค่าส่วนกลาง (global settings) ใช้ได้กับ Codex, Claude Code และ VS Code agent
+
+<CopyText text="npx whipui init" />
+
+## สถานะตอนนี้
+
+เริ่มจากการช่วยทำงานตาม design brief แล้วพัฒนาต่อเป็น design harness ที่ครอบคลุมมากขึ้น โมเดลใหม่ทำงานได้ด้วยตัวเองมากขึ้น บางชั้นจึงอาจไม่จำเป็นอีกต่อไป
+
+<ClaimLedger
+  exists={[{ en: 'npm 0.1.0 → 1.2.0 (11 Aug – 14 Sep 2026), 5 GitHub releases; installs per project with npx whipui init for Codex, Claude Code and VS Code agents.', th: 'npm 0.1.0 → 1.2.0 (11 ส.ค. – 14 ก.ย. 2026) 5 GitHub release ติดตั้งต่อโปรเจกต์ด้วย npx whipui init สำหรับ Codex, Claude Code และ VS Code agent' }]}
+  useful={[{ en: 'In my own use it helps AI follow the brief, give elements a reason, and think about UX more explicitly.', th: 'จากการใช้งานของผมเอง มันช่วยให้ AI ทำตาม brief ทุกส่วนของหน้ามีเหตุผล และคิดเรื่อง UX ชัดขึ้น' }]}
+  unproven={[{ en: 'Any measured drop in generic output, or a measured quality gain.', th: 'ตัวเลขที่วัดได้ว่า output แบบทั่วไปลดลง หรือคุณภาพดีขึ้น' }, { en: 'That the current architecture is the right one.', th: 'ว่าสถาปัตยกรรมปัจจุบันเป็นแบบที่ถูกต้อง' }]}
+  unnecessary={[{ en: 'Layers that newer models already handle on their own.', th: 'ชั้นที่โมเดลใหม่ทำเองได้อยู่แล้ว' }]} />
+
+<EvidenceLink href="https://github.com/VVeb1250/WhipUI" label="GitHub · WhipUI" kind="page" shows={{ en: '5 releases', th: '5 release' }} />

@@ -1,0 +1,54 @@
+---
+/**
+ * @component Plate
+ * @group media
+ * @summary The Chaos-Zero-style backing: three bars with parallel diagonal ends, one low-chroma gradient (deep → mid → pale of the context color) running across all three.
+ * @use Opt-in, behind a subject — <Stage> places it for you. Use it where a composition wants the work's color near the artifact (CZN-style). Never as an automatic background for every work.
+ * @avoid Plates without a subject in front; more than one large plate per screen; saturated colors.
+ * @behavior Pure CSS (container units + tan()), no JS. Bars grow 7% from the left when an ancestor sets --grow (hover / selected state).
+ * @example
+ * <div style="position:relative;height:160px" data-cat="tool"><Plate shape="wide" /></div>
+ */
+import type { Plate as Shape } from '../../lib/vocab';
+
+export interface Props {
+  /** Bar layout. See src/lib/vocab.ts PLATES for when to use each. Default 'step-right'. */
+  shape?: Shape;
+  /** Cut angle in degrees from horizontal (steeper = closer to 90). Sign picks the lean: + is "/", − is "\". Defaults per shape. */
+  cut?: number;
+  /** Inset inside the parent, CSS inset shorthand. Default '10% 7%' (Stage) — use '0' to fill a card header. */
+  inset?: string;
+}
+const PRESETS: Record<Shape, { cut: number; bars: [number, number, number, number][] }> = {
+  'step-right': { cut: 58, bars: [[0, 27, 0, 66], [33, 64, 12, 86], [70, 100, 30, 100]] },
+  'step-left': { cut: -58, bars: [[0, 27, 34, 100], [33, 64, 14, 88], [70, 100, 0, 66]] },
+  center: { cut: 60, bars: [[6, 30, 18, 82], [36, 64, 4, 96], [70, 94, 18, 82]] },
+  wide: { cut: 62, bars: [[0, 30, 0, 92], [35, 65, 4, 96], [70, 100, 8, 100]] }
+};
+const { shape = 'step-right', cut, inset = '10% 7%' } = Astro.props;
+const p = PRESETS[shape];
+const c = cut ?? p.cut;
+---
+<div class="plate" aria-hidden="true" data-lean={c >= 0 ? 'fwd' : 'back'} style={`--cut:${Math.min(89, Math.max(20, Math.abs(c)))}deg;inset:${inset}`}>
+  {p.bars.map(([y0, y1, x0, x1]) => <i style={`--y0:${y0};--y1:${y1};--x0:${x0};--x1:${x1}`}></i>)}
+</div>
+
+<style is:global>
+  .plate { position: absolute; z-index: 0; container-type: size; pointer-events: none; }
+  .plate i {
+    position: absolute;
+    top: calc(var(--y0) * 1%); height: calc((var(--y1) - var(--y0)) * 1%);
+    left: calc(var(--x0) * 1%); width: calc((var(--x1) - var(--x0)) * 1%);
+    --dx: calc((var(--y1) - var(--y0)) * 1cqh / tan(var(--cut)));
+    clip-path: polygon(var(--dx) 0, 100% 0, calc(100% - var(--dx)) 100%, 0 100%);
+    background:
+      linear-gradient(100deg, transparent 30%, color-mix(in oklab, var(--ctxp) 60%, transparent) 100%),
+      linear-gradient(176deg, var(--ctx) 0%, var(--ctxm) 52%, var(--ctxp) 100%);
+    background-size: 100cqw 100cqh;
+    background-position: calc(var(--x0) * -1cqw) calc(var(--y0) * -1cqh);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--grow, 1));
+    transition: transform var(--t-roll) var(--e-enter);
+  }
+  .plate[data-lean='back'] i { clip-path: polygon(0 0, calc(100% - var(--dx)) 0, 100% 100%, var(--dx) 100%); transform-origin: 100% 50%; }
+</style>

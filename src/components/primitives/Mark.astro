@@ -1,0 +1,20 @@
+---
+/**
+ * @component Mark
+ * @group primitives
+ * @summary A numbered square marker in the context signal color. Pins a caption to a spot on an image.
+ * @use Inside <EvidenceItem marks> (placed for you) and at the start of the matching caption line.
+ * @avoid More than 4 marks on one image; marks without a caption that explains them.
+ * @example
+ * <Mark n={1} />
+ */
+export interface Props {
+  n: number;
+}
+const { n } = Astro.props;
+---
+<span class="mk num" aria-hidden="true">{n}</span>
+
+<style>
+  .mk { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; background: var(--ctxs); color: var(--acc-ink); font: 600 11px/1 var(--f-mono); }
+</style>

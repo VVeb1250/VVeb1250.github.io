@@ -1,0 +1,35 @@
+---
+/**
+ * @component NextWork
+ * @group project
+ * @summary The last row of a work page: "Next project" with the next work's kind and title; the page pushes up into it.
+ * @use End of every work page — the WorkPage layout renders it when there is a next work.
+ * @avoid "You may also like" grids; autoplaying into the next page.
+ * @example
+ * <NextWork work="z80" />
+ */
+import CategoryTick from '../primitives/CategoryTick.astro';
+import GoLink from '../primitives/GoLink.astro';
+import { langOf, t } from '../../lib/i18n';
+import { work, workHref, ctxOf } from '../../lib/works';
+export interface Props {
+  /** The NEXT work's id. */
+  work: string;
+  base?: string;
+}
+const { work: id, base } = Astro.props;
+const lang = langOf(Astro.url);
+const w = await work(id);
+const d = w.data;
+---
+<a class="nx" href={workHref(id, lang, base)} data-vt="push-next" data-cat={ctxOf(w)}>
+  <span class="nx-t"><span class="nx-h"><span class="eyebrow l10n">{t('next', lang)}</span><CategoryTick cat={d.cat} kind={d.kind} /></span><span class="disp nx-name">{d.title}</span></span>
+  <GoLink lineOnly />
+</a>
+
+<style>
+  .nx { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 28px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); color: inherit; text-decoration: none; }
+  .nx-t { display: grid; gap: 6px; }
+  .nx-h { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+  .nx-name { font-size: clamp(28px, 4vw, 44px); line-height: 1.05; }
+</style>

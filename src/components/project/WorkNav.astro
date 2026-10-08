@@ -1,0 +1,51 @@
+---
+/**
+ * @component WorkNav
+ * @group project
+ * @summary The strip above a work page: "← All work" (goes back to exactly where you were, then locks onto that work), the position among pages `[02] – [03]`, and ↑ ↓ to the neighbouring works with the push transition.
+ * @use Top of every work page — the WorkPage layout renders it.
+ * @avoid Breadcrumb trails; more than one back link.
+ * @behavior Holds still while ↑ ↓ change the work (only the content moves); the first number rolls to the new one.
+ * @example
+ * <WorkNav work="z80" order={['vaja', 'z80', 'oss']} />
+ */
+import { langOf, href as hrefOf, t, tx, type L } from '../../lib/i18n';
+import { workHref } from '../../lib/works';
+export interface Props {
+  work: string;
+  /** Work ids that have pages, in reading order. */
+  order: string[];
+  base?: string;
+  /** Where "All work" goes. Default: the Work page. */
+  back?: string;
+  /** Its label, when it goes somewhere else (an event page goes back to the Timeline). */
+  backLabel?: L;
+}
+const { work: id, order, base, back = '/work/', backLabel } = Astro.props;
+const lang = langOf(Astro.url);
+const i = order.indexOf(id);
+const prev = i > 0 ? order[i - 1] : null, next = i >= 0 && i < order.length - 1 ? order[i + 1] : null;
+const p = (n: number) => String(n).padStart(2, '0');
+---
+<nav class="wn" aria-label={backLabel ? tx(backLabel, lang) : t('allWork', lang)} data-vt-keep>
+  <a class="wn-back" href={hrefOf(back, lang)} data-vt="back">← {backLabel ? tx(backLabel, lang) : t('allWork', lang)}</a>
+  <div class="wn-r">
+    {i >= 0 && <span class="eyebrow num">[<span class="wn-i">{p(i + 1)}</span>] – [{p(order.length)}]</span>}
+    {prev ? <a class="wn-b" href={workHref(prev, lang, base)} data-vt="push-prev" aria-label={t('prev', lang)}>↑</a> : <span class="wn-b off" aria-hidden="true">↑</span>}
+    {next ? <a class="wn-b" href={workHref(next, lang, base)} data-vt="push-next" aria-label={t('next', lang)}>↓</a> : <span class="wn-b off" aria-hidden="true">↓</span>}
+  </div>
+</nav>
+
+<style>
+  .wn { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 22px; flex-wrap: wrap; }
+  .wn-back { font: 500 13px/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink2); text-decoration: none; padding: 6px 0; }
+  :global(:root[lang='th']) .wn-back, :global(:root[lang='ja']) .wn-back { font: 500 14px/1 var(--f-body); }
+  .wn-back:hover { color: var(--ink); }
+  .wn-r { display: flex; gap: 8px; align-items: center; }
+  .wn-b { display: inline-grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--rule); border-radius: 2px; color: var(--ink); text-decoration: none; }
+  a.wn-b:hover { border-color: var(--ink2); }
+  .wn-b.off { color: var(--ink3); opacity: 0.5; }
+  /* the counter's number rolls inside a one-line window (scripts/transitions.ts → roll) */
+  .wn-i { display: inline-block; height: 1lh; overflow: hidden; vertical-align: bottom; }
+  .wn-i :global(.wn-reel) { display: flex; flex-direction: column; }
+</style>

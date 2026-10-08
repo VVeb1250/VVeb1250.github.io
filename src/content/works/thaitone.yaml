@@ -1,0 +1,13 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §4.7.
+title: "thai-tone-rewriter"
+cat: ai
+year: 2026
+type: SMALL APP
+status: COMPLETED
+line:
+  en: "A course assignment: analyses the tone of Thai text and rewrites it without changing the facts. I defined the use case and behaviour; Claude Code implemented it."
+  ja: "授業の課題。タイ語の文章のトーンを分析し、事実を変えずに書き直します。ユースケースと振る舞いは私が定義し、実装は Claude Code が担当しました。"
+  th: "งานในวิชา: วิเคราะห์โทนของข้อความภาษาไทยแล้วเขียนใหม่โดยไม่เปลี่ยนข้อเท็จจริง ผมกำหนด use case กับพฤติกรรมของแอป ส่วน Claude Code เป็นคนเขียนโค้ด"
+links:
+  - { kind: github, url: "https://github.com/VVeb1250/thai-tone-rewriter", label: GitHub }
+sources: [portfolio-facts §4.7, GitHub repo checked 2026-09-30]

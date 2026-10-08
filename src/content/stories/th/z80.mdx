@@ -1,0 +1,70 @@
+---
+work: z80
+recipe: tool-in-use
+summary: IDE บนเบราว์เซอร์ที่รัน toolchain Z80 ของวิชาตัวจริง ทำเสร็จในราว 9 วัน เพราะวิธีทำงานเดิมยุ่งยาก
+---
+
+{/* The integrated workspace leads; the four-step capture sequence proves its workflow. Facts §2.2. */}
+<ProjectHeader work="z80" layout="split" roles={['ปัญหา', 'ทิศทาง', 'การเชื่อมต่อ']}>
+  <MediaFrame slot="media" src="z80/live-compile-to-simulator.webp" alt={{ en: 'Workspace: lab1.asm, the C16 console and Z80sim memory at 2000h', th: 'Workspace: lab1.asm, console ของ C16 และหน่วยความจำของ Z80sim ที่ 2000h' }} frame="screen" width="wide" eager
+    caption={{ en: 'Source, assembly output and simulator memory in one workspace.', th: 'ซอร์ส ผลการประกอบ และหน่วยความจำของ simulator ใน workspace เดียว' }} source={{ en: 'Live site', th: 'เว็บจริง' }} />
+</ProjectHeader>
+
+<ProjectContext label={{ en: 'Friction', th: 'ปัญหาที่พบ' }} lead={{ en: 'The original workflow was cumbersome.', th: 'แบบเก่ายุ่งยากกว่าจะใช้ได้ ต้องจำ command การใช้งานที่ไม่จำเป็นสำหรับผม' }}>
+  <p>ระบบเดิมต้องตั้งค่าหลายขั้นตอนกว่าจะใช้งานได้ และผมยังต้องจำคำสั่งที่ไม่จำเป็นต่องานของผม ผมจึงสร้างพื้นที่เดียวสำหรับเขียน ประกอบ และรันโค้ด</p>
+</ProjectContext>
+
+## ตั้งแต่ต้นจนจบ บนเว็บจริง
+
+แคปจากเว็บจริง การรันจนถึง HALT คือโปรแกรมตัวอย่างที่มีมาให้
+
+<SplitScroll steps={[
+  { title: { en: 'Assemble: no errors', th: 'ประกอบ: ไม่มี error' }, text: { en: 'The real C16.EXE runs in the console and ends with “End of Assembly -- No Errors”.', th: 'C16.EXE ตัวจริงรันใน console และจบด้วย “End of Assembly -- No Errors”' },
+    src: 'z80/live-assemble-success.webp', alt: { en: 'Console: End of Assembly -- No Errors', th: 'Console: End of Assembly -- No Errors' }, source: { en: 'Live site', th: 'เว็บจริง' } },
+  { title: { en: 'Load into the simulator', th: 'โหลดเข้า simulator' }, text: { en: 'Z80sim reports “File load success at 2000h”: the HEX file is in the simulator.', th: 'Z80sim ขึ้น “File load success at 2000h” ไฟล์ HEX เข้าไปอยู่ใน simulator แล้ว' },
+    src: 'z80/live-simulator-loaded.webp', alt: { en: 'Z80sim: File load success at 2000h', th: 'Z80sim: File load success at 2000h' }, source: { en: 'Live site', th: 'เว็บจริง' } },
+  { title: { en: 'Source to memory, in one screen', th: 'จากซอร์สถึงหน่วยความจำ ในจอเดียว' }, text: { en: 'The source, the console’s “No Errors” and the machine code at 2000h, side by side. This shows compile → simulator; it does not show the program running.', th: 'ซอร์ส “No Errors” จาก console และโค้ด machine ที่ 2000h วางเทียบกัน ภาพนี้แสดงช่วง compile ไปถึง simulator ไม่ได้แสดงว่าโปรแกรมกำลังทำงาน' },
+    src: 'z80/live-compile-to-simulator.webp', alt: { en: 'Workspace: lab1.asm, the C16 console and Z80sim memory at 2000h', th: 'Workspace: lab1.asm, console ของ C16 และหน่วยความจำ Z80sim ที่ 2000h' }, source: { en: 'Live site', th: 'เว็บจริง' } },
+  { title: { en: 'Run to HALT', th: 'รันจนถึง HALT' }, text: { en: 'The built-in sample lab1.asm, loaded at 8000h and run with G 8000: “Program halted”, PC 800B, 48 machine cycles.', th: 'โปรแกรมตัวอย่าง lab1.asm ที่มีมาให้ โหลดที่ 8000h แล้วรันด้วย G 8000: “Program halted”, PC 800B, 48 machine cycle' },
+    src: 'z80/live-program-halted.webp', alt: { en: 'Z80sim: Program halted, PC 800B', th: 'Z80sim: Program halted, PC 800B' }, source: { en: 'Live site · sample program', th: 'เว็บจริง · โปรแกรมตัวอย่าง' } }
+]} />
+
+## toolchain ตัวจริง ในเบราว์เซอร์
+
+assembler กับ simulator ของวิชาตัวจริงรันใน DOSBox ที่คอมไพล์เป็น WebAssembly
+
+<FlowDiagram n="01" caption={{ en: 'Toolchain', th: 'toolchain' }} nodes={[
+  { id: 'ed', col: 0, label: 'Monaco editor', sub: '.ASM' },
+  { id: 'as', col: 1, label: 'C16.EXE', sub: 'DOSBOX → WASM', core: true },
+  { id: 'hx', col: 2, label: 'Intel HEX', sub: '+ LISTING' },
+  { id: 'sim', col: 3, label: 'Z80sim', sub: 'ET-BOARD SIMULATOR' }
+]} edges={[
+  { from: 'ed', to: 'as', active: true },
+  { from: 'as', to: 'hx', active: true },
+  { from: 'hx', to: 'sim', active: true, label: { en: 'loads on its own', th: 'โหลดเองอัตโนมัติ' } }
+]} />
+
+workspace หลายไฟล์ที่เก็บไว้ในเบราว์เซอร์ ประกอบเป็น Intel HEX กับ listing ไฟล์ที่คอมไพล์แล้วโหลดเข้า Z80sim เองอัตโนมัติ แต่ละไฟล์แสดงสถานะ build ด้วยสีหนึ่งในสามสี มี TH / EN และทัวร์ของ UI
+
+มี Electron build สำหรับเดสก์ท็อปด้วย ซึ่งผมใช้งานจริง
+
+<EvidenceLink href="https://github.com/VVeb1250/z80-workspace/releases/tag/v0.1.4" label="Desktop downloads" kind="release" shows={{ en: 'GitHub Releases · v0.1.4', th: 'GitHub Releases · v0.1.4' }} />
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Noticed the problem, set the direction, integrated the real tools into one workspace, decided what counted as done.', th: 'ผมเป็นผู้พบปัญหา กำหนดทิศทาง รวมเครื่องมือจริงเข้าเป็น workspace เดียว และกำหนดเกณฑ์ว่าอะไรถือว่าเสร็จสมบูรณ์' } },
+  { who: 'ai', did: { en: 'Most of the implementation, heavily AI-assisted, under my steering.', th: 'AI เป็นผู้เขียนโค้ดส่วนใหญ่ ภายใต้การควบคุมของผม' } },
+  { who: 'upstream', did: { en: 'C16.EXE and the Z80 ET-Board simulator (the course’s tools), DOSBox, the Monaco editor.', th: 'C16.EXE กับ Z80 ET-Board simulator (เครื่องมือของวิชา) DOSBox และ Monaco editor' } }
+]} />
+
+<OutcomeBlock outcome={{ en: 'Complete: it does what I wanted it to do. Used by me and a few others; the course needed this workflow for only 2 labs.', th: 'เสร็จสมบูรณ์แล้ว ทำงานได้ตามที่ผมต้องการ มีผู้ใช้อื่นอีกจำนวนหนึ่ง วิชาต้องใช้ workflow นี้แค่ 2 แลป' }}
+  current={{ en: 'The web version is online on GitHub Pages.', th: 'เวอร์ชันเว็บขึ้นออนไลน์บน GitHub Pages แล้ว' }} />
+
+<details>
+  <summary>บันทึกการใช้งาน · GoatCounter</summary>
+  <MediaFrame src="z80/goatcounter.webp" alt={{ en: 'GoatCounter pages panel: 69 visits, /z80-workspace 54, assemble-toolbar 8, download-export-lst 3, assemble-console-command 3', th: 'แผง GoatCounter: 69 visit, /z80-workspace 54, assemble-toolbar 8, download-export-lst 3, assemble-console-command 3' }} frame="screen" width="text"
+    caption={{ en: '69 visits, 11 assembles (8 from the toolbar, 3 from the console), 20 Jul – 26 Sep 2026. The counts may include my own testing.', th: '69 visit ประกอบ 11 ครั้ง (8 จาก toolbar, 3 จาก console) ระหว่าง 20 ก.ค. – 26 ก.ย. 2026 ตัวเลขอาจรวมการทดสอบของผมเองด้วย' }} source="GoatCounter" />
+</details>
+
+<Draft>
+  <p>เครื่องมือก่อนหน้าของผมคือ DOSBox Handmade ซึ่งเป็นเพียงตัวห่อ DOSBox กับ KKU Z80 simulator โดยทำหน้าที่ตรวจหา DOSBox, mount workspace และเปิด simulator Z80 Workspace เข้ามาแทนทั้งขั้นตอนนี้</p>
+</Draft>

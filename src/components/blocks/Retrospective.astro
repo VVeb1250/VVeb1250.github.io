@@ -1,0 +1,44 @@
+---
+/**
+ * @component Retrospective
+ * @group blocks
+ * @summary Looking back at a finished or dropped work: what to keep, what to change, what to kill — each a short, specific line.
+ * @use End of a work page; the whole body of a retired Lab project (e.g. Portawhip). Owner's own conclusions only — wrap AI-proposed lines in <Draft>.
+ * @avoid Generic lessons ("communication is key"); more than 3 lines per column.
+ * @example
+ * <Retrospective keep={[{ en: 'Running the real assembler instead of reimplementing it.' }]} kill={[{ en: 'The large harness, once the models caught up.' }]} />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+import { VERDICT_LABEL } from '../../lib/vocab';
+export interface Props {
+  keep?: L[];
+  change?: L[];
+  kill?: L[];
+  title?: L;
+}
+const { keep = [], change = [], kill = [], title } = Astro.props;
+const lang = langOf(Astro.url);
+const cols = [['keep', keep], ['change', change], ['kill', kill]] as const;
+---
+<section class="retro" aria-label={title ? tx(title, lang) : 'Retrospective'}>
+  {title && <h3 class="eyebrow l10n">{tx(title, lang)}</h3>}
+  <div class="cols">
+    {cols.filter(([, v]) => v.length).map(([k, v]) => (
+      <div class="col">
+        <span class:list={['vtag', k]}>{tx(VERDICT_LABEL[k], lang)}</span>
+        <ul>{v.map((l) => <li>{tx(l, lang)}</li>)}</ul>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .retro { display: grid; gap: 14px; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 20px clamp(20px, 3vw, 40px); }
+  .col { display: grid; gap: 12px; align-content: start; border-top: 1px solid var(--rule); padding-top: 14px; }
+  .vtag { justify-self: start; font: 600 11px/1 var(--f-mono); letter-spacing: 0.1em; padding: 5px 7px; border: 1.5px solid var(--ink); }
+  .keep { background: var(--ink); color: var(--bg); }
+  .kill { text-decoration: line-through; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  li { font-size: 16px; }
+</style>

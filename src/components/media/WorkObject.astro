@@ -1,0 +1,114 @@
+---
+/**
+ * @component WorkObject
+ * @group media
+ * @summary A work's small object preview: its Pictogram opens into an existing artifact or a labelled isometric sketch, using the same ObjectReveal column as the kit Memory Base card.
+ * @use Opt-in object column in ArchiveRow or a compact TrailRow card. Models below depict subjects recorded in each work's YAML and portfolio-facts, not measured system architecture.
+ * @avoid Inventing screenshots or architecture to fill an empty preview; treating a symbolic sketch as output evidence; using this as a project-card layout.
+ * @behavior By default, the enclosing data-object-host supplies hover and keyboard focus. ObjectReveal is the actual Memory Base column, including its texture, left-third placement and staggered soft sweeps. glyphOnly renders just a static Pictogram, without an image, IsoObject or reveal host. Unsupported work ids leave the column empty.
+ * @example
+ * <div data-object-host><WorkObject work="memory" /><a href="/work/memory/" data-object-go>Memory Base</a></div>
+ */
+import ObjectReveal from './ObjectReveal.astro';
+import Pictogram from './Pictogram.astro';
+import { Image } from 'astro:assets';
+import { img, lqStyle } from '../../lib/media';
+import { work } from '../../lib/works';
+import IsoObject, { type Props as IsoProps } from './IsoObject.astro';
+export interface Props {
+  /** Work id. Each supported subject has an explicit model below. */
+  work: string;
+  /** Show the actual LabItem position in a HorizontalStrip card. */
+  indexed?: boolean;
+  /** Show only the static Pictogram, with no artifact, sketch or reveal behavior. */
+  glyphOnly?: boolean;
+}
+type Model = { label: string; glyph?: string[]; cutout?: string; image?: string; iso?: Pick<IsoProps, 'parts' | 'grids' | 'flows'> };
+const screenGlyph = ['############', '#..........#', '#.##.++++..#', '#.##.++++..#', '#..........#', '############', '....####....'];
+const pageGlyph = ['########', '#......#', '#.++++.#', '#......#', '#.####.#', '#......#', '#.####.#', '########'];
+const pairGlyph = ['####....####', '#..#....#..#', '#++######++#', '#..#....#..#', '####....####'];
+// Paper surfaces denote text artifacts. The bars are text, never sample values or a claim about line counts.
+const documentSketch: Model['iso'] = { parts: [
+  { box: [0, 0, 0, 170, 220, 6] },
+  { box: [20, 20, 6, 130, 24, 2], mat: 'c' },
+  { box: [20, 65, 6, 105, 6, 2] }, { box: [20, 90, 6, 120, 6, 2] },
+  { box: [20, 130, 6, 105, 6, 2] }
+] };
+const models: Record<string, Model> = {
+  vaja: { label: 'Vaja character sprite from the game build', cutout: 'vaja/object.webp' },
+  z80: { label: 'Z80 Workspace sample run after HALT', glyph: screenGlyph, image: 'z80/live-program-halted.webp' },
+  yasm: { label: 'YASM and NASM language support in VS Code', glyph: screenGlyph, image: 'yasm/autocomplete.webp' },
+  z80prep: { label: 'Interactive Z80 exam-preparation lessons', glyph: pageGlyph, image: 'z80/exam-prep.webp' },
+  // Existing Memory Base store vocabulary: cells are storage slots, not a count of memories.
+  memory: { label: 'Memory Base store (sketch)', glyph: ['######', '###+##', '######', '####+#', '#+####', '######'], iso: {
+    parts: [{ box: [0, 0, 0, 200, 170, 38], mat: 'c' }],
+    grids: [{ z: 38, x: 14, y: 14, cols: 6, rows: 5, size: 22, gap: 5 }]
+  } },
+  whipui: { label: 'WhipUI and WhipDesign: two skill documents (sketch)', glyph: ['####..####', '#++#..#++#', '#..#..#..#', '#..#..#..#', '####..####'], iso: {
+    parts: [{ box: [120, 0, 0, 110, 150, 5] }, { box: [135, 18, 5, 80, 16, 2], mat: 'c' }, { box: [0, 75, 0, 110, 150, 5] }, { box: [15, 93, 5, 80, 16, 2], mat: 'c' }]
+  } },
+  combo: { label: 'Combo router and its twelve task entries (sketch)', glyph: ['###.###.###', '###.###.###', '###.###.###', '###.###.###', '....+++....', '....+++....'], iso: {
+    parts: [{ box: [0, 0, 0, 180, 150, 12] }, { box: [50, 180, 0, 80, 45, 22], mat: 'c' }],
+    grids: [{ z: 12, x: 15, y: 12, cols: 4, rows: 3, size: 28, gap: 10 }]
+  } },
+  skills: { label: 'Hybrid skill routing (sketch)', glyph: pairGlyph, iso: {
+    parts: [{ box: [130, 0, 0, 100, 150, 5] }, { box: [0, 75, 0, 80, 60, 25], mat: 'c' }],
+    flows: [{ z: 8, d: 'M80 105 H108 V75 H130', read: true }]
+  } },
+  portawhip: { label: 'Portable agent harness boundary (sketch)', glyph: ['##########', '#........#', '#..++++..#', '#..++++..#', '#........#', '##########'], iso: {
+    parts: [{ box: [0, 0, 0, 220, 180, 48], mat: 'w' }, { box: [30, 30, 0, 160, 120, 26], mat: 'c' }]
+  } },
+  thaitone: { label: 'Thai text before and after rewriting (sketch)', glyph: pairGlyph, iso: {
+    parts: [{ box: [130, 0, 0, 100, 140, 5], mat: 'c' }, { box: [0, 90, 0, 100, 140, 5] }],
+    flows: [{ z: 8, d: 'M100 160 H118 V70 H130', read: true }]
+  } },
+  ragwork: { label: 'RAG and reranking in the coursework notebook (sketch)', glyph: ['####..####', '#..#..#..#', '#++####++#', '#..#..#..#', '####..####'], iso: {
+    parts: [{ box: [125, 0, 0, 100, 135, 8], mat: 'c' }, { box: [0, 90, 0, 100, 135, 8] }],
+    flows: [{ z: 10, d: 'M100 155 H115 V70 H125', read: true }]
+  } },
+  teach: { label: 'Generated exam questions (document sketch)', glyph: pageGlyph, iso: documentSketch },
+  msu: { label: 'Receipt in the breakfast-shop prototype (sketch)', glyph: ['######', '#.++.#', '#....#', '#.##.#', '#.##.#', '#.##.#', '######'], iso: documentSketch },
+  msuq: { label: 'Live-order interface from the qualification round (sketch)', glyph: screenGlyph, iso: {
+    parts: [{ box: [0, 0, 0, 230, 150, 12], mat: 'k' }, { box: [12, 12, 12, 206, 22, 2], mat: 'c' }, { box: [12, 48, 12, 62, 86, 2] }, { box: [85, 48, 12, 133, 86, 2] }]
+  } },
+  mg: { label: 'Motion tokens measured from game UI (file sketch)', glyph: pageGlyph, iso: documentSketch },
+  libreserve: { label: 'Search and filtering interface (sketch)', glyph: ['############', '#..++++++..#', '#..........#', '#.###.###..#', '#.###.###..#', '############'], iso: {
+    parts: [{ box: [0, 0, 0, 230, 150, 12], mat: 'k' }, { box: [15, 15, 12, 200, 22, 2], mat: 'c' }, { box: [15, 55, 12, 70, 80, 2] }, { box: [95, 55, 12, 120, 80, 2] }]
+  } },
+  planner: { label: 'Study-planning calendar (sketch)', glyph: ['########', '#++++++#', '#......#', '#.##.#.#', '#.##.#.#', '########'], iso: {
+    parts: [{ box: [0, 0, 0, 180, 190, 6] }, { box: [12, 12, 6, 156, 24, 2], mat: 'c' }],
+    grids: [{ z: 6, x: 16, y: 50, cols: 4, rows: 3, size: 26, gap: 10 }]
+  } },
+  fpga: { label: 'FPGA board with seven-segment display, buttons and LEDs (sketch)', glyph: ['##########', '#.++++...#', '#.+..+.#.#', '#.++++...#', '#.+..+.#.#', '#.++++...#', '##########'], iso: {
+    parts: [{ box: [0, 0, 0, 230, 160, 12], mat: 'c' }, { box: [20, 20, 12, 105, 100, 14], mat: 'k' }, { box: [32, 28, 26, 70, 7, 2], mat: 'a' }, { box: [32, 65, 26, 70, 7, 2], mat: 'a' }, { box: [32, 102, 26, 70, 7, 2], mat: 'a' }, { box: [32, 35, 26, 7, 30, 2], mat: 'a' }, { box: [95, 35, 26, 7, 30, 2], mat: 'a' }, { box: [32, 72, 26, 7, 30, 2], mat: 'a' }, { box: [95, 72, 26, 7, 30, 2], mat: 'a' }, { box: [155, 30, 12, 26, 26, 10], mat: 'k' }, { box: [155, 85, 12, 12, 12, 5], mat: 'a' }]
+  } },
+  rop: { label: 'Go and C++ solver integration (sketch)', glyph: pairGlyph, iso: {
+    parts: [{ box: [140, 0, 0, 105, 100, 24], mat: 'c' }, { box: [0, 110, 0, 105, 100, 24] }],
+    flows: [{ z: 25, d: 'M105 160 H122 V50 H140', read: true }]
+  } },
+  oss: { label: 'Read-only stale-output check and its inputs (sketch)', glyph: ['###..+++..###', '#.#..+++..#.#', '#############', '.....+++.....'], iso: {
+    parts: [{ box: [0, 0, 0, 85, 100, 5] }, { box: [110, 0, 0, 85, 100, 5] }, { box: [35, 125, 0, 130, 80, 30], mat: 'c' }],
+    flows: [{ z: 8, d: 'M42 100 V118 H100 V125 M152 100 V118 H100', read: true }]
+  } }
+};
+const model = models[Astro.props.work];
+const cat = model ? (await work(Astro.props.work)).data.cat : undefined;
+const meta = !Astro.props.glyphOnly && (model?.cutout || model?.image) ? img((model.cutout || model.image)!) : null;
+const preview = meta ? await lqStyle(meta, 'contain') : '';
+---
+{model && (Astro.props.glyphOnly ? <div class="wo-glyph"><Pictogram grid={model.glyph} from={model.cutout} cols={12} /></div> : <div class:list={['wo', { 'wo-screen': !!model.image, 'wo-cutout': !!model.cutout }]}>
+  <ObjectReveal glyph={model.glyph} glyphFrom={model.cutout} glyphCols={12} indexed={Astro.props.indexed}
+    label={{ en: model.label }} cat={cat} tag={model.image ? 'REAL · SCREEN' : model.cutout ? 'REAL · SPRITE' : 'SYSTEM · SKETCH'}>
+    {meta && <Image src={meta} alt={model.label} style={preview} data-lq loading="lazy" widths={[400, 800].filter(w => w <= meta.width).concat(meta.width < 400 ? [meta.width] : [])} sizes="(max-width: 760px) 160px, 340px" />}
+    {model.iso && <IsoObject label={{ en: model.label }} origin={[300, 140]} scale={1.15}
+      parts={model.iso.parts} grids={model.iso.grids} flows={model.iso.flows} />}
+  </ObjectReveal>
+</div>)}
+<style>
+  .wo-glyph { display: grid; place-items: center; width: 100%; height: 96px; }
+  .wo-glyph :global(.pg) { width: 88px; height: 80px; }
+  @media (max-width: 760px) { .wo-glyph { height: 80px; } .wo-glyph :global(.pg) { width: 72px; height: 72px; } }
+  .wo { width: 100%; min-width: 0; aspect-ratio: 5 / 3; }
+  .wo-screen :global(.obj-real > img) { width: 62%; height: 86%; object-fit: contain; }
+  .wo-cutout :global(.obj-real > img) { width: 45%; height: 90%; object-fit: contain; }
+</style>

@@ -1,0 +1,74 @@
+---
+/**
+ * @component ProjectHeader
+ * @group project
+ * @summary The top of a work page, in the Work reel's scale: the work's outlined number from the reel (filled pale — this is the work you opened; an event page shows its year instead), type · year, kind, status, the title large, one line, the key facts, roles — and a `media` slot the composition fills however this work needs (art, a screen, nothing).
+ * @use First block of every work page. The title is also the SectionMarker label for the page. Choose `layout` by what leads: `stack` (media below, art-led), `split` (media beside, interface-led), `text` (no media, process-led).
+ * @avoid Stuffing every fact into meta (3–5); a second big title below it.
+ * @example
+ * <ProjectHeader work="z80" layout="split" roles={['Direction', 'Integration']}>
+ *   <MediaFrame slot="media" src="z80/workspace.webp" alt={{ en: 'Z80 Workspace' }} frame="screen" eager />
+ * </ProjectHeader>
+ */
+import CategoryTick from '../primitives/CategoryTick.astro';
+import StatusTag from '../primitives/StatusTag.astro';
+import MetaList from '../primitives/MetaList.astro';
+import RoleTag from '../primitives/RoleTag.astro';
+import Quote from '../primitives/Quote.astro';
+import { langOf, tx } from '../../lib/i18n';
+import { work, metaLabel } from '../../lib/works';
+import { SHOWCASE } from '../../lib/site';
+export interface Props {
+  work: string;
+  layout?: 'stack' | 'split' | 'text';
+  /** The owner's roles, shown as tags. */
+  roles?: string[];
+  /** Show the work's own quote (tagline) under the line. Default true. */
+  quote?: boolean;
+}
+const { work: id, layout = 'split', roles = [], quote = true } = Astro.props;
+const lang = langOf(Astro.url);
+const d = (await work(id)).data;
+const meta = d.meta.map((m) => ({ k: metaLabel(m.k, lang), v: m.v }));
+// the same number the work carries on the Work reel, so opening it feels like stepping into that panel;
+// an event (competition, teaching) has no reel number — it carries its year, as on the Timeline
+const at = SHOWCASE.indexOf(id as (typeof SHOWCASE)[number]);
+const no = at >= 0 ? String(at + 1).padStart(2, '0') : d.kind !== 'work' ? String(d.year) : null;
+---
+<header class:list={['ph', layout]} data-mark-trigger>
+  <div class="ph-txt">
+    {no && <span class="ph-no disp num" aria-hidden="true">{no}</span>}
+    <span class="ph-tags"><span class="eyebrow">{d.type} · {d.year}</span><CategoryTick cat={d.cat} kind={d.kind} />{d.status && <StatusTag status={d.status} />}</span>
+    <h1 class="disp" data-vt-title>{d.title}</h1>
+    <p class="lead">{tx(d.line, lang)}</p>
+    {quote && d.quote && <Quote text={d.quote} />}
+    {roles.length > 0 && <span class="ph-roles">{roles.map((r) => <RoleTag me>{r}</RoleTag>)}</span>}
+    {meta.length > 0 && <MetaList items={meta} />}
+  </div>
+  {layout !== 'text' && <div class="ph-media"><slot name="media" /></div>}
+</header>
+
+<style>
+  /* --ph-pad: the space above the header; --no-s: the number's size. The number starts at the top of the work's stage
+     (WorkPage's data-vt-stage), never above it: switching works (↑ ↓) cuts the stage off just under WorkNav, and a number
+     reaching over that edge was cut in half while the content moved. */
+  .ph { --ph-pad: clamp(24px, 5vw, 56px); --no-s: clamp(120px, 15vw, 230px); display: grid; gap: clamp(20px, 3vw, 48px); padding-top: var(--ph-pad); }
+  .stack, .text { grid-template-columns: minmax(0, 1fr); }
+  .ph-media { min-width: 0; }
+  .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); align-items: center; }
+  .stack .ph-txt { max-width: 760px; }
+  .ph-txt { position: relative; display: grid; gap: 12px; align-content: start; justify-items: start; z-index: 1; }
+  .ph-no { position: absolute; left: -0.06em; top: calc(-1 * var(--ph-pad)); z-index: -1; font-size: var(--no-s); line-height: 1; pointer-events: none;
+    color: color-mix(in srgb, var(--ctxp) 70%, transparent); -webkit-text-stroke: 1px var(--ctxm); }
+  .ph-tags { display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; }
+  h1 { font-size: clamp(48px, 6.6vw, 104px); line-height: 0.92; letter-spacing: -0.01em; text-wrap: balance; }
+  /* the tags sit over the number's lower part, as on the reel (the number now starts lower, so they do too) */
+  .ph-tags { margin-top: calc(clamp(40px, 6vw, 96px) + 0.5 * var(--no-s) - var(--ph-pad)); }
+  .lead { font-size: clamp(18px, 1.9vw, 21px); max-width: 40ch; }
+  .ph-roles { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ph-txt :global(.meta) { margin-top: 8px; }
+  @media (max-width: 860px) {
+    .split { grid-template-columns: minmax(0, 1fr); }
+    .ph { --no-s: clamp(96px, 26vw, 160px); }
+  }
+</style>

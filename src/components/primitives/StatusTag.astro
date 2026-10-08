@@ -1,0 +1,37 @@
+---
+/**
+ * @component StatusTag
+ * @group primitives
+ * @summary The state of a work or experiment, in a fixed vocabulary.
+ * @use Next to a title, in rows, on trace nodes. ACTIVE gets a dot in the color of the work it belongs to (inherits the nearest data-cat, or set `cat`).
+ * @avoid Inventing states ("SHIPPED", "DONE") or marking something ACTIVE that isn't. The list is closed on purpose.
+ * @states ACTIVE (ink fill + dot) · WIP (ink border) · COMPLETED (quiet border) · VALIDATED (ink fill) · FAILED (muted border, struck) · RETIRED / ARCHIVED (muted text, no border) · REVISITING (dashed) · NOT STARTED (dotted)
+ * @example
+ * <StatusTag status="ACTIVE" cat="ai" />
+ */
+import { langOf, tx } from '../../lib/i18n';
+import { STATUS_LABEL, type Status, type Cat } from '../../lib/vocab';
+export interface Props {
+  /** One of ACTIVE · WIP · COMPLETED · VALIDATED · FAILED · RETIRED · ARCHIVED · REVISITING · NOT STARTED. */
+  status: Status;
+  /** Color of the ACTIVE dot when the chip is outside the work's own area. */
+  cat?: Cat;
+}
+const { status, cat } = Astro.props;
+const lang = langOf(Astro.url);
+const cls = { ACTIVE: 'on', WIP: 'wip', COMPLETED: 'done', VALIDATED: 'val', FAILED: 'fail', RETIRED: 'arch', ARCHIVED: 'arch', REVISITING: 'rev', 'NOT STARTED': 'ns' }[status];
+---
+<span class:list={['st', cls]} data-cat={cat}>{tx(STATUS_LABEL[status], lang)}</span>
+
+<style>
+  .st { font: 500 11px/1 var(--f-mono); letter-spacing: 0.06em; padding: 4px 6px; border: 1px solid var(--ink3); color: var(--ink2); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; }
+  .on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .on::before { content: ''; width: 6px; height: 6px; background: var(--dot); flex: none; }
+  .wip { border-color: var(--ink); color: var(--ink); }
+  .done { border-color: var(--ink2); color: var(--ink); }
+  .fail { border-color: var(--ink3); color: var(--ink2); text-decoration: line-through; }
+  .val { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .arch { border-color: transparent; color: var(--ink3); padding-inline: 0; }
+  .rev { border-style: dashed; border-color: var(--ink); color: var(--ink); }
+  .ns { border-style: dotted; color: var(--ink2); }
+</style>

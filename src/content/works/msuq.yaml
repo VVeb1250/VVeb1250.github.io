@@ -1,0 +1,12 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §2.3.
+title: "MSU Hackathon qualifier"
+cat: ui
+year: 2026
+date: "2026-06"
+type: WEB APP
+line:
+  en: "Qualification round of the MSU hackathon, June 2026: navigation, event filtering and pagination, animation, and the live-order interface."
+  ja: "MSU Hackathon の予選（2026年6月）。ナビゲーション、イベントの絞り込みとページネーション、アニメーション、リアルタイムの注文画面を担当しました。"
+  th: "รอบคัดเลือกของ MSU Hackathon มิถุนายน 2026: การนำทาง การกรองอีเวนต์และ pagination, animation และหน้าสั่งออเดอร์แบบสด"
+tags: [hackathon, team]
+sources: [portfolio-facts §2.3]

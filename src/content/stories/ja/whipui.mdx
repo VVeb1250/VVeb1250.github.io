@@ -1,0 +1,38 @@
+---
+work: whipui
+recipe: free
+summary: WhipUI — コーディングエージェント向けの薄いパッケージに入った2つのスキル。WhipUIは仕様から制作し、WhipDesignは大まかな依頼をUXとビジュアルの作業に変えます。
+---
+
+{/* Facts §2.4. The package's own tagline, the split, where it stands. No measured quality claim. Moved from the old Notes page (/lab). */}
+
+<ProjectHeader work="whipui" layout="text" />
+
+<div class="pair">
+  <div>
+    <h3>WhipDesign</h3>
+    <p>ブリーフを読み取り、ページが必要かどうか、何を載せるか、コンセプト、UXの意図、アートとアセットの方向性、モーションを整理します。</p>
+  </div>
+  <div>
+    <h3>WhipUI</h3>
+    <p>それを実行します。ルーティング、デザインの指紋（Project DNA）、必要に応じて読み込む専門スキル、レンダリング後の批評を担当します。</p>
+  </div>
+</div>
+
+## インストール
+
+Codex、Claude Code、VS Code agent 向けに、グローバル設定ではなくプロジェクトごとにインストールします。
+
+<CopyText text="npx whipui init" />
+
+## 現在の状況
+
+大まかなデザインブリーフに沿った作業を支える用途から始まり、より本格的なデザインハーネスへと発展しました。新しいモデルは自力で扱える範囲が広がったため、一部のレイヤーは不要になっているかもしれません。
+
+<ClaimLedger
+  exists={[{ en: 'npm 0.1.0 → 1.2.0 (11 Aug – 14 Sep 2026), 5 GitHub releases; installs per project with npx whipui init for Codex, Claude Code and VS Code agents.', ja: 'npm 0.1.0 → 1.2.0（2026年8月11日〜9月14日）、GitHub リリース5件。Codex、Claude Code、VS Code agent 向けに npx whipui init でプロジェクトごとにインストールできます。' }]}
+  useful={[{ en: 'In my own use it helps AI follow the brief, give elements a reason, and think about UX more explicitly.', ja: '私自身の利用では、AIがブリーフに沿って作業し、各要素に理由を持たせ、UXをより明示的に考えるのに役立ちました。' }]}
+  unproven={[{ en: 'Any measured drop in generic output, or a measured quality gain.', ja: '一般的な出力の減少、または品質の向上を計測したこと。' }, { en: 'That the current architecture is the right one.', ja: '現在のアーキテクチャが正しいこと。' }]}
+  unnecessary={[{ en: 'Layers that newer models already handle on their own.', ja: '新しいモデルが自力で扱えるレイヤー。' }]} />
+
+<EvidenceLink href="https://github.com/VVeb1250/WhipUI" label="GitHub · WhipUI" kind="page" shows={{ en: '5 releases', ja: 'リリース5件' }} />

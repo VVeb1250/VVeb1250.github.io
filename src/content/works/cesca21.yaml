@@ -1,0 +1,13 @@
+# Timeline row only; it opens the #21 part of the CESCa page. Facts: _note/portfolio-facts.md §6.6.
+title: CESCa
+kind: teaching
+cat: self
+theme: cesca21
+year: 2026
+type: CAMP · ACADEMIC STAFF / TA
+opens: /timeline/cesca/#n21
+line:
+  en: "#21: academic staff / TA again, this time for Networking."
+  ja: "#21：学術スタッフ / TA として再び参加。今回は Networking を担当しました。"
+  th: "#21: academic staff / TA อีกครั้ง คราวนี้ Networking"
+sources: [portfolio-facts §6.6]

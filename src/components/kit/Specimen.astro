@@ -1,0 +1,91 @@
+---
+/* Kit-only: shows one component's doc (parsed from its own header) above a live example. Not part of the site. */
+import { parseDoc } from '../../../scripts/docparse.mjs';
+import { Code } from 'astro:components';
+
+const raws = import.meta.glob<string>('/src/components/**/*.astro', { query: '?raw', import: 'default', eager: true });
+const DOCS = Object.fromEntries(
+  Object.entries(raws)
+    .filter(([f]) => !f.includes('/kit/'))
+    .map(([f, src]) => parseDoc(src, f.slice(1)))
+    .filter(Boolean)
+    .map((d: any) => [d.name, d])
+);
+
+export interface Props {
+  name: string;
+  /** false = do not render a second instance (once-per-page components); show `note` instead. */
+  live?: boolean;
+  note?: string;
+  /** Demo area layout. */
+  pad?: boolean;
+}
+const { name, live = true, note, pad = true } = Astro.props;
+const d: any = DOCS[name];
+if (!d) throw new Error(`[kit] no doc header for component "${name}"`);
+---
+<article class="spec" id={`c-${name}`} data-group={d.group}>
+  <header class="spec-h">
+    <h3 class="disp">{d.name}</h3>
+    <code class="spec-f">{d.file}</code>
+  </header>
+  <p class="spec-s">{d.summary}</p>
+  <dl class="spec-r">
+    {d.use && <div><dt>Use</dt><dd>{d.use}</dd></div>}
+    {d.avoid && <div><dt>Avoid</dt><dd>{d.avoid}</dd></div>}
+    {d.behavior && <div><dt>Behavior</dt><dd>{d.behavior}</dd></div>}
+    {d.states && <div><dt>States</dt><dd>{d.states}</dd></div>}
+    {d['props-note'] && <div><dt>Note</dt><dd>{d['props-note']}</dd></div>}
+  </dl>
+  <div class:list={['spec-live', { pad }]}>
+    <span class="spec-tag">{live ? 'LIVE' : 'ON THIS PAGE'}</span>
+    {live ? <slot /> : <p class="spec-note">{note}</p>}
+  </div>
+  <div class="spec-more">
+    {d.props.length > 0 && (
+      <details>
+        <summary>Props · {d.props.length}</summary>
+        <table>
+          <thead><tr><th>prop</th><th>type</th><th>notes</th></tr></thead>
+          <tbody>{d.props.map((p: any) => <tr><td><code>{p.name}</code>{!p.optional && <b> required</b>}</td><td><code>{p.type}</code></td><td>{p.doc}</td></tr>)}</tbody>
+        </table>
+      </details>
+    )}
+    {d.example && (
+      <details>
+        <summary>Example</summary>
+        <Code code={d.example} lang="astro" themes={{ light: 'github-light', dark: 'github-dark-dimmed' }} defaultColor={false} />
+      </details>
+    )}
+  </div>
+</article>
+
+<style>
+  .spec { display: grid; gap: 14px; padding-block: 40px; border-top: 1px solid var(--rule); scroll-margin-top: calc(var(--hdr-h) + 16px); }
+  .spec-h { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; }
+  .spec-h h3 { font-size: clamp(26px, 3vw, 34px); line-height: 1.05; }
+  .spec-f { font: 400 12px/1 var(--f-mono); color: var(--ink3); }
+  .spec-s { font-size: 17px; max-width: 72ch; }
+  .spec-r { margin: 0; display: grid; gap: 6px; max-width: 86ch; font-size: 14px; }
+  .spec-r div { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 12px; }
+  .spec-r dt { font: 500 11px/1.9 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
+  .spec-r dd { margin: 0; color: var(--ink2); }
+  .spec-live { position: relative; border: 1px dashed var(--rule); margin-top: 6px; min-width: 0; }
+  .spec-live.pad { padding: clamp(16px, 3vw, 32px); }
+  .spec-tag { position: absolute; top: -9px; left: 12px; background: var(--bg); padding: 0 6px; font: 500 10px/18px var(--f-mono); letter-spacing: 0.1em; color: var(--ink3); z-index: 2; }
+  .spec-note { font-size: 14px; color: var(--ink2); }
+  .spec-more { display: grid; gap: 8px; }
+  details { border: 1px solid var(--rule); background: color-mix(in srgb, var(--surface) 60%, transparent); }
+  summary { cursor: pointer; padding: 8px 12px; font: 500 12px/1.4 var(--f-mono); letter-spacing: 0.04em; color: var(--ink2); }
+  summary:hover { color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-top: 1px solid var(--rule); }
+  th { font: 500 10px/1.4 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
+  td code { font: 400 12px/1.5 var(--f-mono); overflow-wrap: anywhere; }
+  td b { font: 600 10px/1 var(--f-mono); color: var(--ink2); }
+  .spec-more :global(pre) { margin: 0; padding: 12px 14px; overflow-x: auto; font: 400 12.5px/1.6 var(--f-mono); background: transparent !important; border-top: 1px solid var(--rule); }
+  .spec-more :global(.shiki span) { color: var(--shiki-light); }
+  :global(:root[data-theme='dark']) .spec-more :global(.shiki span) { color: var(--shiki-dark); }
+  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme='light'])) .spec-more :global(.shiki span) { color: var(--shiki-dark); } }
+  @media (max-width: 560px) { .spec-r div { grid-template-columns: minmax(0, 1fr); gap: 0; } table { display: block; overflow-x: auto; } }
+</style>

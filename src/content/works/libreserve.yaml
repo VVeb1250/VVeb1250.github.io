@@ -1,0 +1,12 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §3.2.
+title: "Libreserve"
+cat: ui
+year: 2026
+type: FRONTEND
+status: ARCHIVED
+line:
+  en: "Frontend only, joined mid-way to practise GitHub and teamwork: search and filter UX, dark mode, admin UI. The system never saw real use."
+  ja: "フロントエンドのみ担当。途中から参加し、GitHub とチーム開発を経験しました。担当は検索とフィルタの UX、ダークモード、管理画面です。システムが実際に使われることはありませんでした。"
+  th: "เฉพาะ frontend เข้าร่วมกลางทางเพื่อฝึก GitHub และทำงานเป็นทีม: UX การค้นหาและกรอง dark mode และ admin UI ระบบไม่เคยถูกใช้งานจริง"
+tags: [team]
+sources: [portfolio-facts §3.2]

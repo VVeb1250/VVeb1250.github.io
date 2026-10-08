@@ -1,0 +1,42 @@
+---
+/**
+ * @component ReelVaja
+ * @group showcase
+ * @summary Journey of Vaja on the Work reel: the gameplay clip large, and the first attack, frame by frame, over its corner — the animation is the part the owner loved making (Story §0.1).
+ * @use Inside WorkReel, once.
+ * @avoid Overlaying text on the gameplay; adding the credit here (the work page has it).
+ * @behavior The clip loops muted while on screen (VideoEmbed); the attack steps or plays with FrameStepper's own controls. Under 1024px the attack sits under the clip.
+ * @example
+ * <ReelVaja />
+ */
+import ReelPanel from './ReelPanel.astro';
+import VideoEmbed from '../media/VideoEmbed.astro';
+import FrameStepper from '../media/FrameStepper.astro';
+import { langOf, tx } from '../../lib/i18n';
+const lang = langOf(Astro.url);
+---
+<ReelPanel work="vaja" aim>
+  <div class="v-vaja">
+    <figure class="clip">
+      <VideoEmbed src="vaja/highlight-720.mp4" poster="vaja/highlight-poster.webp" label={{ en: 'Journey of Vaja gameplay, no sound', th: 'Gameplay ของ Journey of Vaja ไม่มีเสียง', ja: 'Journey of Vaja のゲームプレイ、音声なし' }} loop />
+      <figcaption class="cap">{tx({ en: 'Gameplay · cut from a recorded build', th: 'Gameplay · ตัดจาก build ที่บันทึกไว้', ja: 'ゲームプレイ · 録画したビルドから切り出し' }, lang)}</figcaption>
+    </figure>
+    <figure class="att">
+      <FrameStepper strips={[{ src: 'vaja/strip-attack1-padded.webp', frames: 10, name: 'Vaja · attack', fps: 12, start: 7 }]} />
+      <figcaption class="cap">{tx({ en: 'The first attack · 10 frames exported from the rig', th: 'การโจมตีแรก · 10 เฟรมส่งออกจาก rig', ja: '最初の攻撃 · リグから書き出した10フレーム' }, lang)}</figcaption>
+    </figure>
+  </div>
+</ReelPanel>
+
+<style>
+  .v-vaja { display: grid; }
+  .clip { margin: 0; }
+  .clip :global(video) { border: 1px solid var(--rule); max-height: calc(var(--rp-vh, 9999px) - 120px); width: auto; max-width: 100%; }
+  .clip .cap { text-align: right; }
+  .att { margin: -18% 0 0 -6%; justify-self: start; width: min(340px, 52%); padding: 14px 14px 10px; background: var(--surface); border: 1px solid var(--rule); position: relative; z-index: 2; }
+  .cap { font: 500 11px/1.45 var(--f-mono); color: var(--ink3); margin-top: 8px; }
+  @media (max-width: 1023px) {
+    .att { margin: 16px 0 0; width: min(320px, 100%); }
+    .clip .cap { text-align: left; }
+  }
+</style>

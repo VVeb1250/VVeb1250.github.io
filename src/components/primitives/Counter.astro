@@ -1,0 +1,31 @@
+---
+/**
+ * @component Counter
+ * @group primitives
+ * @summary Real numbers, current large and total small: `03 / 04`, or bracketed `[03] – [05]`.
+ * @use Positions in a sequence (trace steps, strip position, work index).
+ * @avoid Fake progress or percentages without a source.
+ * @example
+ * <Counter value={3} total={4} size="lg" />
+ */
+export interface Props {
+  value: number;
+  total?: number;
+  /** 'bracket' → [03] – [05]; 'slash' → 03 / 05 with the total small. */
+  style?: 'bracket' | 'slash';
+  size?: 'sm' | 'lg';
+}
+const { value, total, style = 'slash', size = 'sm' } = Astro.props;
+const p = (n: number) => String(n).padStart(2, '0');
+---
+{style === 'bracket'
+  ? <span class="cnt num">[{p(value)}]{total != null && <> – [{p(total)}]</>}</span>
+  : <span class:list={['cnt num slash', size]}><b class="disp">{p(value)}</b>{total != null && <small>/ {p(total)}</small>}</span>}
+
+<style>
+  .cnt { font: 500 13px/1 var(--f-mono); color: var(--ink2); white-space: nowrap; }
+  .slash { display: inline-flex; align-items: flex-end; gap: 6px; }
+  .slash b { color: var(--ink); font-size: 28px; line-height: 0.9; }
+  .slash.lg b { font-size: clamp(64px, 9vw, 112px); }
+  .slash small { font: 500 13px/1 var(--f-mono); margin-bottom: 0.3em; }
+</style>

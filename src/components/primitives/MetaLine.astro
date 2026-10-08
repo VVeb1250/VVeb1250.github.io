@@ -1,0 +1,28 @@
+---
+/**
+ * @component MetaLine
+ * @group primitives
+ * @summary One mono line of small facts separated by middots: "Project head · team of 3 · 2025".
+ * @use Under titles, in rows, in captions — anywhere a few facts belong on one line.
+ * @avoid More than ~4 items (use MetaList); adjectives ("amazing", "robust").
+ * @example
+ * <MetaLine items={[{ en: 'Project head', th: 'หัวหน้าโปรเจกต์' }, { en: 'team of 3', th: 'ทีม 3 คน' }, '2025']} />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  items: L[];
+  /** 'ink' for the strongest fact on a card; default 'muted'. */
+  tone?: 'ink' | 'muted';
+}
+const { items, tone = 'muted' } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<p class:list={['ml', tone]}>{items.map((v, i) => (<>{i > 0 && <span class="dot" aria-hidden="true"> · </span>}<span>{tx(v, lang)}</span></>))}</p>
+
+<style>
+  .ml { font: 500 12px/1.6 var(--f-mono); letter-spacing: 0.04em; }
+  :global(:root[lang='th']) .ml, :global(:root[lang='ja']) .ml { font: 500 14px/1.6 var(--f-body); letter-spacing: 0; }
+  .muted { color: var(--ink2); }
+  .ink { color: var(--ink); }
+  .dot { color: var(--ink3); }
+</style>

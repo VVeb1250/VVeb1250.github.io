@@ -1,0 +1,29 @@
+---
+/**
+ * @component Callout
+ * @group primitives
+ * @summary A short aside: a note, a caveat, a number's source, a "what I'd ask first". `margin` pushes it to the right edge of the column on wide screens; `inline` keeps it at the start of the line.
+ * @use One or two per page, right before or after the block it comments on.
+ * @avoid Warnings styled as alerts, colored boxes, icons; long paragraphs.
+ * @example
+ * <Callout label={{ en: 'Note', th: 'โน้ต' }}>The counts may include my own testing.</Callout>
+ */
+import { langOf, tx, t, type L } from '../../lib/i18n';
+export interface Props {
+  label?: L;
+  /** 'margin' aligns it to the right edge on wide screens; 'inline' keeps it left-aligned. */
+  place?: 'margin' | 'inline';
+}
+const { label, place = 'margin' } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<aside class:list={['co-box', place]}>
+  <span class="eyebrow l10n">{label ? tx(label, lang) : t('note', lang)}</span>
+  <div class="co-body"><slot /></div>
+</aside>
+
+<style>
+  .co-box { display: grid; gap: 6px; padding-left: 12px; border-left: 1px solid var(--ctxs); font-size: 14px; color: var(--ink2); max-width: 34ch; }
+  .co-body :global(p) { margin: 0; }
+  @media (min-width: 1100px) { .margin { margin-left: auto; } }
+</style>

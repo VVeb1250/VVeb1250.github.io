@@ -1,0 +1,3182 @@
+[
+ {
+  "name": "AttributionBlock",
+  "group": "blocks",
+  "file": "src/components/blocks/AttributionBlock.astro",
+  "component": "AttributionBlock",
+  "summary": "Who did what — me, teammates, AI, upstream maintainers, the course — said plainly in a few rows. Text and dividers, not a card.",
+  "use": "On a work's own page, once, wherever more than one party touched the result (teammates, AI, upstream code, course tools). Put it after the work is shown, before the outcome. Say plainly what AI implemented and what the owner directed, judged and integrated. Home and the Work reel name the role in a few words instead (Story §0.3).",
+  "avoid": "Hiding AI's part; overstating it into a disclaimer; percentages nobody measured.",
+  "example": "<AttributionBlock rows={[\n  { who: 'me', did: { en: 'Problem, direction, integration of the real toolchain, what counted as done.' } },\n  { who: 'ai', did: { en: 'Most of the implementation, under my steering.' } },\n  { who: 'course', did: { en: 'C16.EXE and the Z80 ET-Board simulator (the real tools the workspace runs).' } }\n]} />",
+  "props": [
+   {
+    "name": "rows",
+    "optional": false,
+    "type": "{ who: Actor | L; did: L; note?: L }[]",
+    "doc": ""
+   },
+   {
+    "name": "title",
+    "optional": true,
+    "type": "L",
+    "doc": "Heading, default \"Who did what\"."
+   }
+  ]
+ },
+ {
+  "name": "ClaimLedger",
+  "group": "blocks",
+  "file": "src/components/blocks/ClaimLedger.astro",
+  "component": "ClaimLedger",
+  "summary": "The honest state of an open (Lab) project in four rows: what exists now, what looks useful, what is still unproven, what may become unnecessary.",
+  "use": "Every Lab project, following Story §12: do not present Lab projects as proven breakthroughs.",
+  "avoid": "Leaving \"unproven\" empty to look finished; moving items to \"exists\" without evidence.",
+  "example": "<ClaimLedger\n  exists={[{ en: 'M1 (core mechanics) and M2A (safe control plane) are closed.' }]}\n  unproven={[{ en: 'Whether compact understanding beats episodic recall.' }]}\n  unnecessary={[{ en: 'Parts that models start doing well on their own.' }]} />",
+  "props": [
+   {
+    "name": "exists",
+    "optional": true,
+    "type": "L[]",
+    "doc": ""
+   },
+   {
+    "name": "useful",
+    "optional": true,
+    "type": "L[]",
+    "doc": ""
+   },
+   {
+    "name": "unproven",
+    "optional": true,
+    "type": "L[]",
+    "doc": ""
+   },
+   {
+    "name": "unnecessary",
+    "optional": true,
+    "type": "L[]",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "CodeExcerpt",
+  "group": "blocks",
+  "file": "src/components/blocks/CodeExcerpt.astro",
+  "component": "CodeExcerpt",
+  "summary": "A short excerpt of real code with its file name and starting line, highlighted to match the theme.",
+  "use": "When the code itself is the evidence (a tricky rule, a core loop). 5–25 lines, copied from the real file.",
+  "avoid": "Rewritten \"cleaner\" versions presented as the original; whole files; code screenshots.",
+  "example": "<CodeExcerpt file=\"PlayerController.cs\" lang=\"csharp\" from={120} code={`…real lines…`} note={{ en: 'Ledge grab → climb.' }} />",
+  "props": [
+   {
+    "name": "code",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "lang",
+    "optional": false,
+    "type": "string",
+    "doc": "Shiki language id: ts, js, csharp, go, cpp, c, asm, vhdl, verilog, python, bash, json, yaml…"
+   },
+   {
+    "name": "file",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "from",
+    "optional": true,
+    "type": "number",
+    "doc": "Line number of the first line in the real file."
+   },
+   {
+    "name": "note",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "href",
+    "optional": true,
+    "type": "string",
+    "doc": "Link to the file in the repo (if public)."
+   }
+  ]
+ },
+ {
+  "name": "ConstraintBlock",
+  "group": "blocks",
+  "file": "src/components/blocks/ConstraintBlock.astro",
+  "component": "ConstraintBlock",
+  "summary": "One constraint that shaped the work, stated big — a rule, a deadline, a limit you did not control — with why it mattered.",
+  "use": "When a constraint explains the design (e.g. \"The maintainer kept check on its fast checksum path.\"). One or two per page.",
+  "avoid": "Constraints you invented to sound rigorous; lists of generic requirements.",
+  "example": "<ConstraintBlock label={{ en: 'Maintainer constraint' }} statement={{ en: 'The maintainer kept check on its fast checksum path.' }} why={{ en: 'So the stale-output detection had to be a read-only follow-up.' }} source=\"AgentsMesh PR #99 → #102\" />",
+  "props": [
+   {
+    "name": "statement",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": "Small label, default \"Constraint\". e.g. Rule, Deadline, Limit."
+   },
+   {
+    "name": "why",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "source",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "ContributionBlock",
+  "group": "blocks",
+  "file": "src/components/blocks/ContributionBlock.astro",
+  "component": "ContributionBlock",
+  "summary": "A breakdown of the owner's contribution by area (art, rigging, control code, integration…), each with what was done and the evidence for it.",
+  "use": "Team works, where \"what exactly did you do\" is the recruiter's first question. 2–5 areas. Pair with AttributionBlock when others' parts matter.",
+  "avoid": "Listing areas you only watched; tool/skill clouds; unverifiable counts.",
+  "example": "<ContributionBlock areas={[\n  { area: { en: 'Art' }, did: { en: 'Map art, UI and the crystal staff, drawn by hand. Map sheets up to 4000 × 4000 px.' } },\n  { area: { en: 'Player control' }, did: { en: 'Player control and scene scroll in C#.' }, evidence: [{ label: 'PlayerController.cs', shows: '370 lines', kind: 'file' }] }\n]} />",
+  "props": [
+   {
+    "name": "areas",
+    "optional": false,
+    "type": "{ area: L; did: L; evidence?: { label: string; href?: string; shows?: L; kind?: 'pr' | 'release' | 'commit' | 'page' | 'video' | 'file' | 'private' }[] }[]",
+    "doc": ""
+   },
+   {
+    "name": "title",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "HorizontalStrip",
+  "group": "blocks",
+  "file": "src/components/blocks/HorizontalStrip.astro",
+  "component": "HorizontalStrip",
+  "summary": "A section whose items run sideways, and it moves sideways with every input: swipe left/right on touch, the mouse wheel while the pointer rests on the strip, drag with the mouse, ← → buttons, or Tab. The page itself never gets locked. Header, counter and progress live inside.",
+  "use": "Lab preview, a photo series (PhotoCard — each card keeps its own size and tilt), Lab cards with an object (LabItem `glyph` + `real` slot: a pixel glyph at rest, the detailed object opens inside the card on point — Endfield's database row), a series of small items people browse rather than read. 4–8 items of the same kind.",
+  "avoid": "Primary work (the first two minutes must not depend on sideways scrolling); more than one per page; mixing item types; putting it inside a narrower box that clips overflow (overflow: hidden/clip) without `bleed={false}` — the last card ends up in the clipped part and can never be scrolled into view.",
+  "props-note": "By default the track bleeds past the content column to the screen's right edge (a hint that there is more). That is right only when the strip sits in the full-width page column. Anywhere narrower — a card, a sidebar layout, a specimen box — pass `bleed={false}` so the track ends at its own box.",
+  "behavior": "While the strip moves (wheel glide, drag, swipe) it carries data-moving and fires `hs:move`: cards with an object never open meanwhile, and an open one closes. Mouse: the wheel moves the strip only after the pointer has actually moved onto it (a page scrolling under a still cursor is never captured), and hands the wheel back to the page at either end. Drag moves it too (a drag never opens a card). Touch: native sideways swipe with snap. Counter `[03] – [06]` and the progress line follow the position. Reduced motion: wheel and buttons jump instead of gliding.",
+  "example": "<HorizontalStrip id=\"lab\" title={{ en: 'Lab', th: 'Lab' }} description={{ en: 'Open questions. Not proven yet.' }}>\n  <LabItem work=\"memory\" variant=\"card\" />\n  <LabItem work=\"whipui\" variant=\"card\" />\n</HorizontalStrip>",
+  "props": [
+   {
+    "name": "id",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "title",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "index",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "description",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "mark",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "cat",
+    "optional": true,
+    "type": "CatOrSelf",
+    "doc": ""
+   },
+   {
+    "name": "bleed",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Let the track run to the screen's right edge (default true). Set false whenever the strip is not in the full-width page column."
+   }
+  ]
+ },
+ {
+  "name": "Inspector",
+  "group": "blocks",
+  "file": "src/components/blocks/Inspector.astro",
+  "component": "Inspector",
+  "summary": "Endfield's list | subject | detail: a rail of parts on the left, the real artifact in the middle, what the selected part is (and the proof) on the right. Two modes — `swap` (each part has its own media) and `focus` (one shared screenshot that zooms to each part).",
+  "use": "When a work is made of named parts worth inspecting one by one: the tools a workspace integrates, a game's characters and their clips, the modules of a system, the features of an extension. 3–6 parts.",
+  "avoid": "Parts without their own real visual or fact; using it as a generic tab box for prose; more than one per page section.",
+  "behavior": "Selection uses the shared `.sel` grammar (base.css): the charcoal block fills the number cell, then the row (~140ms), with the signal bar on its left; the old row retracts at the same time. The detail swaps fast: old out at once, new fades in ~200ms. Swap mode changes media with the block → image sweep sized to each picture (src/scripts/wipe.ts, ~0.4s; down the list sweeps left → right, up sweeps right → left); focus mode zooms with a 500ms enter curve and pins a mark on the part. Keyboard: ↑ ↓ (← → on phones) move, Home / End jump. On phones the rail becomes a swipe row above the subject.",
+  "example": "<Inspector image=\"z80/workspace.webp\" imageAlt={{ en: 'Z80 Workspace' }} frame=\"screen\" items={[\n  { name: 'Explorer', text: { en: 'Files and folders of the lab.' }, focus: { x: 4, y: 9.4, zoom: 2.4 } },\n  { name: 'Console', meta: 'C16.EXE', text: { en: 'Runs the real assembler inside DOSBox compiled to WebAssembly.' }, focus: { x: 16.8, y: 88.6, zoom: 2.2 } }\n]} />",
+  "props": [
+   {
+    "name": "items",
+    "optional": false,
+    "type": "Item[]",
+    "doc": ""
+   },
+   {
+    "name": "image",
+    "optional": true,
+    "type": "string",
+    "doc": "Shared image → focus mode."
+   },
+   {
+    "name": "imageAlt",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "frame",
+    "optional": true,
+    "type": "'plain' | 'screen'",
+    "doc": ""
+   },
+   {
+    "name": "plate",
+    "optional": true,
+    "type": "Shape",
+    "doc": "Opt-in plate behind the subject (swap mode, for cutouts)."
+   },
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": "Accessible name of the whole inspector."
+   }
+  ]
+ },
+ {
+  "name": "OutcomeBlock",
+  "group": "blocks",
+  "file": "src/components/blocks/OutcomeBlock.astro",
+  "component": "OutcomeBlock",
+  "summary": "What came out of it and where it stands now, plus the keep / change / kill decision when there is one.",
+  "use": "Near the end of every work page, and in Lab items. The outcome is a fact; \"current\" is the honest present state.",
+  "avoid": "Spinning a failure into a win; outcomes without evidence when evidence exists (add `evidence`).",
+  "example": "<OutcomeBlock outcome={{ en: 'Used in 2 labs. 69 visits and 11 assembles between 20 July and 26 September 2026.' }}\n  current={{ en: 'Online on GitHub Pages.' }} verdict=\"keep\" />",
+  "props": [
+   {
+    "name": "outcome",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "current",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "verdict",
+    "optional": true,
+    "type": "Verdict",
+    "doc": ""
+   },
+   {
+    "name": "because",
+    "optional": true,
+    "type": "L",
+    "doc": "One line on why that verdict."
+   },
+   {
+    "name": "evidence",
+    "optional": true,
+    "type": "{ label: string; href?: string; shows?: L; kind?: 'pr' | 'release' | 'commit' | 'page' | 'video' | 'file' | 'private' }[]",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "ProcessLine",
+  "group": "blocks",
+  "file": "src/components/blocks/ProcessLine.astro",
+  "component": "ProcessLine",
+  "summary": "The working pattern as a line of steps — IDEA / FRICTION → WOULD THIS WORK? → BUILD → USE / TEST → KEEP / CHANGE / KILL → KEEP THE TRACE — with how far a given work actually got and what was decided. Custom steps are allowed (e.g. an OSS contribution: real usage → problem → investigation → maintainer constraints → merged).",
+  "use": "Home (\"how I work\", no `reached`), and on a work to show where it stands. Notes under steps must be real facts about that work.",
+  "avoid": "Marking steps as reached that were not; decorating with icons; using it for things that are not a sequence.",
+  "behavior": "The filled part of the line draws once (300ms per step, stagger 35ms) when it scrolls into view. Vertical under 720px.",
+  "example": "<ProcessLine reached=\"decide\" verdict=\"keep\" notes={{\n  idea: { en: 'The course workflow was cumbersome.' },\n  build: { en: '9 days, 59 of 64 commits.' },\n  use: { en: 'Used in 2 labs.' }\n}} />",
+  "props": [
+   {
+    "name": "steps",
+    "optional": true,
+    "type": "{ key: string; label: L }[]",
+    "doc": "Custom steps; default is the owner's working pattern (src/lib/vocab.ts PROCESS)."
+   },
+   {
+    "name": "reached",
+    "optional": true,
+    "type": "string",
+    "doc": "Key of the last step this work reached. Omit to show the pattern itself (nothing filled)."
+   },
+   {
+    "name": "verdict",
+    "optional": true,
+    "type": "Verdict",
+    "doc": "Decision shown on the 'decide' step."
+   },
+   {
+    "name": "notes",
+    "optional": true,
+    "type": "Record<string, L>",
+    "doc": "Short real notes per step key."
+   },
+   {
+    "name": "title",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "compact",
+    "optional": true,
+    "type": "boolean",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "Retrospective",
+  "group": "blocks",
+  "file": "src/components/blocks/Retrospective.astro",
+  "component": "Retrospective",
+  "summary": "Looking back at a finished or dropped work: what to keep, what to change, what to kill — each a short, specific line.",
+  "use": "End of a work page; the whole body of a retired Lab project (e.g. Portawhip). Owner's own conclusions only — wrap AI-proposed lines in <Draft>.",
+  "avoid": "Generic lessons (\"communication is key\"); more than 3 lines per column.",
+  "example": "<Retrospective keep={[{ en: 'Running the real assembler instead of reimplementing it.' }]} kill={[{ en: 'The large harness, once the models caught up.' }]} />",
+  "props": [
+   {
+    "name": "keep",
+    "optional": true,
+    "type": "L[]",
+    "doc": ""
+   },
+   {
+    "name": "change",
+    "optional": true,
+    "type": "L[]",
+    "doc": ""
+   },
+   {
+    "name": "kill",
+    "optional": true,
+    "type": "L[]",
+    "doc": ""
+   },
+   {
+    "name": "title",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "ScrollStepper",
+  "group": "blocks",
+  "file": "src/components/blocks/ScrollStepper.astro",
+  "component": "ScrollStepper",
+  "summary": "sen's pinned stepper: one subject held on screen while scrolling picks its states one by one — `[02] – [03]`, a dot row with a ring on the selected state, \"Selected: Westbrook\". Each change is the site's image swap (src/scripts/wipe.ts): a block in the work's signal color sweeps over the state on show, the next state sweeps in as the block leaves (~0.4s).",
+  "use": "Several real states of the same subject that are worth comparing in place: a game's scenes, versions of a UI, before → after → final, build states. 2–6 states, same image size.",
+  "avoid": "Unrelated images (use MediaFrame); two pinned blocks back to back (put a normal block between them); images of different sizes (they would be cropped to the first one's frame).",
+  "behavior": "The section is ~60% of a screen tall per state; the stage sticks under the header while it runs. The sweep follows the scroll: scrolling down it runs left → right, scrolling up right → left — going back replays the change instead of cutting, and a fast scroll cuts a running sweep short cleanly. Reduced motion: states switch instantly. Works with touch scrolling (no direction change, no scroll-jacking).",
+  "example": "<ScrollStepper label={{ en: 'Scene' }} states={[\n  { src: 'vaja/scene-westbrook.webp', label: 'Westbrook Stonescape', alt: { en: 'Westbrook Stonescape scene' } },\n  { src: 'vaja/scene-celestia.webp', label: 'Celestia Crystal Cavern', alt: { en: 'Celestia Crystal Cavern scene' } }\n]} />",
+  "props": [
+   {
+    "name": "states",
+    "optional": false,
+    "type": "{ src: string; label: L; alt: L; note?: L }[]",
+    "doc": ""
+   },
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": "Word before the state name, default \"Selected\"."
+   }
+  ]
+ },
+ {
+  "name": "SplitScroll",
+  "group": "blocks",
+  "file": "src/components/blocks/SplitScroll.astro",
+  "component": "SplitScroll",
+  "summary": "Scroll-driven walkthrough: short steps on the left, a sticky screen on the right that switches to the matching capture as each step reaches the middle of the viewport — a block in the work's signal color sweeps over the old capture (its own box), reshapes to the new capture's box, the new one sweeps in as it leaves, the index chip rolls, the corner brackets glide to the new capture and lock on. Each capture shows at its own size — no letterbox panel. Stacks (image above each step) on phones.",
+  "use": "Interface-led work: walking through a real tool screen by screen (a workspace, an extension's features). 3–5 steps, each with its own real capture.",
+  "avoid": "Steps that share one image (use MediaFrame with marks); invented UI states; more than 5 steps.",
+  "behavior": "The step whose top has passed 55% of the viewport is active. Switch (src/scripts/wipe.ts, ~0.4s): block covers the old capture (140ms) → reshapes if the sizes differ (120ms) → the new capture sweeps in as the block leaves (240ms), left → right going down, right → left going up → the brackets lock on (accent last). The active step's number inverts with a signal bar. No scroll-jacking. Reduced motion: instant switch.",
+  "example": "<SplitScroll steps={[\n  { title: { en: 'Autocomplete' }, text: { en: 'Inside a memory bracket it offers symbols that fit there.' }, src: 'yasm/autocomplete.webp', alt: { en: 'Autocomplete list inside a memory bracket' } },\n  { title: { en: 'Hover' }, text: { en: 'Hover shows a label’s doc comment.' }, src: 'yasm/hover.webp', alt: { en: 'Hover card' } }\n]} />",
+  "props": [
+   {
+    "name": "steps",
+    "optional": false,
+    "type": "{ title: L; text: L; src: string; alt: L; source?: L }[]",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "Timeline",
+  "group": "blocks",
+  "file": "src/components/blocks/Timeline.astro",
+  "component": "Timeline",
+  "summary": "Dated events in order — releases, milestones, the path of a contribution. Vertical by default; `horizontal` for up to 6 short entries on wide screens.",
+  "use": "Versions (0.1.0 → 1.2.0), a hackathon's rounds, when something was used. Dates must be real (YYYY-MM-DD or YYYY-MM).",
+  "avoid": "Vague dates (\"recently\"), filler events, more than ~10 entries (split or summarize).",
+  "example": "<Timeline items={[\n  { date: '2026-08-11', label: '0.1.0', note: { en: 'First npm release.' } },\n  { date: '2026-08-12', label: { en: 'First use' }, note: { en: 'In the MSU final: .whipui/project-dna.json in the team repo.' } },\n  { date: '2026-09-14', label: '1.2.0', status: 'ACTIVE' }\n]} />",
+  "props": [
+   {
+    "name": "items",
+    "optional": false,
+    "type": "{ date: string; label: L; note?: L; status?: Status; href?: string }[]",
+    "doc": ""
+   },
+   {
+    "name": "layout",
+    "optional": true,
+    "type": "'vertical' | 'horizontal'",
+    "doc": ""
+   },
+   {
+    "name": "title",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "Trace",
+  "group": "blocks",
+  "file": "src/components/blocks/Trace.astro",
+  "component": "Trace",
+  "summary": "A chaptered trace you scroll through step by step — a build log or a chain of beliefs. The sticky head keeps the odometer (`02 / 05`), the current step's name, progress, and a rail of every step (done · current · upcoming · failed). Each step is a chapter: type, date, title, text, what changed it, and real media (image, screen, clip, sprite, or any component via a slot).",
+  "use": "Build logs (ART → SCENES → ANIMATION → CONTROL → DEMO), reasoning (ASSUMPTION → EXPERIMENT → WRONG → NEW MODEL), scope stories. 3–7 steps; give most steps an artifact so each scroll step shows a visible change.",
+  "avoid": "Steps with nothing new to show (merge them); hiding failed steps; long paragraphs (1–3 sentences per step).",
+  "behavior": "The step crossing 55% of the viewport becomes current: its rule turns into the context signal, the others dim, odometer + name roll 500ms, rail marker follows (240ms). Sprite clips play only while their step is current. Rail items jump to their step. Under 760px the head becomes a compact sticky bar and nothing dims. Reduced motion: no dimming transitions, sprites stay on their first frame.",
+  "props-note": "Media per step: `media: { src | video+poster | strip: { src, frames, fps }, alt, caption, source, frame, marks }`. For anything else (a FlowDiagram, a CodeExcerpt) put the component in the slot named `s1`, `s2`… (1-based step number).",
+  "example": "<Trace label={{ en: 'Build notes' }} steps={[\n  { type: 'FRICTION', short: 'convenience', text: { en: 'The original workflow was fragmented.' } },\n  { type: 'BUILD', short: 'real toolchain', title: { en: 'The real toolchain, in the browser' }, text: { en: 'C16.EXE and the ET-Board simulator in DOSBox (WASM).' } },\n  { type: 'OBSERVATION', short: '2 labs', date: '2026-09-26', text: { en: '69 visits, 11 assembles.' },\n    media: { src: 'z80/goatcounter.webp', alt: { en: 'GoatCounter pages panel' }, frame: 'screen', source: 'GoatCounter' } }\n]}>\n  <FlowDiagram slot=\"s2\" … />\n</Trace>",
+  "props": [
+   {
+    "name": "label",
+    "optional": false,
+    "type": "L",
+    "doc": "Small label above the rolling step name (e.g. \"Build notes\", \"Reasoning trace\")."
+   },
+   {
+    "name": "steps",
+    "optional": false,
+    "type": "Step[]",
+    "doc": ""
+   },
+   {
+    "name": "rail",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Hide the step rail in the head (for 3 steps or fewer it adds little)."
+   }
+  ]
+ },
+ {
+  "name": "WorkReel",
+  "group": "showcase",
+  "file": "src/components/blocks/WorkReel.astro",
+  "component": "WorkReel",
+  "summary": "The Work page's showcase: the works side by side on one long track. On a desktop the track holds under the header and scrolling down carries it sideways (sen's sideways travel); elsewhere the works stack. A counter `[03] – [08]`, a progress line and ← → keep the place.",
+  "use": "Once, on /work/. Each child is one work's panel (src/components/showcase/, built on ReelPanel), marked `data-panel` with `data-work` and `data-cat`; the reel only moves them and says which one is current (`.is-cur`). Pinned, it gives panels `--rp-vh`: the height a visual may use.",
+  "avoid": "A second reel on a page; panels that are the same layout with the title and picture swapped; hiding a work's only proof in the reel (its page or links show it openly); anything that moves inside a panel with the scroll (the track is the one moving layer).",
+  "behavior": "A click anywhere on a panel that has a page (its link marked `data-panel-go`) opens it, except on links, buttons, players and selected text. Pinned (hover + fine pointer, ≥1024px wide, no reduced motion): the section is as tall as the track is long, and the scroll moves the track by transform only. The panel that has reached the left edge of the column is current: `.is-cur` goes on it, the counter follows and the fog takes its color. ← → and keyboard focus inside a panel scroll the page to that panel. The view clips sideways instead of scrolling (so focus can never shift the track) and stays open above and below (a big number over a tall title is never cut). Otherwise (touch, narrow, reduced motion): the panels stack with no pin, the current one is the one across the middle of the screen, and the counter and buttons hide.",
+  "example": "<WorkReel>\n  <article data-panel data-work=\"vaja\" data-cat=\"game\">…</article>\n  <article data-panel data-work=\"z80\" data-cat=\"dev\">…</article>\n</WorkReel>",
+  "props": [
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": "Accessible name of the region."
+   }
+  ]
+ },
+ {
+  "name": "ContactCard",
+  "group": "home",
+  "file": "src/components/home/ContactCard.astro",
+  "component": "ContactCard",
+  "summary": "The end of the road for a reader who wants to reach the owner: what the owner is looking for (one line, their words), the email with a copy button, the real profile links, and an optional CV download.",
+  "use": "Once, at the end of About (and optionally the end of Home). Values come from src/lib/site.ts — edit them there, not here.",
+  "avoid": "Contact forms (static site, no backend); social icons for accounts that are not used; \"hire me\" slogans; a CV link without a real file in public/.",
+  "props-note": "`cv` is a path under public/, e.g. '/cv/teethawat-kumying.pdf' — leave it out until the file exists.",
+  "example": "<ContactCard looking={{ en: 'A game dev or AI engineering internship.' }} />",
+  "props": [
+   {
+    "name": "looking",
+    "optional": true,
+    "type": "L",
+    "doc": "What the owner is looking for, in their words."
+   },
+   {
+    "name": "cv",
+    "optional": true,
+    "type": "string",
+    "doc": "Path to a CV file under public/."
+   },
+   {
+    "name": "title",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "HomeCover",
+  "group": "home",
+  "file": "src/components/home/HomeCover.astro",
+  "component": "HomeCover",
+  "summary": "The first screen of Home: the name, very large, and under it the plain facts a hiring reader looks for — what he studies, the internship he wants (and when he is free), how to reach him — then two ways on: the selected work below, or all of it.",
+  "use": "Top of Home only, once. Values come from src/lib/site.ts (name, email, GitHub, availability, the CV file) and the props; the `available` / `cv` slots add anything else under those two facts.",
+  "avoid": "A tagline, slogan or manifesto (Story §0.3); adjective lists; a second giant name anywhere else; hiding the facts behind a hover or a scroll.",
+  "behavior": "The two name lines rise into place one after the other on load (transform + opacity, once), then his nickname writes itself in, raised after the surname, in his own hand between quotes (Signature, identity blue); the facts follow. Reduced motion: everything is simply there. The email copies with one press (CopyText).",
+  "example": "<HomeCover study={{ en: 'Computer Engineering (CoE)' }} school={{ en: 'Khon Kaen University · year 3 · expected 2028' }} looking={{ en: 'A game programming or AI engineering internship.' }} workCount={8} />",
+  "props": [
+   {
+    "name": "study",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "school",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "looking",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "workCount",
+    "optional": false,
+    "type": "number",
+    "doc": "How many works the Work page shows."
+   },
+   {
+    "name": "featured",
+    "optional": true,
+    "type": "number",
+    "doc": "How many Selected work blocks follow on Home."
+   }
+  ]
+ },
+ {
+  "name": "IntroHero",
+  "group": "home",
+  "file": "src/components/home/IntroHero.astro",
+  "component": "IntroHero",
+  "summary": "(Home now opens with HomeCover; kept for the kit.) The home introduction: the owner's name or statement leads, with a supporting line beside study, year, direction and internship availability. Put a NowBar inside.",
+  "use": "Top of the home page only. One per site.",
+  "avoid": "A second giant statement anywhere else; slogans about \"passion\"; emoji; self-describing adjective lists in `traits` (the work shows them) unless the owner picks them.",
+  "example": "<IntroHero statement='Teethawat “Web” Kumying' who={{ en: 'Computer Engineering (CoE), Khon Kaen University · year 3' }}>\n  <NowBar items={[…]} />\n</IntroHero>",
+  "props": [
+   {
+    "name": "statement",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "sub",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "who",
+    "optional": true,
+    "type": "L",
+    "doc": "Who and where, as plain metadata: name, study, year, direction (one line, facts only)."
+   },
+   {
+    "name": "traits",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "NowBar",
+  "group": "home",
+  "file": "src/components/home/NowBar.astro",
+  "component": "NowBar",
+  "summary": "\"Now / Looking for\" lines: what is live right now, stated plainly.",
+  "use": "Inside <IntroHero>. 1–3 lines. Update it when the facts change.",
+  "avoid": "Stale \"now\" lines; marketing phrasing.",
+  "example": "<NowBar items={[\n  { label: { en: 'Now', th: 'ตอนนี้' }, status: 'ACTIVE', cat: 'ai', text: { en: 'Memory Base: testing whether compact understanding beats episodic recall.' } },\n  { label: { en: 'Looking for', th: 'กำลังหา' }, text: { en: 'A game dev or AI engineering internship.' } }\n]} />",
+  "props": [
+   {
+    "name": "items",
+    "optional": false,
+    "type": "{ label: L; text: L; status?: Status; cat?: Cat }[]",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "OSSFeature",
+  "group": "home",
+  "file": "src/components/home/OSSFeature.astro",
+  "component": "OSSFeature",
+  "summary": "OSS on Home: an isometric sketch of the read-only check added in AgentsMesh #102, with two inputs and four integration surfaces. Its actual issue/proposal/follow-up lineage, the Windows fix and the root-cause report stay separate below.",
+  "use": "Home → Selected work. Composition-level for this work only. Every step links to the issue or PR it describes; states and dates must match GitHub.",
+  "avoid": "A GitHub trophy wall (stars, contribution graphs, logos); three identical repository cards; summarizing an issue or PR you cannot link; a block or callout in the object that is not a real repo, issue or PR with its real state.",
+  "behavior": "Hosted SketchReveal: mouse hover or keyboard focus opens the object over an owner-approved center Plate; leaving closes it. Touch opens in the middle screen band. The data-pj block opens the work; references in the separate evidence threads open their own GitHub targets. Under 900px the composition stacks.",
+  "example": "<OSSFeature threads={[{ repo: 'AgentsMesh', place: 'main', steps: [{ ref: '#98', kind: 'issue', state: 'closed', href: '…', text: { en: '…' } }] }]} />",
+  "props": [
+   {
+    "name": "threads",
+    "optional": true,
+    "type": "{ repo: string; place: 'main' | 'side' | 'low'; steps: Step[] }[]",
+    "doc": "`place`: main = the full lineage; side = a single fix, offset right; low = a report, set below."
+   },
+   {
+    "name": "credit",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "glyph",
+    "optional": true,
+    "type": "string[]",
+    "doc": "The detector at its simplest: two inputs, the shared check, four integration surfaces."
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "PatternLines",
+  "group": "home",
+  "file": "src/components/home/PatternLines.astro",
+  "component": "PatternLines",
+  "summary": "The working pattern shown by the works themselves: the six steps once across the top (IDEA / FRICTION → … → KEEP THE TRACE), then one thin line per work, filled as far as that work got, with where it ended — KEEP, CHANGE, KILL, or still OPEN — and one line of what happened.",
+  "use": "About → \"How I work\", after the reader has seen the works. 3–5 rows, each a work already on the site; every note is a fact about that work (Facts), and the verdict is the one the work really got.",
+  "avoid": "Rows for works the reader has not met; a verdict that flatters (a retired project is KILL, not CHANGE); a second copy of the pattern as a manifesto above it; icons.",
+  "behavior": "Static; the rows' lines fill once when the list scrolls into view (the shared reveal). Each work's name links to its page, or to its row on the Timeline. Under 720px each row keeps its own small line of six steps.",
+  "example": "<PatternLines rows={[{ work: 'z80', reached: 'trace', verdict: 'keep', note: { en: 'Fragmented course workflow → one workspace. Complete; still in use.' } }]} />",
+  "props": [
+   {
+    "name": "rows",
+    "optional": false,
+    "type": "{ work: string; name?: L; to?: string; reached: string; verdict: Verdict; note: L }[]",
+    "doc": "`to`: a locale-free path when the work lives elsewhere than its page / Timeline row (e.g. '/timeline/')."
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "SelectedWork",
+  "group": "home",
+  "file": "src/components/home/SelectedWork.astro",
+  "component": "SelectedWork",
+  "summary": "The column holding the featured compositions. Its selection bar tracks scroll position, mouse intent or keyboard focus; its fog follows the project in view. Each SketchReveal owns its hosted interaction independently.",
+  "use": "Home, inside <Section id=\"work\">. Children mark their root with data-feature and data-cat. A hosted SketchReveal uses data-skr-host. The main project block carries data-pj and its main link data-skr-go; extra evidence and attribution stay outside that clickable block. Each work owns its composition.",
+  "avoid": "Generic project cards; more than 3–4 features; opening reveals from scroll selection on desktop.",
+  "behavior": "Scroll: the feature under the middle of the screen (or the nearest edge within the middle half) becomes current; the fog follows scroll only. Mouse: resting ~90ms on another feature makes it current while the mouse is there. Keyboard: focus on a feature's link makes it current. Click / tap anywhere on a feature's `data-pj` block that is not itself a link → its `data-skr-go` link (deeper transition from the press point). After returning from a work page, the origin feature gets .is-locked and the bar locks onto it for 1.4s. The bar is hidden on touch devices. Reduced motion: the same states, switched without movement.",
+  "example": "<SelectedWork>\n  <VajaFeature />\n  <Z80Feature />\n  <OSSFeature />\n</SelectedWork>",
+  "props": []
+ },
+ {
+  "name": "VajaFeature",
+  "group": "home",
+  "file": "src/components/home/VajaFeature.astro",
+  "component": "VajaFeature",
+  "summary": "Journey of Vaja on Home: the original crystal-staff source art is the main object, traced into its own resting glyph. The title and contribution lead; a real build frame and the exported run cycle sit separately below (and the attribution, where the page asks for it).",
+  "use": "Home → Selected work, first. The source-art object shows a concrete piece of the owner's contribution; the recorded build and exported animation show it in the game.",
+  "avoid": "Turning this into a template for other works; presenting a source-art cutout as gameplay; overlaying text on the art; running the object under the selection bar.",
+  "behavior": "Hosted SketchReveal opens the source art on hover or keyboard focus; leaving closes it. Touch opens in the middle screen band. The owner-approved wide Plate grounds the transparent staff. FrameStepper plays or steps the real run cycle with its own controls and stops offscreen; reduced motion retains manual stepping. The project block opens the work; the evidence row is separate. Under 820px text stacks; under 600px evidence stacks.",
+  "example": "<VajaFeature />",
+  "props": [
+   {
+    "name": "art",
+    "optional": true,
+    "type": "string",
+    "doc": "Original transparent source art. Default: the crystal staff from the game project."
+   },
+   {
+    "name": "artAlt",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "glyph",
+    "optional": true,
+    "type": "string[]",
+    "doc": "Optional manual glyph; otherwise trace the source art at 16 cells across."
+   },
+   {
+    "name": "facts",
+    "optional": true,
+    "type": "L[]",
+    "doc": "Short facts line. Default: the work's `fact`."
+   },
+   {
+    "name": "credit",
+    "optional": true,
+    "type": "L",
+    "doc": "Who else made the game (Facts: concept, effects, some skill art)."
+   },
+   {
+    "name": "note",
+    "optional": true,
+    "type": "L",
+    "doc": "What the scene is, under it."
+   },
+   {
+    "name": "frame",
+    "optional": true,
+    "type": "{ src: string; alt: L; caption: L }",
+    "doc": "Evidence told beside the project: a frame from the build, and an exported animation strip (frames laid out left → right)."
+   },
+   {
+    "name": "run",
+    "optional": true,
+    "type": "{ src: string; frames: number; fps: number; caption: L }",
+    "doc": ""
+   },
+   {
+    "name": "attribution",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Show who did what under the evidence row. Home leaves it out (the work page carries the full credit, Story §0.3). Default true."
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "Z80Feature",
+  "group": "home",
+  "file": "src/components/home/Z80Feature.astro",
+  "component": "Z80Feature",
+  "summary": "Z80 Workspace on Home: the workspace leads on the left, its purpose sits beside it, and three real workflow states form a proof rail below. Attribution and the Electron release link stay outside the clickable project. Hosted hover or focus opens the screen; scrolling on desktop does not.",
+  "use": "Home → Selected work. Composition-level for this work only. The project block (text + workspace, `data-pj`) is the link; the proof rail, attribution and Electron release link stay outside it.",
+  "avoid": "Claiming more than the captures show (the HALT is the built-in sample only); a before state that invents tools the course did not use; a heavy SVG object here (the isometric sketch with a screen on its face was slow to open); a plate behind the screen.",
+  "behavior": "The integrated workspace glyph resolves into the real built-in sample HALT capture on hosted hover or keyboard focus. Touch opens in the middle screen band. The proof rail and attribution sit below and stack under 820px. Reduced motion switches states without movement.",
+  "example": "<Z80Feature />",
+  "props": [
+   {
+    "name": "screen",
+    "optional": true,
+    "type": "string",
+    "doc": "The real live-site capture. Default: the built-in sample after HALT."
+   },
+   {
+    "name": "screenAlt",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "why",
+    "optional": true,
+    "type": "L",
+    "doc": "Why it exists, in one or two sentences (Facts §2.2: the workflow was fragmented; built for convenience)."
+   },
+   {
+    "name": "states",
+    "optional": true,
+    "type": "{ title: L; tool: L; crop?: string; alt?: L }[]",
+    "doc": "The states, in the order they happen: what happened, which tool did it, and the real crop that shows it (optional)."
+   },
+   {
+    "name": "credit",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "note",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "ArchiveList",
+  "group": "lists",
+  "file": "src/components/lists/ArchiveList.astro",
+  "component": "ArchiveList",
+  "summary": "Every work worth keeping, as rows, with optional filter chips (All · Game · AI · Tools · Systems · Embedded · Coursework · Archived/failed). Includes ArchiveFilter.",
+  "use": "The /archive page (all works). Filter groups live in src/lib/vocab.ts FILTERS.",
+  "avoid": "A grid of project cards; auto-playing thumbnails; hiding the row's facts behind its object.",
+  "behavior": "Chips use the shared `.sel` grammar. Filtering is instant; visible rows re-enter with a 35ms stagger. Filter state is kept in the URL hash (#f=tools). Optional static glyphs belong to each row; hover highlights the row without opening a preview.",
+  "example": "<ArchiveList filter />",
+  "props": [
+   {
+    "name": "works",
+    "optional": true,
+    "type": "string[]",
+    "doc": "Work ids in display order. Default: every work, newest first."
+   },
+   {
+    "name": "filter",
+    "optional": true,
+    "type": "boolean",
+    "doc": ""
+   },
+   {
+    "name": "objects",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Opt in to each row's left-hand static glyph column."
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "ArchiveRow",
+  "group": "lists",
+  "file": "src/components/lists/ArchiveRow.astro",
+  "component": "ArchiveRow",
+  "summary": "One work as a row: year · title + why it matters · kind · status · where it goes. Opens the work page if there is one (the row ends in GoLink's line), else the first evidence link (↗).",
+  "use": "Inside ArchiveList or RelatedWork (they render the list element). Data from the work's YAML.",
+  "avoid": "Rows for low-signal work (leave it out of the archive entirely).",
+  "behavior": "Optional object column shows only the work's static Pictogram. Hover and keyboard focus highlight the row; no image or sketch opens. The Archive page keeps the year in its own column, aligned at the bottom. Without an object it retains the compact text-row layout.",
+  "example": "<ul class=\"rows\"><ArchiveRow work=\"yasm\" /></ul>",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "noKind",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Hide the kind column (when the list is already about one kind)."
+   },
+   {
+    "name": "object",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Add the work's static glyph column, for the Archive page."
+   }
+  ]
+ },
+ {
+  "name": "EvidenceRow",
+  "group": "lists",
+  "file": "src/components/lists/EvidenceRow.astro",
+  "component": "EvidenceRow",
+  "summary": "Supporting evidence as one dense row: the work, the situation it put you in (team, deadline, startup), the constraint you did not control, and the result — with roles and a link to the proof.",
+  "use": "A compact list of team works that do not need a full page (MSU, ROP, Study Planner). Wrap rows in <ul class=\"rows\">.",
+  "avoid": "Ranking by prize; three different designs for three rows — the row is the same because the information is the same.",
+  "props-note": "`share` shows the owner's part as a Readout (e.g. commits written of the team's total) — the proportion bar makes \"how much was mine\" scannable. Only real, sourced counts.",
+  "example": "<ul class=\"rows\">\n  <EvidenceRow work=\"planner\" situation={{ en: 'Team of 7 · course project' }} result={{ en: 'Deployed on Vercel for questionnaire feedback.' }} roles={['Primary backend']}\n    share={{ value: 39, total: 80, unit: { en: 'commits' }, label: { en: 'mine, of the team repo' }, source: 'team repo' }} />\n</ul>",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "situation",
+    "optional": false,
+    "type": "L",
+    "doc": "The situation: who you worked with and under what pressure."
+   },
+   {
+    "name": "constraint",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "result",
+    "optional": true,
+    "type": "L",
+    "doc": "The result in words. Optional when `share` already says it (e.g. \"39 of 80 commits\" is the share)."
+   },
+   {
+    "name": "roles",
+    "optional": true,
+    "type": "string[]",
+    "doc": "The owner's roles in it."
+   },
+   {
+    "name": "evidence",
+    "optional": true,
+    "type": "{ label: string; href?: string; shows?: L; kind?: 'pr' | 'release' | 'commit' | 'page' | 'video' | 'file' | 'private' }[]",
+    "doc": ""
+   },
+   {
+    "name": "share",
+    "optional": true,
+    "type": "{ value: number; total: number; unit: L; label?: L; source: L }",
+    "doc": "The owner's share as a real count, e.g. { value: 39, total: 80, unit: 'commits', source: 'team repo' }."
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "LabItem",
+  "group": "lists",
+  "file": "src/components/lists/LabItem.astro",
+  "component": "LabItem",
+  "summary": "An open question from the Lab: the work, the question it is testing, how far it got on the process line, its status — as a card (for HorizontalStrip) or a row (for lists).",
+  "use": "Lab preview (cards in HorizontalStrip) and the /lab index (rows). The object/body slots let Engineering trail reuse the exact kit card frame with its own facts and evidence links. Every Lab item says what is still unproven — link to its page where a ClaimLedger lives.",
+  "avoid": "Presenting Lab items as finished products; \"coming soon\" teasers. A glyph or object that is not the work's own thing (made-up parts, a generic icon).",
+  "behavior": "Card with an object (`glyph` + a `real` slot): the header (same height as any card) shows the minimal Pictogram on the left third; point at the card (mouse ~90ms, keyboard focus) and a textured charcoal column (gradient, fine hatch, grain, a dark halo behind the object — Endfield's database column; the same in light and dark mode) sweeps across with a soft slanted edge while it darkens from grey, the whole glyph steps back without cell dissolution or mosaic, and the detailed object opens out centred on the same third point — oversized, cropped by the card, never outside it — with a tag (SYSTEM / REAL / RENDER). The column is charcoal in light mode and near-black in dark mode (--obj-col, like Endfield's column); the object follows the mode (IsoObject materials are lit from above in both). Inside a HorizontalStrip nothing opens while the strip moves. Touch: the first tap opens it, the second follows the link. Reduced motion: instant.",
+  "example": "<LabItem work=\"memory\" question={{ en: 'Does compact understanding beat episodic recall?' }} reached=\"use\" variant=\"card\" />\n<LabItem work=\"memory\" variant=\"card\" glyph={['######', '###+##', '######', '####+#', '#+####', '######']}>\n  <IsoObject slot=\"real\" … />   (the detailed object = the abstract work's \"real\" — see docs/OBJECTS.md)\n</LabItem>",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "question",
+    "optional": true,
+    "type": "L",
+    "doc": "The open question, as a question. Defaults to the work's one line."
+   },
+   {
+    "name": "reached",
+    "optional": true,
+    "type": "string",
+    "doc": "Last step reached on the process line (idea · question · build · use · decide · trace)."
+   },
+   {
+    "name": "variant",
+    "optional": true,
+    "type": "'card' | 'row'",
+    "doc": ""
+   },
+   {
+    "name": "plate",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Opt-in plate header in the work's color (cards only)."
+   },
+   {
+    "name": "glyph",
+    "optional": true,
+    "type": "string[]",
+    "doc": "Cards: the minimal pixel glyph of the work's object (Pictogram rows: '#' grey, '+' accent)."
+   },
+   {
+    "name": "glyphFrom",
+    "optional": true,
+    "type": "string",
+    "doc": "Cards: trace the glyph from this transparent cutout instead (asset key), `glyphCols` cells across."
+   },
+   {
+    "name": "glyphCols",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "realKind",
+    "optional": true,
+    "type": "'system' | 'real' | 'render'",
+    "doc": "What the `real` slot shows: 'system' = the detailed IsoObject of an abstract work, 'real' = a photo / screen, 'render' = a render."
+   },
+   {
+    "name": "to",
+    "optional": true,
+    "type": "string",
+    "doc": "Where the item links when the work has no page of its own (a locale-free path, e.g. '/timeline/')."
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "MilestoneItem",
+  "group": "lists",
+  "file": "src/components/lists/MilestoneItem.astro",
+  "component": "MilestoneItem",
+  "summary": "A dated milestone or community role in one line: award, event, staff role, talk. `kind=\"community\"` covers what the plan calls CommunityItem.",
+  "use": "\"Milestones & community\" on Home or About. Wrap in <ul class=\"rows\">. Real names and dates only.",
+  "avoid": "Participation certificates padding the list; badges and logos.",
+  "example": "<ul class=\"rows\">\n  <MilestoneItem date=\"2026-08\" title={{ en: 'Informatics MSU Hackathon 2026 — Winner, AI track (Higher Education)' }} kind=\"award\" />\n  <MilestoneItem date=\"2025\" title={{ en: 'CESCa #20 — academic staff' }} kind=\"community\" />\n</ul>",
+  "props": [
+   {
+    "name": "date",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "title",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "note",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "kind",
+    "optional": true,
+    "type": "'award' | 'event' | 'community' | 'talk'",
+    "doc": ""
+   },
+   {
+    "name": "href",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "stack",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Date and kind on one line, the title under them — for narrow columns (e.g. one column per year)."
+   }
+  ]
+ },
+ {
+  "name": "RelatedWork",
+  "group": "lists",
+  "file": "src/components/lists/RelatedWork.astro",
+  "component": "RelatedWork",
+  "summary": "A few rows linking to works that share a thread with this one (same tool, same question, a follow-up).",
+  "use": "Near the end of a work page. Defaults to the work's `related` list in its YAML.",
+  "avoid": "Filling it to look busy; more than 4.",
+  "example": "<RelatedWork work=\"z80\" />",
+  "props": [
+   {
+    "name": "work",
+    "optional": true,
+    "type": "string",
+    "doc": "The current work; its `related` ids are used unless `works` is given."
+   },
+   {
+    "name": "works",
+    "optional": true,
+    "type": "string[]",
+    "doc": ""
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "TimelineList",
+  "group": "lists",
+  "file": "src/components/lists/TimelineList.astro",
+  "component": "TimelineList",
+  "summary": "Everything worth keeping, by year, newest first: each year a large outlined number beside its rows (TimelineRow), and chips above that filter by what it was — competitions, teaching, game, AI, tools, systems, coursework, retired.",
+  "use": "The /timeline page. The order comes from `timeline()` in src/lib/works.ts (year → month when known → title); the chips from TIMELINE_FILTERS in src/lib/vocab.ts.",
+  "avoid": "A grid of cards; hiding facts behind hover; a second copy of this list elsewhere (link here instead).",
+  "behavior": "The year whose rows cross the middle of the screen fills its number with the pale color (the same as the Work reel's current panel); on a wide screen the year holds beside its rows while they pass. Chips use the shared `.sel` grammar; filtering is instant, a year with nothing left hides, and the rows that stay re-enter with a short stagger (none with reduced motion). The chip is kept in the URL (#f=competitions).",
+  "example": "<TimelineList filter />",
+  "props": [
+   {
+    "name": "filter",
+    "optional": true,
+    "type": "boolean",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "TimelineRow",
+  "group": "lists",
+  "file": "src/components/lists/TimelineRow.astro",
+  "component": "TimelineRow",
+  "summary": "One entry on the Timeline: month · title + its line · kind · status, and where it goes. An entry with a page (a work, or a competition / teaching page) is a link that ends in GoLink's line; an entry that `opens` part of another page links there; every other entry opens in place to show its type, when, team / solo, the extra `more` text and its links.",
+  "use": "Inside TimelineList (it renders the year groups and the list element). Data from the entry's YAML (src/content/works/<id>.yaml).",
+  "avoid": "A row that does nothing; repeating the line inside its own opened panel; thumbnails.",
+  "behavior": "Hover and keyboard focus highlight the row (a plate and a bar in the entry's color). An in-place row is a <details>: the plus at its end turns into a cross and the panel grows open (instant with reduced motion, or where the browser cannot animate to auto height).",
+  "example": "<ol class=\"tl-rows\"><TimelineRow work=\"icpc\" /><TimelineRow work=\"mg\" /></ol>",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "TrailRow",
+  "group": "lists",
+  "file": "src/components/lists/TrailRow.astro",
+  "component": "TrailRow",
+  "summary": "Engineering trail: a tool or build that does not need a page, with what it is, one proof and evidence links. A compact row or a browseable item in HorizontalStrip.",
+  "use": "Engineering trail on About: four cards in HorizontalStrip. The default row variant still belongs in a ul.rows.",
+  "avoid": "Rows without a place to see the work; star counts as the only proof.",
+  "behavior": "Card variant is the actual kit LabItem card, with Engineering trail facts in its body slot and WorkObject in its object slot. It uses Memory Base's shared ObjectReveal; moving the HorizontalStrip closes it. Evidence links retain their destinations.",
+  "example": "<ul class=\"rows\"><TrailRow work=\"yasm\" proof={{ en: '155 installs · 28 releases' }} where={[{ label: 'Marketplace', href: 'https://marketplace.visualstudio.com/…' }]} /></ul>",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "proof",
+    "optional": true,
+    "type": "L",
+    "doc": "The single strongest checkable fact. Defaults to the work's `fact`."
+   },
+   {
+    "name": "where",
+    "optional": true,
+    "type": "{ label: string; href: string }[]",
+    "doc": "Where to see it. Defaults to the work's `links`."
+   },
+   {
+    "name": "variant",
+    "optional": true,
+    "type": "'row' | 'card'",
+    "doc": "Cards are independent articles for HorizontalStrip; rows are list items."
+   }
+  ]
+ },
+ {
+  "name": "BeforeAfter",
+  "group": "media",
+  "file": "src/components/media/BeforeAfter.astro",
+  "component": "BeforeAfter",
+  "summary": "Two real captures of the same thing, compared with a draggable divider (also works with keyboard: it is a range input).",
+  "use": "Before/after a change you made: redesign, a fix, a WhipUI run vs plain agent output, an old drawing vs a new one. Both images must be the same size and framing.",
+  "avoid": "Comparing unrelated images; \"after\" images that were retouched.",
+  "example": "<BeforeAfter before=\"whipui/plain.webp\" after=\"whipui/with-whipui.webp\" alt={{ en: 'The same page built without and with WhipUI' }} />",
+  "props": [
+   {
+    "name": "before",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "after",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "alt",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "beforeLabel",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "afterLabel",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "start",
+    "optional": true,
+    "type": "number",
+    "doc": "Starting divider position in %, default 50."
+   }
+  ]
+ },
+ {
+  "name": "Figure",
+  "group": "media",
+  "file": "src/components/media/Figure.astro",
+  "component": "Figure",
+  "summary": "A numbered technical figure: \"FIG. 01\" + caption on a thin rule, then a diagram (inline SVG or an image) on a faint panel. Wide diagrams scroll sideways on phones instead of shrinking to unreadable — the cut-off edge fades and a \"drag ↔\" hint appears only while there is more to see.",
+  "use": "Architecture, data flow, signal paths, state machines — drawn from the real system.",
+  "avoid": "Diagrams of things that do not exist; boxes-and-arrows that encode nothing; decorative \"tech\" lines.",
+  "example": "<Figure n=\"01\" caption={{ en: 'System sketch — not the final architecture' }} minWidth={520}>\n  <svg viewBox=\"0 0 560 300\" role=\"img\" aria-label=\"…\">…</svg>\n</Figure>",
+  "props": [
+   {
+    "name": "n",
+    "optional": false,
+    "type": "string",
+    "doc": "Figure number, e.g. \"01\"."
+   },
+   {
+    "name": "caption",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "minWidth",
+    "optional": true,
+    "type": "number",
+    "doc": "Below this width (px) the diagram scrolls horizontally instead of shrinking. Default 520."
+   },
+   {
+    "name": "note",
+    "optional": true,
+    "type": "L",
+    "doc": "One line under the figure: honesty note or source."
+   }
+  ]
+ },
+ {
+  "name": "FlowDiagram",
+  "group": "media",
+  "file": "src/components/media/FlowDiagram.astro",
+  "component": "FlowDiagram",
+  "summary": "A technical figure drawn from data — boxes in columns, arrows between them, the active path as a thick band in the context color with a dashed direction line (Endfield blueprint grammar). No hand-written SVG needed.",
+  "use": "Toolchains, pipelines, system sketches, a rule's decision path — only real parts and real connections. Mark the path the story is about as `active`.",
+  "avoid": "Diagrams of plans presented as built systems (say \"sketch\" in `note`); more than ~10 boxes; decorative arrows.",
+  "props-note": "Nodes sit in columns (`col` 0, 1, 2 …) and stack top to bottom in the order given. Edges run left → right between columns, or downward inside one column.",
+  "example": "<FlowDiagram n=\"02\" caption={{ en: 'Toolchain' }} nodes={[\n  { id: 'ed', col: 0, label: 'Monaco editor', sub: '.ASM' },\n  { id: 'as', col: 1, label: 'C16.EXE', sub: 'DOSBOX → WASM', core: true },\n  { id: 'hx', col: 2, label: 'Intel HEX', sub: '+ LISTING' },\n  { id: 'sim', col: 3, label: 'Z80sim', sub: 'ET-BOARD' }\n]} edges={[{ from: 'ed', to: 'as', active: true }, { from: 'as', to: 'hx', active: true }, { from: 'hx', to: 'sim', active: true, label: 'auto' }]} />",
+  "props": [
+   {
+    "name": "n",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "caption",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "nodes",
+    "optional": false,
+    "type": "{ id: string; col: number; label: L; sub?: L; core?: boolean }[]",
+    "doc": ""
+   },
+   {
+    "name": "edges",
+    "optional": false,
+    "type": "{ from: string; to: string; active?: boolean; dashed?: boolean; label?: L }[]",
+    "doc": ""
+   },
+   {
+    "name": "note",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "FrameStepper",
+  "group": "media",
+  "file": "src/components/media/FrameStepper.astro",
+  "component": "FrameStepper",
+  "summary": "Real animation frames from a sprite strip, stepped one at a time (← →) or played at the clip's own fps. Several strips sit side by side.",
+  "use": "Game/character animation, UI motion studies — anything where the frames themselves are the evidence.",
+  "avoid": "Re-drawing frames that are not from the build; GIFs (heavier and cannot be paused).",
+  "behavior": "Buttons: previous, next, play/pause (a `.sel` toggle: the charcoal block sweeps in while playing), plus arrow keys when a panel has focus. Plays only while on screen; reduced motion: never autoplays.",
+  "example": "<FrameStepper strips={[\n  { src: 'vaja/strip-attack1-padded.webp', frames: 10, name: 'Vaja · attack1', fps: 12, start: 7 },\n  { src: 'vaja/strip-run.webp', frames: 8, name: 'Vaja · run', fps: 12 }\n]} />",
+  "props": [
+   {
+    "name": "strips",
+    "optional": false,
+    "type": "{ src: string; frames: number; name: string; fps?: number; start?: number }[]",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "ImageCaption",
+  "group": "media",
+  "file": "src/components/media/ImageCaption.astro",
+  "component": "ImageCaption",
+  "summary": "The caption under a piece of media: optional number marker, a bold title, one or two sentences, and a mono source line.",
+  "use": "Inside MediaFrame (it renders one for you from title/caption/source), or under a custom figure.",
+  "avoid": "Captions that repeat the title; unsourced numbers.",
+  "example": "<ImageCaption n={2} title={{ en: 'Gameplay · 51 s' }} text={{ en: 'Cut from a recorded build.' }} source=\"Recorded build, 2025-03\" />",
+  "props": [
+   {
+    "name": "n",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "title",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "text",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "source",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "IsoObject",
+  "group": "media",
+  "file": "src/components/media/IsoObject.astro",
+  "component": "IsoObject",
+  "summary": "An isometric object sketch drawn from data — blocks, a cell grid, conveyor lines and callouts, in the site's palette (neutral faces, the work's color for the parts that matter, the signal for what is lit). For things that have no picture of their own: a system, a process, an idea. No background: it sits on the fog like a cutout.",
+  "use": "Abstract or behind-the-scenes work (Memory Base, a pipeline, an algorithm) where a screenshot would say nothing. Every block and callout is a real part with its real name. How to build one: docs/OBJECTS.md. Real rectangular pictures go ON a face (`screens`); wrap the object in SketchReveal to switch them on.",
+  "avoid": "Decoration (\"tech-looking\" cubes that stand for nothing); objects that pretend to be the final architecture (say \"sketch\" in `note`); more than ~12 blocks.",
+  "behavior": "Static. Hover / focus: the conveyor dashes run in their direction (process, on request — never on its own). Phones: sub-labels hide, labels grow. Reduced motion: no running dashes.",
+  "props-note": "Coordinates are in \"world\" units: x to the lower right, y to the lower left, z up. `box: [x, y, z, w, d, h]`. List parts back to front (painter's order). Materials: n neutral · c the work's color · a signal (lit) · k dark · w wire (dashed outline). Callout `at` is a world point; `x`/`y` place its label in SVG units (viewBox 600 × 440 by default).",
+  "example": "<IsoObject label={{ en: 'Memory Base sketch' }} parts={[\n  { box: [-70, 150, 0, 80, 80, 30] },\n  { box: [10, 182, 22, 100, 16, 8], mat: 'c' },\n  { box: [110, 110, 0, 150, 150, 48], mat: 'c' }\n]} flows={[{ z: 30, d: 'M16 190 H106' }]}\n  callouts={[{ at: [235, 160, 48], label: 'Memory Base', sub: 'RELEVANCE · BELIEF', x: 452, y: 196 }]} />",
+  "props": [
+   {
+    "name": "parts",
+    "optional": false,
+    "type": "{ box: [number, number, number, number, number, number]; mat?: Mat }[]",
+    "doc": "Blocks, back to front. box = [x, y, z, w, d, h]."
+   },
+   {
+    "name": "grids",
+    "optional": true,
+    "type": "{ z: number; x: number; y: number; cols: number; rows: number; size: number; gap: number }[]",
+    "doc": "Cell grids drawn flat on a plane (e.g. the top of a block)."
+   },
+   {
+    "name": "flows",
+    "optional": true,
+    "type": "{ z: number; d: string; read?: boolean }[]",
+    "doc": "Direction lines on a plane at height z, as an SVG path in world x/y (e.g. 'M16 190 H106'). `read` = thinner, one-way read."
+   },
+   {
+    "name": "callouts",
+    "optional": true,
+    "type": "{ at: [number, number, number]; label: L; sub?: L; x: number; y: number; minor?: boolean }[]",
+    "doc": ""
+   },
+   {
+    "name": "screens",
+    "optional": true,
+    "type": "{ src: string; face?: 'top' | 'left' | 'right'; x: number; y: number; z: number; w: number; h: number; reveal?: boolean }[]",
+    "doc": "Real rectangular pictures (screenshots, photos without transparency) mapped ONTO a face of the object, so they read as a screen with depth instead of a flat rectangle. face 'top' lies on the plane at height z (x → right-down, y → left-down); 'left' stands on the front-left side (x across, z up, at y); 'right' on the front-right side (y across, z up, at x). `reveal: true` keeps it hidden until a SketchReveal around the object is pointed at."
+   },
+   {
+    "name": "label",
+    "optional": false,
+    "type": "L",
+    "doc": "Accessible description of the whole object."
+   },
+   {
+    "name": "caption",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "note",
+    "optional": true,
+    "type": "L",
+    "doc": "Honesty note, e.g. \"System sketch — not the final architecture.\""
+   },
+   {
+    "name": "origin",
+    "optional": true,
+    "type": "[number, number]",
+    "doc": "Where world (0,0,0) lands in the SVG, and a zoom. Default [300, 84], 1."
+   },
+   {
+    "name": "scale",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "size",
+    "optional": true,
+    "type": "[number, number]",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "MediaFrame",
+  "group": "media",
+  "file": "src/components/media/MediaFrame.astro",
+  "component": "MediaFrame",
+  "summary": "The standard way to show one real artifact — an image or a video — with optional numbered marks pinned on it and a caption. Frames: `plain` (art, photos, video), `screen` (UI screenshots: thin border, lifted). Widths: `text`, `wide`, `full` (edge to edge inside a story — for art that should dominate).",
+  "use": "Every screenshot, capture, drawing, photo. Marks point at the exact spot the caption talks about.",
+  "avoid": "Decorative images, stock photos, \"device mockups\", more than 4 marks, screenshots too small to read (use width=\"wide\").",
+  "behavior": "Images are resized and lazy-loaded by astro:assets. Marks stay pinned at the same % position at every width.",
+  "example": "<MediaFrame src=\"z80/workspace.webp\" alt={{ en: 'Z80 Workspace welcome screen' }} frame=\"screen\" width=\"wide\"\n  marks={[{ n: 1, x: 4, y: 9.4 }, { n: 2, x: 16.8, y: 88.6 }]}\n  title={{ en: 'Workspace' }} caption={{ en: '① explorer · ② the console runs the real C16.EXE in DOSBox' }} />",
+  "props": [
+   {
+    "name": "src",
+    "optional": true,
+    "type": "string | ImageMetadata",
+    "doc": "Image key (\"z80/workspace.webp\") or imported image. Omit when using `video`."
+   },
+   {
+    "name": "video",
+    "optional": true,
+    "type": "string",
+    "doc": "Video key (\"vaja/highlight-720.mp4\"); needs `poster`."
+   },
+   {
+    "name": "poster",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "loop",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Short silent clip that loops while visible."
+   },
+   {
+    "name": "alt",
+    "optional": true,
+    "type": "L",
+    "doc": "Required for images: what is in it."
+   },
+   {
+    "name": "frame",
+    "optional": true,
+    "type": "'plain' | 'screen'",
+    "doc": ""
+   },
+   {
+    "name": "width",
+    "optional": true,
+    "type": "'text' | 'wide' | 'full'",
+    "doc": "How much room it takes inside a story/page column."
+   },
+   {
+    "name": "ratio",
+    "optional": true,
+    "type": "string",
+    "doc": "Crop to a ratio (e.g. \"16/9\"). Default: the file's own ratio, never cropped."
+   },
+   {
+    "name": "focus",
+    "optional": true,
+    "type": "string",
+    "doc": "Crop focus when `ratio` crops, CSS object-position (e.g. \"30% 60%\")."
+   },
+   {
+    "name": "marks",
+    "optional": true,
+    "type": "{ n: number; x: number; y: number }[]",
+    "doc": ""
+   },
+   {
+    "name": "n",
+    "optional": true,
+    "type": "number",
+    "doc": "Caption number (matches a mark on another figure, or orders a sequence)."
+   },
+   {
+    "name": "title",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "caption",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "source",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "eager",
+    "optional": true,
+    "type": "boolean",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "ObjectReveal",
+  "group": "media",
+  "file": "src/components/media/ObjectReveal.astro",
+  "component": "ObjectReveal",
+  "summary": "Memory Base's object column, shared by LabItem cards and Archive previews.",
+  "use": "Inside a data-object-host: the original left-third Pictogram, charcoal column and detailed object, with an optional strip item index.",
+  "avoid": "Independent project layouts or invented evidence. A symbolic object must be labelled SKETCH.",
+  "behavior": "Reuses the owner-approved Memory Base column texture, placement and two soft slanted sweeps. The column opens first, then the whole object; no cell dissolution or mosaic. Hover and keyboard focus open it; leaving or moving the strip closes it. Touch opens first, then follows the primary evidence link. Reduced motion switches instantly. The owner explicitly requested this same column for Archive and Engineering trail.",
+  "example": "<div data-object-host tabindex=\"0\"><ObjectReveal glyph={['######', '###+##']} label=\"Memory store sketch\" tag=\"SYSTEM · SKETCH\"><IsoObject … /></ObjectReveal></div>",
+  "props": [
+   {
+    "name": "glyph",
+    "optional": true,
+    "type": "string[]",
+    "doc": ""
+   },
+   {
+    "name": "glyphFrom",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "glyphCols",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": "Accessible description of the real artifact or labelled symbolic sketch."
+   },
+   {
+    "name": "tag",
+    "optional": false,
+    "type": "L",
+    "doc": "Visible evidence type, e.g. REAL · SCREEN or SYSTEM · SKETCH."
+   },
+   {
+    "name": "cat",
+    "optional": true,
+    "type": "CatOrSelf",
+    "doc": "Work category on the preserved light-palette evidence tag."
+   },
+   {
+    "name": "indexed",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Use the enclosing LabItem's actual position counter."
+   }
+  ]
+ },
+ {
+  "name": "PhotoCard",
+  "group": "media",
+  "file": "src/components/media/PhotoCard.astro",
+  "component": "PhotoCard",
+  "summary": "A hobby picture as a printed photo card: a paper card with a window for the picture (at its own shape — portrait, landscape or square) and a writing area underneath for one line in the owner's words.",
+  "use": "The owner's drawings, sketches and photographs — the personal layer (About, a Desk/Notes section). A few loose cards in a `<div class=\"pc-row\">`; a series (4–8, e.g. sketches → final) inside a HorizontalStrip. In a row the cards share one picture height (`size` is ignored there). Tilt a few of them a little so a row looks laid down by hand. When a page sizes cards with its own layout, pass `sizes` so the browser loads a sharp image at that width.",
+  "avoid": "Work screenshots or evidence (use MediaFrame); more than a sentence of text; tilts bigger than ±4°; the same tilt on every card.",
+  "behavior": "Hover / focus: the card straightens and lifts (240ms). Tap / click / Enter opens the same card large in the middle of the screen (one shared <dialog> for the page). The card's own picture shows at once at the right shape; the large one is fetched only then and replaces it when decoded — if that takes over 150ms the loading HUD sits on the picture meanwhile (never the previous card's picture). Esc, a click outside or ✕ closes it and focus returns to the card. Reduced motion: no movement. `signed`: the owner's handwritten signature sits at the bottom-right of the paper strip under the picture (the strip grows to hold it) and again on the large card; its ink is colored at build time from the picture (its most saturated pixels, lightness set per theme to read on the paper).",
+  "example": "<div class=\"pc-row\">\n  <PhotoCard src=\"vaja/object.webp\" alt={{ en: 'Vaja holding the crystal staff' }} caption={{ en: 'Vaja, drawn by hand' }} meta=\"2025 · DIGITAL\" tilt={-2} />\n  <PhotoCard src=\"vaja/scene-westbrook.webp\" alt={{ en: 'Westbrook Stonescape' }} caption={{ en: 'Westbrook Stonescape' }} tilt={1.5} />\n</div>",
+  "props": [
+   {
+    "name": "src",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "alt",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "caption",
+    "optional": true,
+    "type": "L",
+    "doc": "The line written on the card — the owner's words."
+   },
+   {
+    "name": "meta",
+    "optional": true,
+    "type": "L",
+    "doc": "Small mono line under the caption: year, medium, place."
+   },
+   {
+    "name": "tilt",
+    "optional": true,
+    "type": "number",
+    "doc": "Degrees, −4 … 4. Default 0."
+   },
+   {
+    "name": "size",
+    "optional": true,
+    "type": "'sm' | 'md' | 'lg'",
+    "doc": ""
+   },
+   {
+    "name": "sizes",
+    "optional": true,
+    "type": "string",
+    "doc": "Responsive image sizes when the surrounding layout overrides the card's default width."
+   },
+   {
+    "name": "signed",
+    "optional": true,
+    "type": "boolean",
+    "doc": "The owner's signature at the bottom-right of the paper, inked in the picture's own accent. Only on his own drawings."
+   }
+  ]
+ },
+ {
+  "name": "Pictogram",
+  "group": "media",
+  "file": "src/components/media/Pictogram.astro",
+  "component": "Pictogram",
+  "summary": "The minimal level of an object: a flat pixel-block glyph in grey on a faint cell grid (Endfield's database icons) — less detail than an IsoObject, so pointing at it can open the detailed object or the real picture.",
+  "use": "The resting face of a LabItem card that has an object (`glyph` / `glyphFrom`), or a small marker for a work. Draw the SAME object the card reveals: a slab of cells for a memory store, a screen for an IDE, the character's own silhouette traced from its cutout (`from`).",
+  "avoid": "Detail (that is IsoObject's job); more than ~16 cells across; decorative glyphs that are not the work's object; more than one accent group.",
+  "behavior": "Static SVG, no motion of its own; the card around it animates (its cells break away as the object opens and settle back after — scripts/pixels.ts). Quiet colours on purpose: the grey is ink3 mixed ~half into the page and the accent is softened, so the resting glyph never pulls the eye from the work's name. '#' = grey cell, '+' = accent cell (context signal), anything else = empty — transparent by default (`backdrop` draws the empty cells faintly).",
+  "example": "<Pictogram grid={['######', '###+##', '######', '####+#', '#+####', '######']} label=\"Memory Base store\" />\n<Pictogram from=\"vaja/object.webp\" cols={12} label=\"Vaja\" />",
+  "props": [
+   {
+    "name": "grid",
+    "optional": true,
+    "type": "string[]",
+    "doc": "Rows of cells: '#' grey, '+' accent, anything else empty."
+   },
+   {
+    "name": "from",
+    "optional": true,
+    "type": "string",
+    "doc": "Trace this transparent cutout's silhouette instead (asset key)."
+   },
+   {
+    "name": "cols",
+    "optional": true,
+    "type": "number",
+    "doc": "Cells across when tracing. Default 12."
+   },
+   {
+    "name": "backdrop",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Draw the empty cells as a faint grid. Default false: empty cells are transparent."
+   },
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": "What it depicts (for screen readers); omit when the name is right next to it."
+   },
+   {
+    "name": "class",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "Plate",
+  "group": "media",
+  "file": "src/components/media/Plate.astro",
+  "component": "Plate",
+  "summary": "The Chaos-Zero-style backing: three bars with parallel diagonal ends, one low-chroma gradient (deep → mid → pale of the context color) running across all three.",
+  "use": "Opt-in, behind a subject — <Stage> places it for you. Use it where a composition wants the work's color near the artifact (CZN-style). Never as an automatic background for every work.",
+  "avoid": "Plates without a subject in front; more than one large plate per screen; saturated colors.",
+  "behavior": "Pure CSS (container units + tan()), no JS. Bars grow 7% from the left when an ancestor sets --grow (hover / selected state).",
+  "example": "<div style=\"position:relative;height:160px\" data-cat=\"tool\"><Plate shape=\"wide\" /></div>",
+  "props": [
+   {
+    "name": "shape",
+    "optional": true,
+    "type": "Shape",
+    "doc": "Bar layout. See src/lib/vocab.ts PLATES for when to use each. Default 'step-right'."
+   },
+   {
+    "name": "cut",
+    "optional": true,
+    "type": "number",
+    "doc": "Cut angle in degrees from horizontal (steeper = closer to 90). Sign picks the lean: + is \"/\", − is \"\\\". Defaults per shape."
+   },
+   {
+    "name": "inset",
+    "optional": true,
+    "type": "string",
+    "doc": "Inset inside the parent, CSS inset shorthand. Default '10% 7%' (Stage) — use '0' to fill a card header."
+   }
+  ]
+ },
+ {
+  "name": "PortraitSwap",
+  "group": "media",
+  "file": "src/components/media/PortraitSwap.astro",
+  "component": "PortraitSwap",
+  "summary": "The About page's picture: one square frame showing one picture at a time — the GitHub avatar, the Instagram one, a real photo — with the line under it saying which it is (a link when it is an account, plain text for the photo). Pressing the picture shows the next one.",
+  "use": "About, in place of a single portrait. Each item: the picture key, its alt, its line, and the account URL when there is one.",
+  "avoid": "More than four pictures; switching on its own (auto-play); pictures that are not the owner; a link on the real photo.",
+  "behavior": "Pressed (click, Enter or Space), the picture changes with the shared block → image sweep (scripts/wipe.ts) while the counter on it and the line under it roll to the new one (the label roll, --t-roll). The last picture goes back to the first. Only the line in view can be reached with Tab. Reduced motion: an instant swap.",
+  "example": "<PortraitSwap items={[\n  { src: 'portrait/github-avatar.jpg', alt: { en: 'GitHub avatar' }, label: 'GitHub · VVeb1250', href: 'https://github.com/VVeb1250' },\n  { src: 'portrait/photo-2025.webp', alt: { en: 'Photo of Web' }, label: { en: 'Photo · 2025' } }\n]} />",
+  "props": [
+   {
+    "name": "items",
+    "optional": false,
+    "type": "{ src: string; alt: L; label: L | string; href?: string }[]",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "ScrubFrames",
+  "group": "media",
+  "file": "src/components/media/ScrubFrames.astro",
+  "component": "ScrubFrames",
+  "summary": "A real animation clip scrubbed by scroll: the sprite holds still under the header and every bit of scrolling moves it one frame forward — or back. Reversibility is the point: you can study a swing frame by frame.",
+  "use": "One signature clip on a game / motion work page (an attack, a run cycle) whose in-between frames are worth seeing. 8–24 frames from the real build.",
+  "avoid": "Clips that read as nothing when reversed; two pinned blocks back to back; frames that are not from the build.",
+  "behavior": "~6% of a screen of scrolling per frame. Counter `05 / 10`, clip name and fps below. Loading: the sprite is fetched when the block is a screen away; while it comes, the bar under the counter shows the real download progress (then becomes the scroll position), the counter holds at 01 and, after 150ms, the loading HUD sits on the frame. Reduced motion: no scrubbing — first, middle and last frames are shown side by side instead.",
+  "example": "<ScrubFrames src=\"vaja/strip-attack1-padded.webp\" frames={10} name=\"Vaja · attack1\" fps={12} />",
+  "props": [
+   {
+    "name": "src",
+    "optional": false,
+    "type": "string",
+    "doc": "Sprite strip key: one horizontal image with equal-width frames."
+   },
+   {
+    "name": "frames",
+    "optional": false,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "name",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "fps",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "SketchReveal",
+  "group": "media",
+  "file": "src/components/media/SketchReveal.astro",
+  "component": "SketchReveal",
+  "summary": "The crafted sketch, and the thing itself: point at it and the picture comes up in Endfield's order — an optional Plate opens as the plane, the picture opens out from the middle, the corner brackets lock on, the tag slides in (REAL, or RENDER for a render). Move away and it folds back, faster than it came. A screen (rectangular screenshot / photo) switches on ON the object's own face (IsoObject `screens` with `reveal`) so it has depth; a cutout or render (transparent PNG / WebP) comes up over the sketch (`real`), and the sketch steps back behind it.",
+  "use": "Glyph mode (home features, Lab rows): `glyph`/`glyphFrom` + `plate` + either `real` (the photo / cutout — REAL) or an IsoObject in the `real` slot (`kind=\"system\"` — the abstract work's real) — a minimal Pictogram at rest that opens into the thing on its own plate. Otherwise: wrap an IsoObject (or any drawing) when a real photo, screenshot or scan of the same subject exists: the sketch explains, the reveal proves it is real. Abstract work (a memory layer, a skill compiler) may reveal a render instead — `kind=\"render\"`: tagged RENDER, never REAL; the real results stay on the work page, and AttributionBlock says the render is AI-made. Same subject, similar framing. `plate` puts a Plate behind a cutout / render to lift it.",
+  "avoid": "A rectangular picture flat over an isometric sketch; map it onto a face with IsoObject `screens` instead. A flat Pictogram may directly reveal a rectangular capture in glyph mode. A render tagged as real; a render of a work that has real pictures; a picture of something else than the sketch; the only evidence hidden behind a hover (say so in the caption); multiple independently animated objects without a browsing structure (use hosted rows or HorizontalStrip); a plate when the screen already has one.",
+  "behavior": "Hosted (`host`, inside an element marked `data-skr-host`): the whole block is the trigger, not just the picture — rest the mouse anywhere on the project, or tab to one of its links (keyboard focus), and it opens; leave the block and it folds back. A click on the picture opens the project (its link marked `data-skr-go`). Touch outside HorizontalStrip: it opens by itself in the middle band of the screen; a tap on the open picture follows its link. Inside HorizontalStrip: the first tap opens the object, the second follows its link; swiping keeps previews closed. Desktop scroll never opens the reveal. `lead` (ms): the glyph gets a prelude before the reveal — the class `skr-lead` goes on first and the rest waits (Z80: the three separate tool windows slide together); it comes off after the reveal has folded back. Otherwise — mouse: after resting ~90ms on it (never while its HorizontalStrip is moving; it folds back when the strip starts to move) (a pointer passing over does nothing): [plate opens left → right 250ms with the shared streaked sweep edge] → picture opens from the middle 250ms, feathered (a screen powers on like a display). Glyph mode: the plate lies under the glyph as its ground and takes its time (opens in 450ms, leaves in ~320ms); the glyph's cells break away left → right while the object comes up in the glyph's own grid and its resolution doubles twice (cuts, 70ms each: glyph → pixels → real); leave: back down the steps while the cells settle back → settles 500ms → brackets + tag (accent last). Leave: folds back in ~140ms. A mouse click does nothing (no pinning — hover is the whole interaction). Touch / pen tap, Enter, Space: toggle it. The picture loads lazily with the loading preview. Reduced motion: instant switch.",
+  "example": "<SketchReveal tag={{ en: 'SCREEN' }} realAlt={{ en: 'The real Z80 Workspace screen' }}>\n  <IsoObject … screens={[{ src: 'z80/workspace.webp', face: 'top', …, reveal: true }]} />\n</SketchReveal>\n<SketchReveal kind=\"render\" plate=\"center\" real={{ src: 'memory/render.webp', alt: { en: 'Render of the memory layer' } }}>\n  <IsoObject … />\n</SketchReveal>",
+  "props": [
+   {
+    "name": "real",
+    "optional": true,
+    "type": "{ src: string; alt: L }",
+    "doc": "A cutout (transparent background) shown over the whole sketch. Rectangular pictures go on a face instead (IsoObject screens)."
+   },
+   {
+    "name": "kind",
+    "optional": true,
+    "type": "'real' | 'render' | 'system'",
+    "doc": "'real' (default): a photo / screen / scan of the thing itself. 'render': an AI-made or 3D render of an abstract work — tagged RENDER, never REAL. 'system': the detailed IsoObject of an abstract work (in the `real` slot)."
+   },
+   {
+    "name": "glyph",
+    "optional": true,
+    "type": "string[]",
+    "doc": "Glyph mode: the resting face is a minimal Pictogram instead of the default slot (rows: '#' grey, '+' accent). A composed glyph (several Pictograms placed by the feature) goes in the `glyph` slot instead."
+   },
+   {
+    "name": "glyphFrom",
+    "optional": true,
+    "type": "string",
+    "doc": "Glyph mode: trace the glyph from this transparent cutout (asset key), `glyphCols` cells across."
+   },
+   {
+    "name": "glyphCols",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "ratio",
+    "optional": true,
+    "type": "string",
+    "doc": "Glyph mode: the box shape. Default '4 / 3'."
+   },
+   {
+    "name": "focus",
+    "optional": true,
+    "type": "'center' | 'third'",
+    "doc": "Glyph mode: where the glyph and the opened object sit — 'center' (default) or 'third' (⅓ across)."
+   },
+   {
+    "name": "index",
+    "optional": true,
+    "type": "string",
+    "doc": "Glyph mode: a big outlined index behind the glyph, e.g. \"01\" (Endfield's database numbers)."
+   },
+   {
+    "name": "glyphScale",
+    "optional": true,
+    "type": "number",
+    "doc": "Glyph mode: the glyph's height as a share of the box — match the real picture's size so the switch reads as the same thing. Default 0.55; a traced cutout ≈ 0.9."
+   },
+   {
+    "name": "size",
+    "optional": true,
+    "type": "'sm' | 'md' | 'lg' | 'xl' | 'fill'",
+    "doc": "Glyph mode: box width — sm 260px · md 340px (default) · lg 440px · xl 640px · fill = the whole column (it never grows past its column)."
+   },
+   {
+    "name": "realWidth",
+    "optional": true,
+    "type": "number",
+    "doc": "Glyph mode: the revealed cutout's width as a share of the box. Default 0.8; a wide scene that should fill the box ≈ 0.96."
+   },
+   {
+    "name": "host",
+    "optional": true,
+    "type": "boolean",
+    "doc": "The project block around it (an ancestor marked `data-skr-host`) is the trigger: hover / keyboard focus anywhere in it opens this; it is not a control of its own."
+   },
+   {
+    "name": "lead",
+    "optional": true,
+    "type": "number",
+    "doc": "Glyph mode: ms of prelude before the reveal (see @behavior) — the feature styles `.skr-lead` in its own CSS."
+   },
+   {
+    "name": "plate",
+    "optional": true,
+    "type": "Shape",
+    "doc": "A Plate (shape) behind the revealed cutout / render; it opens first, as the plane. One plate per screen."
+   },
+   {
+    "name": "realAlt",
+    "optional": true,
+    "type": "L",
+    "doc": "What the reveal shows, for screen readers, when there is no `real` (e.g. the screen mapped on the object)."
+   },
+   {
+    "name": "tag",
+    "optional": true,
+    "type": "L",
+    "doc": "What it is: PHOTO, SCREEN, SCAN, CONCEPT… (shown after REAL / RENDER)."
+   },
+   {
+    "name": "hint",
+    "optional": true,
+    "type": "L",
+    "doc": "One line under the sketch saying the real thing is there."
+   },
+   {
+    "name": "cat",
+    "optional": true,
+    "type": "string",
+    "doc": "The work's color key when the reveal sits outside that work's context."
+   },
+   {
+    "name": "fit",
+    "optional": true,
+    "type": "'cover' | 'contain'",
+    "doc": "'cover' fills the box (crop), 'contain' shows the whole picture on the sunk color. Default 'cover'."
+   }
+  ]
+ },
+ {
+  "name": "Stage",
+  "group": "media",
+  "file": "src/components/media/Stage.astro",
+  "component": "Stage",
+  "summary": "The subject shot: a real artifact (transparent cutout or a screen) standing on a Plate, overflowing it, with optional callouts that name real parts.",
+  "use": "One per screen at most — it is the visual hit. Hero of a work page, featured cards, desk objects.",
+  "avoid": "Stock imagery, mockups of devices that do not exist, callouts with invented labels, two Stages side by side at full size.",
+  "behavior": "Static (no parallax). Callouts drop their small second line under 600px wide; in size=\"mini\" only callouts marked `key` show.",
+  "example": "<Stage src=\"vaja/object.webp\" alt=\"Vaja, the player character, holding the crystal staff\" plate=\"step-right\" size=\"hero\"\n  callouts={[{ x: 78, y: 12, label: 'Crystal staff', sub: 'DRAWN BY HAND', side: 'right', key: true }]} />",
+  "props": [
+   {
+    "name": "src",
+    "optional": true,
+    "type": "string | ImageMetadata",
+    "doc": "Media key (\"vaja/object.webp\") or an imported image. Omit to put your own SVG/HTML object in the slot."
+   },
+   {
+    "name": "alt",
+    "optional": true,
+    "type": "L",
+    "doc": "What the object is (required with src)."
+   },
+   {
+    "name": "plate",
+    "optional": true,
+    "type": "Shape",
+    "doc": ""
+   },
+   {
+    "name": "cut",
+    "optional": true,
+    "type": "number",
+    "doc": "Override the plate's cut angle (see Plate)."
+   },
+   {
+    "name": "size",
+    "optional": true,
+    "type": "'hero' | 'card' | 'mini'",
+    "doc": "hero = work page top; card = featured item; mini = small cards and desk objects."
+   },
+   {
+    "name": "frame",
+    "optional": true,
+    "type": "'cutout' | 'screen'",
+    "doc": "'cutout' = transparent PNG/WebP that overflows the plate; 'screen' = a screenshot shown as a lifted panel."
+   },
+   {
+    "name": "idx",
+    "optional": true,
+    "type": "string",
+    "doc": "Index label on the plate corner, e.g. \"01\"."
+   },
+   {
+    "name": "callouts",
+    "optional": true,
+    "type": "Callout[]",
+    "doc": ""
+   },
+   {
+    "name": "note",
+    "optional": true,
+    "type": "L",
+    "doc": "One small line under the stage (source or honesty note, e.g. \"Sprite from the game build\")."
+   },
+   {
+    "name": "cat",
+    "optional": true,
+    "type": "Cat",
+    "doc": "Context color if the Stage is not already inside a work's area."
+   },
+   {
+    "name": "eager",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Load immediately (use for the first Stage on a page)."
+   }
+  ]
+ },
+ {
+  "name": "VideoEmbed",
+  "group": "media",
+  "file": "src/components/media/VideoEmbed.astro",
+  "component": "VideoEmbed",
+  "summary": "A local video clip. Short clips (`loop`) play muted only while on screen and pause off screen; long clips show controls.",
+  "use": "Gameplay captures, screen recordings. Keep clips under ~60 s and ~5 MB; always give a poster.",
+  "avoid": "Autoplay with sound, background videos behind text, YouTube iframes on the home page (heavy).",
+  "behavior": "Nothing downloads until the clip is near the viewport (preload=\"none\" + poster). A looping clip that stalls for more than 150ms (first frames or buffering) gets the loading HUD over its last frame until it plays again; clips with controls keep the browser's own indicator. Reduced motion: no autoplay, controls shown.",
+  "example": "<VideoEmbed src=\"vaja/highlight-720.mp4\" poster=\"vaja/highlight-poster.webp\" label={{ en: 'Gameplay, 51 seconds, no sound' }} loop />",
+  "props": [
+   {
+    "name": "src",
+    "optional": false,
+    "type": "string",
+    "doc": "Media key, e.g. \"vaja/highlight-720.mp4\"."
+   },
+   {
+    "name": "poster",
+    "optional": false,
+    "type": "string",
+    "doc": "Poster image key."
+   },
+   {
+    "name": "label",
+    "optional": false,
+    "type": "L",
+    "doc": "Accessible description of what the clip shows."
+   },
+   {
+    "name": "loop",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Short silent clip: autoplay in view, loop, no controls. Default false (controls)."
+   },
+   {
+    "name": "ratio",
+    "optional": true,
+    "type": "string",
+    "doc": "CSS aspect ratio, default from the poster."
+   }
+  ]
+ },
+ {
+  "name": "WorkObject",
+  "group": "media",
+  "file": "src/components/media/WorkObject.astro",
+  "component": "WorkObject",
+  "summary": "A work's small object preview: its Pictogram opens into an existing artifact or a labelled isometric sketch, using the same ObjectReveal column as the kit Memory Base card.",
+  "use": "Opt-in object column in ArchiveRow or a compact TrailRow card. Models below depict subjects recorded in each work's YAML and portfolio-facts, not measured system architecture.",
+  "avoid": "Inventing screenshots or architecture to fill an empty preview; treating a symbolic sketch as output evidence; using this as a project-card layout.",
+  "behavior": "By default, the enclosing data-object-host supplies hover and keyboard focus. ObjectReveal is the actual Memory Base column, including its texture, left-third placement and staggered soft sweeps. glyphOnly renders just a static Pictogram, without an image, IsoObject or reveal host. Unsupported work ids leave the column empty.",
+  "example": "<div data-object-host><WorkObject work=\"memory\" /><a href=\"/work/memory/\" data-object-go>Memory Base</a></div>",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": "Work id. Each supported subject has an explicit model below."
+   },
+   {
+    "name": "indexed",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Show the actual LabItem position in a HorizontalStrip card."
+   },
+   {
+    "name": "glyphOnly",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Show only the static Pictogram, with no artifact, sketch or reveal behavior."
+   }
+  ]
+ },
+ {
+  "name": "Callout",
+  "group": "primitives",
+  "file": "src/components/primitives/Callout.astro",
+  "component": "Callout",
+  "summary": "A short aside: a note, a caveat, a number's source, a \"what I'd ask first\". `margin` pushes it to the right edge of the column on wide screens; `inline` keeps it at the start of the line.",
+  "use": "One or two per page, right before or after the block it comments on.",
+  "avoid": "Warnings styled as alerts, colored boxes, icons; long paragraphs.",
+  "example": "<Callout label={{ en: 'Note', th: 'โน้ต' }}>The counts may include my own testing.</Callout>",
+  "props": [
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "place",
+    "optional": true,
+    "type": "'margin' | 'inline'",
+    "doc": "'margin' aligns it to the right edge on wide screens; 'inline' keeps it left-aligned."
+   }
+  ]
+ },
+ {
+  "name": "CategoryTick",
+  "group": "primitives",
+  "file": "src/components/primitives/CategoryTick.astro",
+  "component": "CategoryTick",
+  "summary": "The kind of work as a tiny slanted bar (the plate in miniature, deep → mid color) + its name.",
+  "use": "Next to every work title outside its own page (cards, rows, filters) so the color has a reason.",
+  "avoid": "Using it as decoration without text, or for the owner's own sections.",
+  "example": "<CategoryTick cat=\"game\" />\n<CategoryTick cat=\"self\" kind=\"competition\" />",
+  "props": [
+   {
+    "name": "cat",
+    "optional": false,
+    "type": "CatOrSelf",
+    "doc": "Kind of work: game · ai · dev · tool · sys · ui · hw (or `self`, an event in the owner's own color)."
+   },
+   {
+    "name": "kind",
+    "optional": true,
+    "type": "Kind",
+    "doc": "The entry's kind: a competition or teaching role is named as that, not as a kind of work."
+   },
+   {
+    "name": "bare",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Hide the text (only inside a control that already names the kind)."
+   }
+  ]
+ },
+ {
+  "name": "CopyText",
+  "group": "primitives",
+  "file": "src/components/primitives/CopyText.astro",
+  "component": "CopyText",
+  "summary": "Selectable mono text with a small Copy button (email, install command).",
+  "use": "Emails and one-line commands people will paste somewhere.",
+  "avoid": "Long code — use <CodeExcerpt>.",
+  "example": "<CopyText text=\"npx whipui init\" />",
+  "props": [
+   {
+    "name": "text",
+    "optional": false,
+    "type": "string",
+    "doc": "The exact text to copy."
+   }
+  ]
+ },
+ {
+  "name": "Counter",
+  "group": "primitives",
+  "file": "src/components/primitives/Counter.astro",
+  "component": "Counter",
+  "summary": "Real numbers, current large and total small: `03 / 04`, or bracketed `[03] – [05]`.",
+  "use": "Positions in a sequence (trace steps, strip position, work index).",
+  "avoid": "Fake progress or percentages without a source.",
+  "example": "<Counter value={3} total={4} size=\"lg\" />",
+  "props": [
+   {
+    "name": "value",
+    "optional": false,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "total",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "style",
+    "optional": true,
+    "type": "'bracket' | 'slash'",
+    "doc": "'bracket' → [03] – [05]; 'slash' → 03 / 05 with the total small."
+   },
+   {
+    "name": "size",
+    "optional": true,
+    "type": "'sm' | 'lg'",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "Draft",
+  "group": "primitives",
+  "file": "src/components/primitives/Draft.astro",
+  "component": "Draft",
+  "summary": "Wraps text the owner has not confirmed yet (a proposed question, a lesson, a caption). Visible with a dashed outline in `npm run dev`; removed completely from production builds.",
+  "use": "Whenever an AI writes wording that is not a stated fact: the owner reviews in dev, then removes the wrapper to publish.",
+  "avoid": "Wrapping numbers, dates, names or results — those must be real before they exist at all.",
+  "example": "<Draft><Question text=\"Can one person carry both how a game looks and how it feels?\" /></Draft>",
+  "props": []
+ },
+ {
+  "name": "EvidenceLink",
+  "group": "primitives",
+  "file": "src/components/primitives/EvidenceLink.astro",
+  "component": "EvidenceLink",
+  "summary": "A link to the thing that proves a claim — a merged PR, an issue, a release, a marketplace page, a commit — with what it shows in one short line.",
+  "use": "Right next to the claim it supports (in ContributionBlock, EvidenceRow, OutcomeBlock). The `shows` text must be checkable on the linked page.",
+  "avoid": "Linking private repos to strangers; `shows` text the page does not actually show.",
+  "example": "<EvidenceLink href=\"https://github.com/…/pull/102\" label=\"agentsmesh #102\" shows=\"merged\" kind=\"pr\" />",
+  "props": [
+   {
+    "name": "href",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "label",
+    "optional": false,
+    "type": "string",
+    "doc": "Short name of the evidence, e.g. \"agentsmesh #102\"."
+   },
+   {
+    "name": "shows",
+    "optional": true,
+    "type": "L",
+    "doc": "What it shows, e.g. \"merged\" or \"Reproduction and expected behavior\"."
+   },
+   {
+    "name": "kind",
+    "optional": true,
+    "type": "'pr' | 'issue' | 'release' | 'commit' | 'page' | 'video' | 'file' | 'private'",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "ExternalLink",
+  "group": "primitives",
+  "file": "src/components/primitives/ExternalLink.astro",
+  "component": "ExternalLink",
+  "summary": "An outbound link that says where it goes: label + domain + ↗. Opens in the same tab unless `newTab`.",
+  "use": "Repos, marketplace pages, live demos, Pixiv. For a link that proves a specific claim, use EvidenceLink.",
+  "avoid": "Bare URLs in text; \"click here\".",
+  "example": "<ExternalLink href=\"https://github.com/VVeb1250\">GitHub</ExternalLink>",
+  "props": []
+ },
+ {
+  "name": "FallbackNotice",
+  "group": "primitives",
+  "file": "src/components/primitives/FallbackNotice.astro",
+  "component": "FallbackNotice",
+  "summary": "A thin line that says \"this page is not translated yet — you are reading the English version\", in the language of the page, with a link to the English URL. Shows up only when a Thai / Japanese page falls back to English.",
+  "use": "Automatically on work pages (WorkPage renders it when a story has no TH / JA file). Use by hand anywhere else a block is shown in a fallback language.",
+  "avoid": "Showing it on English pages; machine-translating the story to hide the gap.",
+  "example": "<FallbackNotice shown=\"en\" />",
+  "props": [
+   {
+    "name": "shown",
+    "optional": true,
+    "type": "'en' | 'th' | 'ja'",
+    "doc": "The language the content is actually in. Default 'en'."
+   }
+  ]
+ },
+ {
+  "name": "GoLink",
+  "group": "primitives",
+  "file": "src/components/primitives/GoLink.astro",
+  "component": "GoLink",
+  "summary": "\"// Open project ——\": two slanted strokes in the context color lead, the mono label, and the line behind it (`lineOnly`, for big links, keeps only the line). Aimed at (hover or focus of the link or of its block), the strokes lean forward and step in, the label follows a hair, and the line runs 28 → 52px in the context color; pressed, the strokes snap upright and the line pulls back — so it feels like it gives. Nothing is filled.",
+  "use": "The call-to-action inside cards and rows. Renders a <span> by default (the whole card is the link); pass `href` to make it a link itself.",
+  "avoid": "Buttons with fills, arrows (→ reads less sharp to the owner), arrows-in-circles, filling the text with color on hover. The strokes are the only ornament (the owner asked for links that feel clickable without buttons).",
+  "example": "<GoLink label={{ en: 'Open project', th: 'เปิดดูงาน' }} />",
+  "props": [
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "href",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "lineOnly",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Hide the text and the strokes, keep only the line (big links: Next row, Home's doors)."
+   },
+   {
+    "name": "only",
+    "optional": true,
+    "type": "'strokes' | 'line'",
+    "doc": "Only one part, when the label is the block's own big text: 'strokes' goes before it, 'line' after it (both react to the same hover)."
+   }
+  ]
+ },
+ {
+  "name": "Mark",
+  "group": "primitives",
+  "file": "src/components/primitives/Mark.astro",
+  "component": "Mark",
+  "summary": "A numbered square marker in the context signal color. Pins a caption to a spot on an image.",
+  "use": "Inside <EvidenceItem marks> (placed for you) and at the start of the matching caption line.",
+  "avoid": "More than 4 marks on one image; marks without a caption that explains them.",
+  "example": "<Mark n={1} />",
+  "props": [
+   {
+    "name": "n",
+    "optional": false,
+    "type": "number",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "MetaLine",
+  "group": "primitives",
+  "file": "src/components/primitives/MetaLine.astro",
+  "component": "MetaLine",
+  "summary": "One mono line of small facts separated by middots: \"Project head · team of 3 · 2025\".",
+  "use": "Under titles, in rows, in captions — anywhere a few facts belong on one line.",
+  "avoid": "More than ~4 items (use MetaList); adjectives (\"amazing\", \"robust\").",
+  "example": "<MetaLine items={[{ en: 'Project head', th: 'หัวหน้าโปรเจกต์' }, { en: 'team of 3', th: 'ทีม 3 คน' }, '2025']} />",
+  "props": [
+   {
+    "name": "items",
+    "optional": false,
+    "type": "L[]",
+    "doc": ""
+   },
+   {
+    "name": "tone",
+    "optional": true,
+    "type": "'ink' | 'muted'",
+    "doc": "'ink' for the strongest fact on a card; default 'muted'."
+   }
+  ]
+ },
+ {
+  "name": "MetaList",
+  "group": "primitives",
+  "file": "src/components/primitives/MetaList.astro",
+  "component": "MetaList",
+  "summary": "Small facts as label/value pairs (type, role, engine, dates, result).",
+  "use": "Under a WorkHero title, or in a Profile. 3–5 items.",
+  "avoid": "Paragraphs as values; labels that repeat the value.",
+  "example": "<MetaList items={[{ k: { en: 'Engine', th: 'Engine' }, v: 'Unity 6 · 2D Animation + IK' }, { k: 'When', v: '2025-02 → 2025-03' }]} />",
+  "props": [
+   {
+    "name": "items",
+    "optional": false,
+    "type": "{ k: L; v: L }[]",
+    "doc": ""
+   },
+   {
+    "name": "layout",
+    "optional": true,
+    "type": "'row' | 'table'",
+    "doc": "'row' wraps items horizontally (hero); 'table' stacks label | value rows (profile)."
+   }
+  ]
+ },
+ {
+  "name": "Quote",
+  "group": "primitives",
+  "file": "src/components/primitives/Quote.astro",
+  "component": "Quote",
+  "summary": "A short quote with its real source: a work's own tagline, a rule it follows, a maintainer's review comment, the owner's principle.",
+  "use": "Sparingly — one per page. `size=\"lg\"` for words that belong to the work itself (a package's own tagline). Not for the owner's principles or slogans (Story §0.3).",
+  "avoid": "Invented testimonials, quotes without a source, famous-person quotes.",
+  "example": "<Quote text=\"Make AI-built frontends feel designed.\" source=\"WhipUI\" size=\"lg\" />",
+  "props": [
+   {
+    "name": "text",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "source",
+    "optional": true,
+    "type": "L",
+    "doc": "Who/where it comes from. Required unless it is the work's own tagline."
+   },
+   {
+    "name": "size",
+    "optional": true,
+    "type": "'md' | 'lg'",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "Readout",
+  "group": "primitives",
+  "file": "src/components/primitives/Readout.astro",
+  "component": "Readout",
+  "summary": "A real number read like a game UI value: current large, total small (`59 / 64`), what it counts, a thin share bar when there is a total, and where the number comes from.",
+  "use": "Contribution share (commits you wrote of the team's), installs, visits, releases — numbers a recruiter would ask about. In a row of 2–4, or inline in an EvidenceRow.",
+  "avoid": "Decorative stats, rounded-up numbers, percentages without the raw count, any number without `source`.",
+  "example": "<Readout value={59} total={64} unit={{ en: 'commits', th: 'commit' }} label={{ en: 'of the repo' }} source=\"GitHub · 2026-07-30\" />",
+  "props": [
+   {
+    "name": "value",
+    "optional": false,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "total",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "unit",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": "What the number is about (e.g. \"in the final\", \"on the Marketplace\")."
+   },
+   {
+    "name": "source",
+    "optional": false,
+    "type": "L",
+    "doc": "Where the number comes from, with a date. Required."
+   },
+   {
+    "name": "size",
+    "optional": true,
+    "type": "'sm' | 'md' | 'lg'",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "RoleTag",
+  "group": "primitives",
+  "file": "src/components/primitives/RoleTag.astro",
+  "component": "RoleTag",
+  "summary": "A small outlined tag naming a role or a kind of contribution (\"Project head\", \"Art\", \"Rigging\", \"Integration\").",
+  "use": "In ContributionBlock, EvidenceRow, ProjectHeader — to scan who-did-what quickly. `me` marks roles the owner held.",
+  "avoid": "Skill clouds, tech-logo walls, more than ~5 tags in a row.",
+  "example": "<RoleTag me>Project head</RoleTag> <RoleTag>Story (team)</RoleTag>",
+  "props": [
+   {
+    "name": "me",
+    "optional": true,
+    "type": "boolean",
+    "doc": "The owner held this role: solid ink. Default: outlined."
+   }
+  ]
+ },
+ {
+  "name": "Signature",
+  "group": "primitives",
+  "file": "src/components/primitives/Signature.astro",
+  "component": "Signature",
+  "summary": "The owner's own handwriting (traced from his writing: \"WeB\", \"teethawat.\", the Thai first name; `web-quoted` adds quote marks drawn by us to match his pen, owner's request 2026-10-08), inked in the identity blue. It can write itself in once, left → right, the first time it is shown.",
+  "use": "Only where the owner signs: his name on the main pages (Home cover, About title) and the header's name mark. Size it with `font-size` / `height` on the parent: the signature is 1em tall.",
+  "avoid": "Inventing handwriting he did not write; signing the same thing twice; work / event pages (owner, 2026-10-08: no ornaments there); any color but the identity blue.",
+  "behavior": "`write`: the first time it comes into view, one soft edge runs left → right (0.9s, after `delay` ms) and the ink is left behind it — the same edge as the header's name mark. Reduced motion: it is simply there.",
+  "example": "<h1>Teethawat Kumying <Signature name=\"web\" label=\"Web\" write /></h1>",
+  "props": [
+   {
+    "name": "name",
+    "optional": false,
+    "type": "'web' | 'web-quoted' | 'teethawat' | 'teethawat-th'",
+    "doc": ""
+   },
+   {
+    "name": "label",
+    "optional": false,
+    "type": "string",
+    "doc": "What it says, for screen readers ('' = decorative: the name is already said nearby)."
+   },
+   {
+    "name": "write",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Write it in the first time it is shown."
+   },
+   {
+    "name": "delay",
+    "optional": true,
+    "type": "number",
+    "doc": "ms before writing starts (e.g. after a heading's own entrance)."
+   },
+   {
+    "name": "class",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "StatusTag",
+  "group": "primitives",
+  "file": "src/components/primitives/StatusTag.astro",
+  "component": "StatusTag",
+  "summary": "The state of a work or experiment, in a fixed vocabulary.",
+  "use": "Next to a title, in rows, on trace nodes. ACTIVE gets a dot in the color of the work it belongs to (inherits the nearest data-cat, or set `cat`).",
+  "avoid": "Inventing states (\"SHIPPED\", \"DONE\") or marking something ACTIVE that isn't. The list is closed on purpose.",
+  "states": "ACTIVE (ink fill + dot) · WIP (ink border) · COMPLETED (quiet border) · VALIDATED (ink fill) · FAILED (muted border, struck) · RETIRED / ARCHIVED (muted text, no border) · REVISITING (dashed) · NOT STARTED (dotted)",
+  "example": "<StatusTag status=\"ACTIVE\" cat=\"ai\" />",
+  "props": [
+   {
+    "name": "status",
+    "optional": false,
+    "type": "Status",
+    "doc": "One of ACTIVE · WIP · COMPLETED · VALIDATED · FAILED · RETIRED · ARCHIVED · REVISITING · NOT STARTED."
+   },
+   {
+    "name": "cat",
+    "optional": true,
+    "type": "Cat",
+    "doc": "Color of the ACTIVE dot when the chip is outside the work's own area."
+   }
+  ]
+ },
+ {
+  "name": "NextWork",
+  "group": "project",
+  "file": "src/components/project/NextWork.astro",
+  "component": "NextWork",
+  "summary": "The last row of a work page: \"Next project\" with the next work's kind and title; the page pushes up into it.",
+  "use": "End of every work page — the WorkPage layout renders it when there is a next work.",
+  "avoid": "\"You may also like\" grids; autoplaying into the next page.",
+  "example": "<NextWork work=\"z80\" />",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": "The NEXT work's id."
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "PRCard",
+  "group": "project",
+  "file": "src/components/project/PRCard.astro",
+  "component": "PRCard",
+  "summary": "One contribution to someone else's project as a single card: repo and PR number, state, the size of the change as a +/− bar, what was broken, what the change did, and what the maintainer said — with the link to the real PR.",
+  "use": "Process-led OSS pages (one card per PR, in order), EvidenceRow-like proof on About. Every field comes from the PR itself.",
+  "avoid": "Paraphrasing the maintainer into praise (quote them or leave `maintainer` out); star counts, contribution graphs; PRs that were not merged shown as MERGED.",
+  "props-note": "`add` / `del` are the line counts GitHub shows on the PR; leave them out if unknown — the bar is hidden then. `maintainer.quote` must be their words (trim, don't rewrite).",
+  "example": "<PRCard repo=\"slash9494/ai-config-sync-manager\" number={28} state=\"merged\" date=\"2026-07-09\"\n  href=\"https://github.com/slash9494/ai-config-sync-manager/pull/28\" title=\"fix: sanitize Windows backup paths\"\n  problem={{ en: 'Backups silently broke on Windows drive-letter paths.' }}\n  change={{ en: 'Backup paths are derived with parse() + relative() and a sanitized root label; POSIX layouts unchanged.' }}\n  maintainer={{ who: 'slash9494', quote: 'The bug is real … the correct cross-platform fix.' }} />",
+  "props": [
+   {
+    "name": "repo",
+    "optional": false,
+    "type": "string",
+    "doc": "owner/name"
+   },
+   {
+    "name": "number",
+    "optional": false,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "href",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "title",
+    "optional": false,
+    "type": "string",
+    "doc": "The PR title as written on GitHub."
+   },
+   {
+    "name": "state",
+    "optional": false,
+    "type": "'merged' | 'open' | 'closed'",
+    "doc": ""
+   },
+   {
+    "name": "date",
+    "optional": true,
+    "type": "string",
+    "doc": "YYYY-MM-DD (merge date when merged)."
+   },
+   {
+    "name": "add",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "del",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "issues",
+    "optional": true,
+    "type": "string[]",
+    "doc": "Issues it closes / refers to, e.g. ['#98', '#99']."
+   },
+   {
+    "name": "problem",
+    "optional": false,
+    "type": "L",
+    "doc": "What was broken, in real use."
+   },
+   {
+    "name": "change",
+    "optional": false,
+    "type": "L",
+    "doc": "What the change did."
+   },
+   {
+    "name": "maintainer",
+    "optional": true,
+    "type": "{ who: string; quote: L }",
+    "doc": "The maintainer's own words."
+   }
+  ]
+ },
+ {
+  "name": "ProjectContext",
+  "group": "project",
+  "file": "src/components/project/ProjectContext.astro",
+  "component": "ProjectContext",
+  "summary": "The situation before the work: what existed, what was frustrating or worth testing, and why it was yours to take on. One strong sentence on the left, the rest as prose on the right.",
+  "use": "Right after ProjectHeader on most work pages (the \"IDEA / FRICTION → WOULD THIS WORK?\" part of the story).",
+  "avoid": "Background history nobody needs; restating the header's line.",
+  "example": "<ProjectContext label={{ en: 'Why' }} lead={{ en: 'The lab tools only ran on the lab machines.' }}>\n  <p>…</p>\n</ProjectContext>",
+  "props": [
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": "Small label, default \"Context\"."
+   },
+   {
+    "name": "lead",
+    "optional": false,
+    "type": "L",
+    "doc": "The one sentence that frames the problem."
+   }
+  ]
+ },
+ {
+  "name": "ProjectHeader",
+  "group": "project",
+  "file": "src/components/project/ProjectHeader.astro",
+  "component": "ProjectHeader",
+  "summary": "The top of a work page, in the Work reel's scale: the work's outlined number from the reel (filled pale — this is the work you opened; an event page shows its year instead), type · year, kind, status, the title large, one line, the key facts, roles — and a `media` slot the composition fills however this work needs (art, a screen, nothing).",
+  "use": "First block of every work page. The title is also the SectionMarker label for the page. Choose `layout` by what leads: `stack` (media below, art-led), `split` (media beside, interface-led), `text` (no media, process-led).",
+  "avoid": "Stuffing every fact into meta (3–5); a second big title below it.",
+  "example": "<ProjectHeader work=\"z80\" layout=\"split\" roles={['Direction', 'Integration']}>\n  <MediaFrame slot=\"media\" src=\"z80/workspace.webp\" alt={{ en: 'Z80 Workspace' }} frame=\"screen\" eager />\n</ProjectHeader>",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "layout",
+    "optional": true,
+    "type": "'stack' | 'split' | 'text'",
+    "doc": ""
+   },
+   {
+    "name": "roles",
+    "optional": true,
+    "type": "string[]",
+    "doc": "The owner's roles, shown as tags."
+   },
+   {
+    "name": "quote",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Show the work's own quote (tagline) under the line. Default true."
+   }
+  ]
+ },
+ {
+  "name": "RefBoard",
+  "group": "project",
+  "file": "src/components/project/RefBoard.astro",
+  "component": "RefBoard",
+  "summary": "The opening of a contribution story: the references themselves, very large (#102, #28, #878), each with its repo, its real state and one plain line. Merged ones stand in ink; the rest stay grey, so \"merged\" and \"reported\" never read the same.",
+  "use": "Right after ProjectHeader on a page about work in other people's repos (OSS). Each item jumps to its part of the page (`to`, an #id on the same page); the GitHub links live there, in the PR cards and evidence links.",
+  "avoid": "Star counts, a heatmap or a trophy wall; calling a report a fix; more than four items (the rest belong lower on the page).",
+  "behavior": "Aimed at, the number takes the signal color and the line under the item runs out (GoLink). Reduced motion: the same states, no movement.",
+  "example": "<RefBoard items={[\n  { ref: '#102', repo: 'AgentsMesh', state: { en: 'merged · 21 Jul 2026' }, merged: true, text: { en: 'A read-only check for stale generated files.' }, to: '#agentsmesh' },\n  { ref: '#878', repo: 'context-mode', state: { en: 'open · root cause found' }, text: { en: 'Oversized paragraphs slipped past the chunk cap.' }, to: '#context-mode' }\n]} />",
+  "props": [
+   {
+    "name": "items",
+    "optional": false,
+    "type": "{ ref: string; repo: string; state: L; merged?: boolean; text: L; to: string }[]",
+    "doc": ""
+   },
+   {
+    "name": "label",
+    "optional": true,
+    "type": "L",
+    "doc": "Accessible name of the list."
+   }
+  ]
+ },
+ {
+  "name": "WorkNav",
+  "group": "project",
+  "file": "src/components/project/WorkNav.astro",
+  "component": "WorkNav",
+  "summary": "The strip above a work page: \"← All work\" (goes back to exactly where you were, then locks onto that work), the position among pages `[02] – [03]`, and ↑ ↓ to the neighbouring works with the push transition.",
+  "use": "Top of every work page — the WorkPage layout renders it.",
+  "avoid": "Breadcrumb trails; more than one back link.",
+  "behavior": "Holds still while ↑ ↓ change the work (only the content moves); the first number rolls to the new one.",
+  "example": "<WorkNav work=\"z80\" order={['vaja', 'z80', 'oss']} />",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "order",
+    "optional": false,
+    "type": "string[]",
+    "doc": "Work ids that have pages, in reading order."
+   },
+   {
+    "name": "base",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "back",
+    "optional": true,
+    "type": "string",
+    "doc": "Where \"All work\" goes. Default: the Work page."
+   },
+   {
+    "name": "backLabel",
+    "optional": true,
+    "type": "L",
+    "doc": "Its label, when it goes somewhere else (an event page goes back to the Timeline)."
+   }
+  ]
+ },
+ {
+  "name": "Atmosphere",
+  "group": "shell",
+  "file": "src/components/shell/Atmosphere.astro",
+  "component": "Atmosphere",
+  "summary": "The misty ground behind every page: soft gradient + two tiled cloud layers + a tint whose color follows the kind of work in view.",
+  "use": "Once per page. PageShell already includes it — you normally never place it yourself.",
+  "avoid": "Adding grain, blobs or extra glow layers (default-deny list). Never put content inside it.",
+  "behavior": "The tint is identity wash by default. It changes where a composition opts in with `data-fog`, on a page whose PageShell has `fog`, or when a list dispatches `atmo:cat` on document (detail: a category, or null for the page's own — SelectedWork does this for the project in the middle of the screen). A 700ms crossfade changes the tint. On mouse devices, the whole atmosphere drifts at 0.025 × scroll distance as one opaque canvas (after a page change it glides to the new position instead of jumping), and the canvas always reaches the bottom of the screen — even mid-fade, or back on a long page; touch and reduced motion keep it still. Static CSS layers remain visible until the canvas is ready.",
+  "example": "<section data-cat=\"game\" data-fog>…</section>   (opt-in: only where the work's color should reach the background)",
+  "props": []
+ },
+ {
+  "name": "Footer",
+  "group": "shell",
+  "file": "src/components/shell/Footer.astro",
+  "component": "Footer",
+  "summary": "Contact email with copy button, last-updated month, languages.",
+  "use": "Once per page (PageShell renders it).",
+  "avoid": "Social icon rows, newsletter forms.",
+  "example": "<Footer />",
+  "props": []
+ },
+ {
+  "name": "LanguageToggle",
+  "group": "shell",
+  "file": "src/components/shell/LanguageToggle.astro",
+  "component": "LanguageToggle",
+  "summary": "EN · TH · JA links to the same page in each language.",
+  "use": "Inside SiteNav (already there). Can also sit in a footer.",
+  "avoid": "Flags or a dropdown; three short codes are enough.",
+  "behavior": "The current language is a `.sel` block (charcoal + identity-blue bar — site chrome); hover plate + press from base.css.",
+  "example": "<LanguageToggle />",
+  "props": []
+ },
+ {
+  "name": "LoadLine",
+  "group": "shell",
+  "file": "src/components/shell/LoadLine.astro",
+  "component": "LoadLine",
+  "summary": "Floema's loading line: when a page takes a moment to arrive, a thin line runs across the top while the current page stays on screen — never a blank screen or a spinner.",
+  "use": "Once per page — PageShell renders it. Nothing to configure.",
+  "avoid": "Loaders, spinners, percentage counters.",
+  "behavior": "Appears only if the next page takes longer than 150ms (prefetching on hover — scripts/prefetch-media.ts — usually makes it invisible). Completes and fades when the new page is swapped in.",
+  "example": "<LoadLine />",
+  "props": []
+ },
+ {
+  "name": "PageScrollbar",
+  "group": "shell",
+  "file": "src/components/shell/PageScrollbar.astro",
+  "component": "PageScrollbar",
+  "summary": "A page scrollbar at the right edge below the header: grey dashed track, context-colored progress, and a deep cyan cursor in light mode or spark cursor in dark mode.",
+  "use": "Once per page — PageShell renders it. Drag or click the track to scroll; wheel, touch and keyboard page scrolling still work.",
+  "avoid": "Placing it beside a visible native scrollbar or inside a section's own scroll area.",
+  "behavior": "The line thickens on hover and focus. The native scrollbar is hidden only after drag is ready, and remains the fallback when custom styling is unavailable or forced colors are active.",
+  "example": "<PageScrollbar cat=\"game\" />",
+  "props": [
+   {
+    "name": "cat",
+    "optional": false,
+    "type": "CatOrSelf",
+    "doc": "Page context color. The shell passes its own `cat`."
+   }
+  ]
+ },
+ {
+  "name": "Section",
+  "group": "shell",
+  "file": "src/components/shell/Section.astro",
+  "component": "Section",
+  "summary": "A top-level page section: spacing, anchor, SectionHeader, SectionMarker registration. Context color and fog tint are opt-in.",
+  "use": "Wrap each top-level block of a page (Selected work, the path so far, Outside software…). Put compositions or lists inside.",
+  "avoid": "Nesting Sections; wrapping every small block (use SectionHeader alone for sub-parts).",
+  "example": "<Section id=\"path\" index=\"02\" title={{ en: 'The path so far', th: 'เส้นทางที่ผ่านมา' }} mark={{ en: 'Path', th: 'เส้นทาง' }}>\n  <EvidenceRow … />\n</Section>",
+  "props": [
+   {
+    "name": "id",
+    "optional": true,
+    "type": "string",
+    "doc": "Anchor id (e.g. used by /#work)."
+   },
+   {
+    "name": "title",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "index",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   },
+   {
+    "name": "description",
+    "optional": true,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "mark",
+    "optional": true,
+    "type": "L",
+    "doc": "Vertical SectionMarker label; defaults to `title`. One or two words."
+   },
+   {
+    "name": "count",
+    "optional": true,
+    "type": "number",
+    "doc": ""
+   },
+   {
+    "name": "cat",
+    "optional": true,
+    "type": "CatOrSelf",
+    "doc": "Context color for everything inside. Omit to inherit (identity blue on most pages)."
+   },
+   {
+    "name": "fog",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Opt in: let this section tint the background fog with its context color while in view."
+   },
+   {
+    "name": "tight",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Remove the large top spacing (first section after the intro)."
+   },
+   {
+    "name": "class",
+    "optional": true,
+    "type": "string",
+    "doc": ""
+   }
+  ]
+ },
+ {
+  "name": "SectionHeader",
+  "group": "shell",
+  "file": "src/components/shell/SectionHeader.astro",
+  "component": "SectionHeader",
+  "summary": "The small title row of a section: optional index, mono title, optional count, optional one-line description. Carries no layout of its own.",
+  "use": "At the top of any section. <Section> renders one for you; use it directly when a composition needs the header somewhere unusual (inside a pinned strip, beside media).",
+  "avoid": "Big display headings for sections (one statement per page); descriptions longer than one sentence.",
+  "example": "<SectionHeader index=\"02\" title={{ en: 'Sheets, frames, captures' }} />",
+  "props": [
+   {
+    "name": "title",
+    "optional": false,
+    "type": "L",
+    "doc": ""
+   },
+   {
+    "name": "index",
+    "optional": true,
+    "type": "string",
+    "doc": "Section number, e.g. \"02\"."
+   },
+   {
+    "name": "count",
+    "optional": true,
+    "type": "number",
+    "doc": "Shows `[04]` at the right end."
+   },
+   {
+    "name": "description",
+    "optional": true,
+    "type": "L",
+    "doc": "One sentence under the title."
+   },
+   {
+    "name": "as",
+    "optional": true,
+    "type": "'h2' | 'h3'",
+    "doc": "Heading level. Default h2."
+   },
+   {
+    "name": "trigger",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Register as the SectionMarker trigger of the enclosing [data-mark] element. Default true."
+   }
+  ]
+ },
+ {
+  "name": "SectionMarker",
+  "group": "shell",
+  "file": "src/components/shell/SectionMarker.astro",
+  "component": "SectionMarker",
+  "summary": "A vertical label that sticks to the top-left corner once a section's own horizontal title has scrolled under the header, with a progress line for that section.",
+  "use": "Once per page (PageShell renders it). Any element with `data-mark=\"Label\"` becomes a stop; its title is the child with `data-mark-trigger` (else its first h1/h2). <Section> and <ProjectHeader> set these for you.",
+  "avoid": "Marking small blocks — only sections at least ~1 screen tall. Hidden below 760px (the gutter is too narrow).",
+  "behavior": "Appears with a top-down wipe (500ms enter), disappears in 60ms, swaps label with exit → wipe. Progress fill uses the section's context color (identity blue, or the work's kind inside a work).",
+  "example": "<section data-mark=\"Work\"><h2 data-mark-trigger>Featured work</h2>…</section>",
+  "props": []
+ },
+ {
+  "name": "SiteNav",
+  "group": "shell",
+  "file": "src/components/shell/SiteNav.astro",
+  "component": "SiteNav",
+  "summary": "Thin sticky header: name mark (the first name, which turns into the owner's handwriting when pointed at), main nav with a sliding cursor, language switch, theme toggle.",
+  "use": "Once per page (PageShell renders it). PageShell passes `nav` through as `current`.",
+  "avoid": "Adding more than ~5 nav items, or icons — on phones the menu is a text button (MENU), never an icon-only hamburger.",
+  "behavior": "The name mark, pointed at or focused, is written over by the owner's handwriting in the identity blue: one soft edge travels left → right, the typed name giving way behind it (Thai pages: the Thai signature; reduced motion: an instant swap; touch: stays typed). Cursor slides to the hovered item (240ms) and back; a clicked item becomes current at once. Desktop links have a wider click target from 960px. Phones (≤760px): one thin row — name + a MENU button; the button drops a panel under the header (the nav as 48px rows, language and theme below it; items come in one after another), closed by the button, Esc, a tap outside or choosing a page; the page does not scroll while it is open and focus stays inside. On pages that contain the nav's #anchors, it follows the section in view (scroll-spy). Stays still during page transitions.",
+  "example": "<SiteNav current=\"work\" />",
+  "props": [
+   {
+    "name": "current",
+    "optional": true,
+    "type": "string",
+    "doc": "Key of the active nav item: 'work' | 'about' | 'timeline' (see NAV in src/lib/site.ts). Home has none: the name mark is its link."
+   }
+  ]
+ },
+ {
+  "name": "ThemeToggle",
+  "group": "shell",
+  "file": "src/components/shell/ThemeToggle.astro",
+  "component": "ThemeToggle",
+  "summary": "Cycles Auto → Light → Dark. Auto follows the device. Remembered per browser.",
+  "use": "Inside SiteNav (already there).",
+  "avoid": "Sun/moon icons without text.",
+  "behavior": "Switching: a plane in the new mode's ground slides in from the right (the toggle's side) on the click, covers the page, the theme switches underneath, and the plane slides on out to the left (~0.8s, soft 10° edges, transform only — no page capture; scripts/theme.ts). Nothing inside the page animates while it switches. A step that does not change what shows (Auto → Light on a light device) just changes the setting. Reduced motion: instant.",
+  "example": "<ThemeToggle />",
+  "props": []
+ },
+ {
+  "name": "ReelDrawing",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelDrawing.astro",
+  "component": "ReelDrawing",
+  "summary": "Drawing on the Work reel: four of the owner's drawings laid down like cards on a desk, overlapping and a little tilted — the sketchbook, not a gallery wall.",
+  "use": "Inside WorkReel, once, last (it is a hobby, shown as one).",
+  "avoid": "Calling it an art portfolio; adding dates or captions the owner has not written; a plate (the art is the color).",
+  "behavior": "Static. The whole panel opens the Drawing page, where each card opens large.",
+  "example": "<ReelDrawing />",
+  "props": []
+ },
+ {
+  "name": "ReelMSU",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelMSU.astro",
+  "component": "ReelMSU",
+  "summary": "MSU Informatics Hackathon 2026 on the Work reel: the result as one word, the track, and the four parts of the product that were the owner's.",
+  "use": "Inside WorkReel, once. Values from MSU in src/lib/facts.ts.",
+  "avoid": "Making the win the reason for its place; naming parts the team decided together as his (the product and OCR architecture were team decisions).",
+  "behavior": "Static. The word scales with its column (container units), so it never runs into the next panel.",
+  "example": "<ReelMSU />",
+  "props": []
+ },
+ {
+  "name": "ReelMemory",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelMemory.astro",
+  "component": "ReelMemory",
+  "summary": "Memory Base on the Work reel: still an experiment — the system sketch (labelled a sketch) and where it stands, with a way to the notes.",
+  "use": "Inside WorkReel, once. The sketch is MEMORY_SKETCH in src/lib/facts.ts, shared with the notes page.",
+  "avoid": "Presenting the sketch as the final architecture or as a result; any superiority claim.",
+  "behavior": "Static; the diagram scrolls sideways inside itself on narrow screens (FlowDiagram).",
+  "example": "<ReelMemory />",
+  "props": []
+ },
+ {
+  "name": "ReelOSS",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelOSS.astro",
+  "component": "ReelOSS",
+  "summary": "OSS Contributions on the Work reel: the references are the picture — #102 and #28 merged, #878 open with its root cause — each with one plain line and a link to the real thread.",
+  "use": "Inside WorkReel, once. The list comes from OSS_REFS in src/lib/facts.ts (shared with Home).",
+  "avoid": "A trophy wall, heatmap or star counts; calling #878 a fix.",
+  "behavior": "Each row is a link to GitHub (new tab); its number takes the signal color on hover. The panel's title and \"Open project\" lead to the full story.",
+  "example": "<ReelOSS />",
+  "props": []
+ },
+ {
+  "name": "ReelPanel",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelPanel.astro",
+  "component": "ReelPanel",
+  "summary": "One work on the Work reel: the big outlined number, the plain text column from the work's YAML (type · year, title, strongest fact, one line, links), and the visual — which is the work's own composition, passed in the slot.",
+  "use": "Only inside WorkReel, one per work, wrapped by that work's own panel component in src/components/showcase/ (ReelVaja, ReelZ80 …). The panel component writes the visual; this frame keeps the text, the number and the click behaviour the same everywhere.",
+  "avoid": "Using it outside the reel; filling the visual slot with the same picture-plus-caption for every work (then it is a template); repeating who-did-what here (it belongs on the work page, Story §0.3).",
+  "behavior": "A work with a page: the title is a link; aimed at, a signal-colored line draws across under each line of it (the title itself never fills with color); \"// Open project ——\" sits under the text; the whole panel opens the page on click (WorkReel), and with `aim` the visual gets four corner brackets that close in and an unfilled \"// OPEN PROJECT\" tag while the pointer is on the panel or a link in it has keyboard focus. The current panel (WorkReel's `.is-cur`) fills its number with the work's pale color. Reduced motion: the same states, no movement.",
+  "example": "<ReelPanel work=\"z80\" aim>\n  <div class=\"my-composition\">…</div>\n</ReelPanel>",
+  "props": [
+   {
+    "name": "work",
+    "optional": false,
+    "type": "string",
+    "doc": "Work id (src/content/works/<id>.yaml)."
+   },
+   {
+    "name": "fact",
+    "optional": true,
+    "type": "L | null",
+    "doc": "The strongest fact under the title. Default: the work's `fact`; `null` hides it."
+   },
+   {
+    "name": "links",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Show the work's YAML links (GitHub, Marketplace, Live…). Default true."
+   },
+   {
+    "name": "aim",
+    "optional": true,
+    "type": "boolean",
+    "doc": "Corner brackets + OPEN PROJECT tag over the visual on hover (works with a page whose visual is not itself made of links)."
+   }
+  ]
+ },
+ {
+  "name": "ReelPrep",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelPrep.astro",
+  "component": "ReelPrep",
+  "summary": "z80-exam-prep on the Work reel: the lessons page itself.",
+  "use": "Inside WorkReel, once.",
+  "avoid": "Inventing a usage number.",
+  "behavior": "Static.",
+  "example": "<ReelPrep />",
+  "props": []
+ },
+ {
+  "name": "ReelVaja",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelVaja.astro",
+  "component": "ReelVaja",
+  "summary": "Journey of Vaja on the Work reel: the gameplay clip large, and the first attack, frame by frame, over its corner — the animation is the part the owner loved making (Story §0.1).",
+  "use": "Inside WorkReel, once.",
+  "avoid": "Overlaying text on the gameplay; adding the credit here (the work page has it).",
+  "behavior": "The clip loops muted while on screen (VideoEmbed); the attack steps or plays with FrameStepper's own controls. Under 1024px the attack sits under the clip.",
+  "example": "<ReelVaja />",
+  "props": []
+ },
+ {
+  "name": "ReelWhipUI",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelWhipUI.astro",
+  "component": "ReelWhipUI",
+  "summary": "WhipUI on the Work reel: the package's own tagline large, how it is installed, which hosts it runs in and how fast it moved — the words are the picture.",
+  "use": "Inside WorkReel, once.",
+  "avoid": "Claiming a measured quality gain (none is measured); presenting the tagline as the owner's slogan (it is the package's).",
+  "behavior": "The install command copies with one press (CopyText).",
+  "example": "<ReelWhipUI />",
+  "props": []
+ },
+ {
+  "name": "ReelYASM",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelYASM.astro",
+  "component": "ReelYASM",
+  "summary": "Assembly YASM Helper on the Work reel: two real features (autocomplete, hover docs) overlapping, the install count with its source, and the credit to the extension it grew from.",
+  "use": "Inside WorkReel, once.",
+  "avoid": "Dropping Roncho's TASM credit; a bare install number without its source and date.",
+  "behavior": "Static. Under 600px the captures stack.",
+  "example": "<ReelYASM />",
+  "props": []
+ },
+ {
+  "name": "ReelZ80",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelZ80.astro",
+  "component": "ReelZ80",
+  "summary": "Z80 Workspace on the Work reel: the three states it was built to reach — Assemble, Load, Run — as live captures stacked like windows, each labelled with what it shows.",
+  "use": "Inside WorkReel, once.",
+  "avoid": "Claiming more than the captures show (the run is the built-in lab1.asm sample).",
+  "behavior": "Pointing at a window lifts it to the front. Under 600px the windows stack in order.",
+  "example": "<ReelZ80 />",
+  "props": []
+ }
+]

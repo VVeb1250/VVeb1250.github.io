@@ -1,0 +1,44 @@
+This repository has two parts with different terms.
+
+1. CODE AND COMPONENTS — MIT License
+----------------------------------------------------------------------------
+Applies to: src/components/, src/layouts/, src/lib/, src/scripts/, src/styles/,
+src/content.config.ts, scripts/, astro.config.mjs, tsconfig.json, package.json,
+.github/, docs/ (the build, the components and how they work).
+
+Copyright (c) 2026 Teethawat Kumying
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+2. EVERYTHING ELSE — ALL RIGHTS RESERVED
+----------------------------------------------------------------------------
+Applies to: src/content/ (the work facts and stories), src/assets/ and public/
+(pictures, drawings, photos, video, handwriting, textures, the CV), and the
+written text of the site, including text that sits inside page files under
+src/pages/.
+
+Copyright (c) 2026 Teethawat Kumying. All rights reserved. You may not copy,
+reuse or redistribute this material without written permission.
+
+Third-party material (photos credited to their photographers, reference
+artwork shown for study, upstream code and game assets shown as context) stays
+with its owners and is not covered by either part.
+
+The Thai handwriting mark public/hand/teethawat-th.svg is outlines of the font Sriracha
+(SIL Open Font License 1.1), reshaped; it is not the owner's own handwriting.

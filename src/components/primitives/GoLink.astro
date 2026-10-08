@@ -1,0 +1,44 @@
+---
+/**
+ * @component GoLink
+ * @group primitives
+ * @summary "// Open project ——": two slanted strokes in the context color lead, the mono label, and the line behind it (`lineOnly`, for big links, keeps only the line). Aimed at (hover or focus of the link or of its block), the strokes lean forward and step in, the label follows a hair, and the line runs 28 → 52px in the context color; pressed, the strokes snap upright and the line pulls back — so it feels like it gives. Nothing is filled.
+ * @use The call-to-action inside cards and rows. Renders a <span> by default (the whole card is the link); pass `href` to make it a link itself.
+ * @avoid Buttons with fills, arrows (→ reads less sharp to the owner), arrows-in-circles, filling the text with color on hover. The strokes are the only ornament (the owner asked for links that feel clickable without buttons).
+ * @example
+ * <GoLink label={{ en: 'Open project', th: 'เปิดดูงาน' }} />
+ */
+import { langOf, tx, t, type L } from '../../lib/i18n';
+export interface Props {
+  label?: L;
+  href?: string;
+  /** Hide the text and the strokes, keep only the line (big links: Next row, Home's doors). */
+  lineOnly?: boolean;
+  /** Only one part, when the label is the block's own big text: 'strokes' goes before it, 'line' after it (both react to the same hover). */
+  only?: 'strokes' | 'line';
+}
+const { label, href, lineOnly = false, only } = Astro.props;
+const lang = langOf(Astro.url);
+const text = label ? tx(label, lang) : t('open', lang);
+const Tag = href ? 'a' : 'span';
+---
+<Tag class="go" href={href}>{only !== 'line' && !lineOnly && <i class="go-sl" aria-hidden="true"><b></b><b></b></i>}{!lineOnly && !only && <span class="go-t">{text}</span>}{only !== 'strokes' && <i class="go-ln" aria-hidden="true"></i>}</Tag>
+
+<style>
+  /* --go-on (0 / 1): aimed at — hover or focus of the link or of its block, a locked or current feature. --go-down: pressed. */
+  .go { --go-on: 0; --go-down: 0; font: 500 13px/1 var(--f-mono); letter-spacing: 0.04em; display: inline-flex; gap: 10px; align-items: center; text-decoration: none; color: var(--ink); }
+  :global(:root[lang='th']) .go, :global(:root[lang='ja']) .go { font: 500 14px/1.2 var(--f-body); letter-spacing: 0; }
+  /* the strokes: lean further forward and step in when aimed at, stand up when pressed */
+  .go-sl { display: inline-flex; gap: 4px; align-items: center; height: 13px; transform: translateX(calc(var(--go-on) * 3px)); transition: transform var(--t-cursor) var(--e-enter); }
+  .go-sl b { display: block; width: 1.5px; height: 13px; background: var(--ctxs, var(--acc));
+    transform: skewX(calc(-24deg - var(--go-on) * 12deg + var(--go-down) * 22deg)); transition: transform var(--t-cursor) var(--e-enter); }
+  .go-sl b + b { transition-delay: 30ms; }
+  .go-t { display: inline-block; transform: translateX(calc(var(--go-on) * 3px)); transition: transform var(--t-cursor) var(--e-enter); }
+  /* the line behind: runs out when aimed at, pulls back when pressed */
+  .go-ln { display: inline-block; height: 1px; width: calc(28px + var(--go-on) * 24px - var(--go-down) * 14px); background: var(--ink);
+    transition: width var(--t-cursor) var(--e-enter), background-color var(--t-cursor); }
+  .go:is(:hover, :focus-visible) .go-ln, :global(:is(a, [data-go]):is(:hover, :focus-visible)) .go .go-ln, :global(.is-locked) .go .go-ln { background: var(--ctxs, var(--acc)); }
+  :global(:is(a, [data-go]):hover) > .go, :global(:is(a, [data-go]):hover) .go, :global(:is(a, [data-go]):focus-visible) .go, a.go:hover, a.go:focus-visible, :global(.is-locked) .go { --go-on: 1; }
+  :global(:is(a, [data-go]):active) .go, a.go:active { --go-down: 1; }
+  :global(:is(a, [data-go]):active) .go .go-sl b, a.go:active .go-sl b, :global(:is(a, [data-go]):active) .go .go-ln, a.go:active .go-ln { transition-duration: var(--t-exit); }
+</style>

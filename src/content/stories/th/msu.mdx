@@ -1,0 +1,50 @@
+---
+work: msu
+recipe: constraint-product
+summary: Informatics MSU Hackathon 2026 สาย AI ระดับอุดมศึกษา — ชนะเลิศ ทีมสามคนสร้างระบบที่ใช้ AI ช่วยสำหรับร้านอาหารเช้าในสองวัน
+---
+
+import '../../../styles/stories/msu.css';
+
+{/* Facts §2.3, §6.1; media: _note/media-candidates/msu (owner, 2026-10-01: all usable). The prototype screens run on demo data with mock OCR — say so on each. */}
+
+<ProjectHeader work="msu" layout="stack" roles={['ขั้นตอน OCR ใบสั่ง', 'Chatbot UI', 'พยากรณ์สต็อก', 'เชื่อม dashboard']}>
+  <MediaFrame slot="media" src="msu/award-team.webp" alt={{ en: 'The team holding the AI track winner board at Informatics MSU Hackathon 2026', th: 'ทีมถือป้ายผู้ชนะสาย AI ใน Informatics MSU Hackathon 2026' }} width="full" eager ratio="16/9" focus="50% 35%"
+    caption={{ en: 'Winner · AI track · Higher Education · 13–14 August 2026', th: 'ชนะเลิศ · สาย AI · ระดับอุดมศึกษา · 13–14 ส.ค. 2026' }} />
+</ProjectHeader>
+
+<div class="msu-what">
+  <div>
+    <h2>ร้านอาหารเช้าที่รับออเดอร์ด้วยกระดาษ</h2>
+    <p>ทีมของเราซึ่งมีสามคนได้พัฒนาระบบหนึ่งให้ร้านนี้ รูปใบสั่งที่เขียนด้วยมือจะกลายเป็นออเดอร์ที่มีโครงสร้าง คนจะตรวจรายการที่ AI ไม่แน่ใจ จากนั้นออเดอร์จะถูกรวมเป็นใบเสร็จ พยากรณ์วัตถุดิบและสต็อก มี chatbot ช่วยการตลาด และ kitchen dashboard</p>
+    <p>รอบคัดเลือกจัดขึ้นในเดือนมิถุนายน ส่วนรอบชิงชนะเลิศจัดในวันที่ 13–14 สิงหาคม 2026</p>
+  </div>
+  <MediaFrame src="msu/award-stage.webp" alt={{ en: 'The team on stage at Informatics MSU Hackathon 2026, receiving the award', th: 'ทีมขึ้นรับรางวัลบนเวทีใน Informatics MSU Hackathon 2026' }} width="text" caption={{ en: 'On stage at the final', th: 'บนเวทีในรอบชิง' }} />
+</div>
+
+## ออเดอร์หนึ่งรายการ จากรูปจนถึงบันทึก
+
+ต้นแบบที่รันในเครื่องด้วยข้อมูล demo ส่วน OCR ที่เห็นตรงนี้เป็นผลจำลอง (mock) ที่มีมาให้ ไม่ได้อ่านลายมือจริง
+
+<SplitScroll steps={[
+  { title: { en: 'Read the order (mock OCR)', th: 'อ่านออเดอร์ (mock OCR)' }, text: { en: 'A sample pencil order slip goes in; the mock result comes back at 62% confidence, so the next step stays locked until a person checks it.', th: 'ใส่ใบสั่งที่เขียนด้วยดินสอตัวอย่าง ผล mock ได้ความมั่นใจ 62% ขั้นตอนถัดไปจึงล็อกไว้จนกว่าคนจะตรวจ' },
+    src: 'msu/ocr-review-mock.webp', alt: { en: 'Prototype: mock OCR result at 62% confidence, next step locked until reviewed', th: 'ต้นแบบ: ผล mock OCR ความมั่นใจ 62% ขั้นตอนถัดไปถูกล็อกจนกว่าจะตรวจ' }, source: { en: 'Prototype · demo data', th: 'ต้นแบบ · ข้อมูล demo' } },
+  { title: { en: 'A person checks it', th: 'คนตรวจ' }, text: { en: 'After the check, the order total is worked out from the menu prices — ฿80 for this sample.', th: 'หลังตรวจ ยอดรวมคิดจากราคาในเมนู ได้ ฿80 สำหรับตัวอย่างนี้' },
+    src: 'msu/order-total-mock.webp', alt: { en: 'Prototype: order total of 80 baht after review', th: 'ต้นแบบ: ยอดรวมออเดอร์ 80 บาทหลังตรวจ' }, source: { en: 'Prototype · demo data', th: 'ต้นแบบ · ข้อมูล demo' } },
+  { title: { en: 'Saved', th: 'บันทึกแล้ว' }, text: { en: 'The order is saved in the prototype’s session.', th: 'ออเดอร์ถูกบันทึกไว้ใน session ของต้นแบบ' },
+    src: 'msu/order-saved-mock.webp', alt: { en: 'Prototype: order saved confirmation', th: 'ต้นแบบ: ยืนยันการบันทึกออเดอร์' }, source: { en: 'Prototype · demo data', th: 'ต้นแบบ · ข้อมูล demo' } },
+  { title: { en: 'Orders to review', th: 'ออเดอร์รอตรวจ' }, text: { en: 'The review screen with the order slip beside its details.', th: 'หน้าตรวจที่มีใบสั่งอยู่ข้างรายละเอียด' },
+    src: 'msu/review-demo.webp', alt: { en: 'Prototype: order review screen with a sample slip', th: 'ต้นแบบ: หน้าตรวจออเดอร์พร้อมใบสั่งตัวอย่าง' }, source: { en: 'Prototype · demo data', th: 'ต้นแบบ · ข้อมูล demo' } }
+]} />
+
+<MediaFrame src="msu/dashboard-demo.webp" alt={{ en: 'Prototype: shop dashboard with charts from demo data', th: 'ต้นแบบ: dashboard ของร้านที่มีกราฟจากข้อมูล demo' }} frame="screen" width="wide"
+  caption={{ en: 'The shop dashboard. The numbers are demo data, not real use or a competition result.', th: 'dashboard ของร้าน ตัวเลขเป็นข้อมูล demo ไม่ใช่การใช้งานจริงหรือผลการแข่งขัน' }} source={{ en: 'Prototype · demo data', th: 'ต้นแบบ · ข้อมูล demo' }} />
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'In the final: the order OCR workflow and its data integration, the chatbot interface, the marketing assistant, ingredient and stock forecasting, the kitchen dashboard integration, and dashboard / expense fixes. In the qualifier: navigation, event filtering and pagination, animation, and the live-order screen.', th: 'ในรอบชิง ผมรับผิดชอบ flow OCR ใบสั่งและการเชื่อมข้อมูล หน้า chatbot ผู้ช่วยการตลาด การพยากรณ์วัตถุดิบและสต็อก การเชื่อม kitchen dashboard และการแก้ dashboard / ค่าใช้จ่าย ในรอบคัดเลือก ผมรับผิดชอบการนำทาง การกรองอีเวนต์และ pagination, animation และหน้าสั่งออเดอร์แบบสด' } },
+  { who: 'team', did: { en: 'We decided the product, the OCR architecture and the human-review step together.', th: 'ทีมร่วมกันตัดสินใจเรื่องผลิตภัณฑ์ สถาปัตยกรรม OCR และขั้นตอนให้คนตรวจ' } },
+  { who: 'ai', did: { en: 'Built very AI-heavy, on purpose, to move fast under the deadline. I used WhipUI during the event.', th: 'ทีมตั้งใจใช้ AI เป็นหลักเพื่อให้ทันกำหนดเวลา และผมใช้ WhipUI ระหว่างการแข่งขัน' } }
+]} />
+
+<OutcomeBlock outcome={{ en: 'Winner · AI track · Higher Education.', th: 'ชนะเลิศ · สาย AI · ระดับอุดมศึกษา' }}
+  current={{ en: 'A two-day prototype; the OCR in these captures is the mock path.', th: 'เป็นต้นแบบที่พัฒนาในเวลาสองวัน ส่วน OCR ในภาพเหล่านี้เป็นเส้นทาง mock' }} />

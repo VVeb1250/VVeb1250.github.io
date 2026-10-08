@@ -1,0 +1,654 @@
+---
+/**
+ * /kit — every component, live, with the rules from its own header. Switch EN / TH / JA in the header to see
+ * every specimen in that language. Content in specimens is real (from src/content) unless tagged SAMPLE WORDING.
+ */
+import PageShell from '../../../layouts/PageShell.astro';
+import Specimen from '../../../components/kit/Specimen.astro';
+import Tokens from '../../../components/kit/Tokens.astro';
+import { parseDoc, GROUPS } from '../../../../scripts/docparse.mjs';
+import { localePaths, langOf, href } from '../../../lib/i18n';
+// shell
+import Section from '../../../components/shell/Section.astro';
+import SectionHeader from '../../../components/shell/SectionHeader.astro';
+// primitives
+import Callout from '../../../components/primitives/Callout.astro';
+import CategoryTick from '../../../components/primitives/CategoryTick.astro';
+import Signature from '../../../components/primitives/Signature.astro';
+import CopyText from '../../../components/primitives/CopyText.astro';
+import Counter from '../../../components/primitives/Counter.astro';
+import EvidenceLink from '../../../components/primitives/EvidenceLink.astro';
+import ExternalLink from '../../../components/primitives/ExternalLink.astro';
+import GoLink from '../../../components/primitives/GoLink.astro';
+import Mark from '../../../components/primitives/Mark.astro';
+import MetaLine from '../../../components/primitives/MetaLine.astro';
+import MetaList from '../../../components/primitives/MetaList.astro';
+import Quote from '../../../components/primitives/Quote.astro';
+import RoleTag from '../../../components/primitives/RoleTag.astro';
+import StatusTag from '../../../components/primitives/StatusTag.astro';
+import Readout from '../../../components/primitives/Readout.astro';
+// media
+import Figure from '../../../components/media/Figure.astro';
+import FlowDiagram from '../../../components/media/FlowDiagram.astro';
+import ScrubFrames from '../../../components/media/ScrubFrames.astro';
+import PhotoCard from '../../../components/media/PhotoCard.astro';
+import PortraitSwap from '../../../components/media/PortraitSwap.astro';
+import IsoObject from '../../../components/media/IsoObject.astro';
+import Pictogram from '../../../components/media/Pictogram.astro';
+import SketchReveal from '../../../components/media/SketchReveal.astro';
+import WorkObject from '../../../components/media/WorkObject.astro';
+import PRCard from '../../../components/project/PRCard.astro';
+import RefBoard from '../../../components/project/RefBoard.astro';
+import FallbackNotice from '../../../components/primitives/FallbackNotice.astro';
+import ContactCard from '../../../components/home/ContactCard.astro';
+import FrameStepper from '../../../components/media/FrameStepper.astro';
+import ImageCaption from '../../../components/media/ImageCaption.astro';
+import MediaFrame from '../../../components/media/MediaFrame.astro';
+import Plate from '../../../components/media/Plate.astro';
+import Stage from '../../../components/media/Stage.astro';
+import VideoEmbed from '../../../components/media/VideoEmbed.astro';
+// blocks
+import AttributionBlock from '../../../components/blocks/AttributionBlock.astro';
+import ClaimLedger from '../../../components/blocks/ClaimLedger.astro';
+import CodeExcerpt from '../../../components/blocks/CodeExcerpt.astro';
+import ConstraintBlock from '../../../components/blocks/ConstraintBlock.astro';
+import ContributionBlock from '../../../components/blocks/ContributionBlock.astro';
+import HorizontalStrip from '../../../components/blocks/HorizontalStrip.astro';
+import Inspector from '../../../components/blocks/Inspector.astro';
+import ScrollStepper from '../../../components/blocks/ScrollStepper.astro';
+import OutcomeBlock from '../../../components/blocks/OutcomeBlock.astro';
+import ProcessLine from '../../../components/blocks/ProcessLine.astro';
+import Retrospective from '../../../components/blocks/Retrospective.astro';
+import SplitScroll from '../../../components/blocks/SplitScroll.astro';
+import Timeline from '../../../components/blocks/Timeline.astro';
+import Trace from '../../../components/blocks/Trace.astro';
+// lists
+import ArchiveList from '../../../components/lists/ArchiveList.astro';
+import TimelineRow from '../../../components/lists/TimelineRow.astro';
+import ArchiveRow from '../../../components/lists/ArchiveRow.astro';
+import EvidenceRow from '../../../components/lists/EvidenceRow.astro';
+import LabItem from '../../../components/lists/LabItem.astro';
+import MilestoneItem from '../../../components/lists/MilestoneItem.astro';
+import RelatedWork from '../../../components/lists/RelatedWork.astro';
+import TrailRow from '../../../components/lists/TrailRow.astro';
+// project
+import NextWork from '../../../components/project/NextWork.astro';
+import ProjectContext from '../../../components/project/ProjectContext.astro';
+import ProjectHeader from '../../../components/project/ProjectHeader.astro';
+import WorkNav from '../../../components/project/WorkNav.astro';
+// home
+import IntroHero from '../../../components/home/IntroHero.astro';
+import HomeCover from '../../../components/home/HomeCover.astro';
+import ReelOSS from '../../../components/showcase/ReelOSS.astro';
+import Draft from '../../../components/primitives/Draft.astro';
+import { SHOWCASE } from '../../../lib/site';
+import NowBar from '../../../components/home/NowBar.astro';
+import VajaFeature from '../../../components/home/VajaFeature.astro';
+import Z80Feature from '../../../components/home/Z80Feature.astro';
+import OSSFeature from '../../../components/home/OSSFeature.astro';
+
+export const getStaticPaths = () => localePaths();
+const raws = import.meta.glob<string>('/src/components/**/*.astro', { query: '?raw', import: 'default', eager: true });
+const docs = Object.entries(raws).filter(([f]) => !f.includes('/kit/')).map(([f, s]) => parseDoc(s, f)).filter(Boolean) as any[];
+const byGroup = GROUPS.map((g) => ({ ...g, items: docs.filter((d) => d.group === g.key).map((d) => d.name).sort() }));
+const tokensCode = `export const H = 248; // identity hue — locked to Azure by the owner
+
+// Tier 3 recipe shared by every kind: deep → mid → pale make the plate gradient; s = the kind's signal (state, dots, hover).
+export const RECIPE = {
+  light: { d: [0.73, 0.1], m: [0.8, 0.08], p: [0.89, 0.04], s: [0.5, 0.15] },
+  dark: { d: [0.44, 0.1], m: [0.36, 0.08], p: [0.27, 0.04], s: [0.76, 0.12] }
+};`;
+---
+<PageShell title="Kit" allFonts noindex>
+  <div class="wrap kit">
+    <header class="kit-top" data-mark="Kit">
+      <p class="eyebrow">Component kit · {docs.length} components</p>
+      <h1 class="disp" data-mark-trigger>Structure stable, composition flexible.</h1>
+      <p class="kit-lead">Every component of the site, live, with the rules written in its own file. Switch <b>EN · TH · JA</b> and <b>Auto / Light / Dark</b> in the header to see each one in every language and theme. Reference for AI: <code>docs/COMPONENTS.md</code>, <code>docs/STORY-RECIPES.md</code>, <code>AGENTS.md</code>.</p>
+      <p class="kit-tools"><button type="button" class="kit-b" onclick="window.__lqReplay && window.__lqReplay()">Replay image loading</button> <span class="kit-tip">Shows the loading state of every image on screen (blurred preview → the real picture develops in), as on a slow connection.</span></p>
+    </header>
+
+    <div class="kit-grid">
+      <nav class="kit-nav" aria-label="Kit index">
+        <details open>
+          <summary class="eyebrow">Index</summary>
+          <ol>
+            <li><a href="#tokens">Tokens</a></li>
+            {byGroup.map((g) => <li><a href={`#g-${g.key}`}>{g.title}</a><ol>{g.items.map((n) => <li><a href={`#c-${n}`}>{n}</a></li>)}</ol></li>)}
+          </ol>
+        </details>
+      </nav>
+
+      <div class="kit-body">
+        <section id="tokens" class="grp" data-mark="Tokens">
+          <SectionHeader title="Tokens" description="Colors are generated from scripts/tokens.config.mjs (npm run tokens) and fail the build if contrast drops." />
+          <Tokens />
+        </section>
+
+        <!-- ================= SHELL ================= -->
+        <section id="g-shell" class="grp" data-mark="Shell">
+          <SectionHeader index="01" title="Shell" description={GROUPS[0].note} />
+          <Specimen name="SiteNav" live={false} note="The header at the top of this page. Desktop links have wider click targets; hover the nav to see the cursor follow you." />
+          <Specimen name="LanguageToggle" live={false} note="EN · TH · JA in the header." />
+          <Specimen name="ThemeToggle" live={false} note="Auto / Light / Dark in the header." />
+          <Specimen name="SectionMarker" live={false} note="Scroll: once a section title passes under the header, its name appears vertically at the top-left (wide screens)." />
+          <Specimen name="PageScrollbar" live={false} note="Grey dashed track, context-colored progress and a small deep cyan (light) or spark (dark) cursor at the right edge below the header. Drag it to scroll." />
+          <Specimen name="Atmosphere" live={false} note="The misty background behind this page. Identity wash here; work pages tint it with the work's color." />
+          <Specimen name="Footer" live={false} note="Bottom of this page." />
+          <Specimen name="LoadLine" live={false} note="At the very top of the window, only when a page takes longer than 150 ms to arrive. Links prefetch on hover, so on a good connection you will rarely see it." />
+          <Specimen name="SectionHeader">
+            <SectionHeader index="02" title={{ en: 'Sheets, frames, captures', th: 'ชิ้นส่วน เฟรม และภาพจากหน้าจอ' }} description={{ en: 'One sentence under the title, when it helps.' }} count={3} trigger={false} />
+          </Specimen>
+          <Specimen name="Section">
+            <Section title={{ en: 'Milestones & community', th: 'Milestones และชุมชน' }} tight>
+              <ul class="rows"><MilestoneItem date="2024" kind="award" title={{ en: 'AISE CAMP #2 — 2nd runner-up', th: 'AISE CAMP #2 — รองชนะเลิศอันดับ 2', ja: 'AISE CAMP #2 — 3位' }} /></ul>
+            </Section>
+          </Specimen>
+        </section>
+
+        <!-- ================= PRIMITIVES ================= -->
+        <section id="g-primitives" class="grp" data-mark="Primitives">
+          <SectionHeader index="02" title="Primitives" description={GROUPS[1].note} />
+          <Specimen name="StatusTag">
+            <div class="row"><StatusTag status="ACTIVE" cat="ai" /><StatusTag status="WIP" /><StatusTag status="COMPLETED" /><StatusTag status="VALIDATED" /><StatusTag status="FAILED" /><StatusTag status="RETIRED" /><StatusTag status="ARCHIVED" /><StatusTag status="REVISITING" /><StatusTag status="NOT STARTED" /></div>
+          </Specimen>
+          <Specimen name="Signature">
+            <div class="row" style="font-size:56px;gap:32px;align-items:center"><Signature name="web" label="Web" write /><Signature name="teethawat" label="teethawat" /><Signature name="teethawat-th" label="ธีร์ธวัช" /></div>
+          </Specimen>
+          <Specimen name="CategoryTick">
+            <div class="row"><CategoryTick cat="game" /><CategoryTick cat="ai" /><CategoryTick cat="dev" /><CategoryTick cat="tool" /><CategoryTick cat="sys" /><CategoryTick cat="ui" /><CategoryTick cat="hw" /></div>
+          </Specimen>
+          <Specimen name="MetaLine">
+            <div class="col"><MetaLine items={[{ en: 'Project head', th: 'หัวหน้าโปรเจกต์', ja: 'プロジェクトリーダー' }, { en: 'team of 3', th: 'ทีม 3 คน', ja: '3人チーム' }, '2025']} tone="ink" /><MetaLine items={['Monaco', 'DOSBox → WASM', 'C16.EXE']} /></div>
+          </Specimen>
+          <Specimen name="MetaList">
+            <MetaList items={[{ k: { en: 'Built', th: 'ทำเมื่อ', ja: '制作' }, v: { en: '9 days · 2026-07-22 → 07-30', th: '9 วัน · 2026-07-22 → 07-30', ja: '9日間 · 2026-07-22 → 07-30' } }, { k: { en: 'Commits', th: 'Commits', ja: 'コミット' }, v: { en: '59 of 64 · 5 releases', th: '59 จาก 64 · 5 release', ja: '64中59 · 5リリース' } }, { k: 'Stack', v: 'Monaco · DOSBox → WASM · C16.EXE' }]} />
+          </Specimen>
+          <Specimen name="RoleTag">
+            <div class="row"><RoleTag me>Project head</RoleTag><RoleTag me>Art</RoleTag><RoleTag me>Player control</RoleTag><RoleTag>Story (team)</RoleTag></div>
+          </Specimen>
+          <Specimen name="Counter">
+            <div class="row"><Counter value={2} total={4} size="lg" /><Counter value={3} total={5} style="bracket" /></div>
+          </Specimen>
+          <Specimen name="Readout">
+            <div data-cat="dev" class="col gap">
+              <div class="readouts">
+                <Readout value={9} unit={{ en: 'days', th: 'วัน', ja: '日' }} label={{ en: 'Z80 Workspace · 2026-07-22 → 07-30', th: 'Z80 Workspace · 2026-07-22 → 07-30', ja: 'Z80 Workspace · 2026-07-22 → 07-30' }} source="GitHub" />
+                <Readout value={59} total={64} unit={{ en: 'commits', th: 'commit', ja: 'コミット' }} label={{ en: 'mine, of the repo', th: 'ของผม ใน repo', ja: '自分の分 · リポジトリ' }} source="GitHub" />
+                <Readout value={5} unit={{ en: 'releases', th: 'release', ja: 'リリース' }} source="GitHub" />
+              </div>
+              <div class="narrow"><Readout size="sm" value={27} total={93} unit={{ en: 'commits', th: 'commit', ja: 'コミット' }} label={{ en: 'mine, in the MSU final', th: 'ของผม ในรอบชิง MSU', ja: '自分の分 · MSU決勝' }} source={{ en: 'team repo', th: 'repo ของทีม', ja: 'チームのリポジトリ' }} /></div>
+            </div>
+          </Specimen>
+          <Specimen name="GoLink">
+            <a class="row demo-link" href="#c-GoLink"><GoLink /></a>
+          </Specimen>
+          <Specimen name="Mark">
+            <div class="row"><Mark n={1} /><Mark n={2} /><Mark n={3} /><span data-cat="dev" class="row"><Mark n={1} /><Mark n={2} /></span></div>
+          </Specimen>
+          <Specimen name="ExternalLink">
+            <div class="row"><ExternalLink href="https://github.com/VVeb1250">GitHub</ExternalLink><ExternalLink href="https://www.pixiv.net/en/users/116719673">Pixiv</ExternalLink></div>
+          </Specimen>
+          <Specimen name="EvidenceLink">
+            <div class="col"><EvidenceLink label="agentsmesh #102" shows={{ en: 'merged', th: 'merged', ja: 'マージ済み' }} kind="pr" /><EvidenceLink label="rop-algorithm" shows={{ en: 'private, archived', th: 'private, archived', ja: '非公開・アーカイブ' }} kind="private" /><EvidenceLink label="PlayerController.cs" shows={{ en: '370 lines', th: '370 บรรทัด', ja: '370行' }} kind="file" /></div>
+          </Specimen>
+          <Specimen name="Quote">
+            <div class="col"><Quote size="lg" text="Make AI-built frontends feel designed." source={{ en: 'WhipUI · the package’s tagline' }} /></div>
+          </Specimen>
+          <Specimen name="Callout">
+            <div class="demo-text"><Callout place="inline">The counts may include my own testing.</Callout><p>GoatCounter counted 69 visits and 11 assembles between 20 July and 26 September 2026.</p></div>
+          </Specimen>
+          <Specimen name="CopyText">
+            <div class="col"><CopyText text="npx whipui init" /><CopyText text="supimol.web@gmail.com" /></div>
+          </Specimen>
+          <Specimen name="FallbackNotice">
+            <p class="sample">Visible only on /th/kit/ and /ja/kit/ (on English pages it renders nothing). Work pages add it on their own.</p>
+            <FallbackNotice shown="en" />
+          </Specimen>
+          <Specimen name="Draft" live={false} note="Renders only in `npm run dev` (dashed outline + DRAFT label) and is stripped from production — so nothing appears here on the live site. See the Vaja and Z80 stories: the proposed question and retrospective are wrapped in <Draft>." />
+        </section>
+
+        <!-- ================= MEDIA ================= -->
+        <section id="g-media" class="grp" data-mark="Media">
+          <SectionHeader index="03" title="Media" description={GROUPS[2].note} />
+          <Specimen name="MediaFrame">
+            <MediaFrame src="z80/workspace.webp" alt={{ en: 'Z80 Workspace welcome screen with explorer, toolbar and console' }} frame="screen"
+              marks={[{ n: 1, x: 4, y: 9.4 }, { n: 2, x: 16.8, y: 88.6 }, { n: 3, x: 20.6, y: 2.6 }]}
+              title={{ en: 'Workspace', th: 'Workspace', ja: 'ワークスペース' }} caption={{ en: '① explorer · ② the console runs the real C16.EXE in DOSBox · ③ Run Z80sim opens the ET-Board simulator.', th: '① explorer · ② console รัน C16.EXE ตัวจริงใน DOSBox · ③ Run Z80sim เปิด ET-Board simulator', ja: '① エクスプローラー · ② コンソールがDOSBox内の本物のC16.EXEを実行 · ③ Run Z80simでET-Boardシミュレータを開く' }} />
+          </Specimen>
+          <Specimen name="ImageCaption">
+            <ImageCaption n={2} title={{ en: 'Gameplay · 51 s · no sound', th: 'Gameplay · 51 วินาที · ไม่มีเสียง', ja: 'ゲームプレイ · 51秒 · 無音' }} text={{ en: 'Cut from a recorded build.', th: 'ตัดจาก build ที่อัดไว้', ja: '録画したビルドから編集。' }} source="Journey of Vaja build, 2025" />
+          </Specimen>
+          <Specimen name="VideoEmbed">
+            <div class="narrow"><VideoEmbed src="vaja/highlight-720.mp4" poster="vaja/highlight-poster.webp" label={{ en: 'Journey of Vaja gameplay, 51 seconds, no sound' }} loop /></div>
+          </Specimen>
+          <Specimen name="Stage">
+            <Stage src="vaja/object.webp" alt={{ en: 'Vaja, the player character, holding the crystal staff' }} plate="step-right" size="card" cat="game" idx="01" note={{ en: 'Sprite from the game build', th: 'sprite จาก build ของเกม', ja: 'ゲームビルドのスプライト' }}
+              callouts={[{ x: 86, y: 9, label: { en: 'Crystal staff', th: 'ไม้เท้าคริสตัล', ja: '水晶の杖' }, sub: { en: 'DRAWN BY HAND', th: 'วาดเอง', ja: '手描き' }, side: 'right', key: true }, { x: 30, y: 30, label: 'Vaja', sub: { en: '20 ANIMATION CLIPS', th: 'ANIMATION 20 CLIP', ja: 'アニメーション20クリップ' }, side: 'left' }]} />
+          </Specimen>
+          <Specimen name="Plate">
+            <div class="plates">
+              {(['step-right', 'step-left', 'center', 'wide'] as const).map((s, i) => (
+                <figure data-cat={(['game', 'ai', 'hw', 'tool'] as const)[i]}><div class="plate-box"><Plate shape={s} inset="6%" /></div><figcaption class="eyebrow">{s}</figcaption></figure>
+              ))}
+            </div>
+          </Specimen>
+          <Specimen name="FrameStepper">
+            <FrameStepper strips={[{ src: 'vaja/strip-attack1-padded.webp', frames: 10, name: 'Vaja · attack1', fps: 12, start: 7 }, { src: 'vaja/strip-run.webp', frames: 8, name: 'Vaja · run', fps: 12, start: 2 }, { src: 'vaja/strip-boss-deer-idle.webp', frames: 13, name: 'Crystal deer boss · idle', fps: 12 }]} />
+          </Specimen>
+          <Specimen name="Figure">
+            <Figure n="01" caption={{ en: 'How content becomes this site', th: 'เนื้อหากลายเป็นเว็บนี้ยังไง', ja: 'コンテンツがこのサイトになるまで' }} note={{ en: 'The real pipeline of this repo.', th: 'pipeline จริงของ repo นี้', ja: 'このリポジトリの実際のパイプライン' }}>
+              <svg viewBox="0 0 600 190" role="img" aria-label="works yaml and stories mdx are checked by the schema, built by Astro, deployed to GitHub Pages">
+                <g class="dg-grid">{Array.from({ length: 30 }, (_, i) => <line x1={i * 20} y1="0" x2={i * 20} y2="190" />)}</g>
+                <rect class="dg-box" x="16" y="30" width="136" height="50" /><text class="dg-lbl" x="28" y="52">works/*.yaml</text><text class="dg-sm" x="28" y="68">FACTS · 3 LANGS</text>
+                <rect class="dg-box" x="16" y="110" width="136" height="50" /><text class="dg-lbl" x="28" y="132">stories/*.mdx</text><text class="dg-sm" x="28" y="148">COMPOSITION</text>
+                <path class="dg-flow" d="M152 55 H214 V95 M152 135 H214 V95 H250" /><path class="dg-dir" d="M152 55 H214 V95 M152 135 H214 V95 H250" />
+                <rect class="dg-box core" x="250" y="66" width="130" height="58" /><text class="dg-lbl" x="262" y="90">schema check</text><text class="dg-sm" x="262" y="108">BUILD FAILS IF WRONG</text>
+                <path class="dg-wire" d="M380 95 H428" /><path class="dg-arrow" d="M428 90 L438 95 L428 100 Z" />
+                <rect class="dg-box" x="440" y="66" width="140" height="58" /><text class="dg-lbl" x="452" y="90">astro build</text><text class="dg-sm" x="452" y="108">→ GITHUB PAGES</text>
+              </svg>
+            </Figure>
+          </Specimen>
+          <Specimen name="FlowDiagram">
+            <FlowDiagram n="02" caption={{ en: 'How content becomes this site — drawn from data', th: 'เนื้อหากลายเป็นเว็บนี้ยังไง — วาดจากข้อมูล', ja: 'コンテンツがこのサイトになるまで — データから描画' }}
+              note={{ en: 'The same real pipeline as the Figure above, written as nodes and edges instead of SVG.', th: 'pipeline จริงเดียวกับ Figure ด้านบน แต่เขียนเป็น node กับ edge แทน SVG', ja: '上のFigureと同じ実際のパイプラインを、SVGではなくノードとエッジで書いたもの。' }}
+              nodes={[
+                { id: 'y', col: 0, label: 'works/*.yaml', sub: { en: 'FACTS · 3 LANGS', th: 'FACTS · 3 ภาษา', ja: '事実 · 3言語' } },
+                { id: 'm', col: 0, label: 'stories/*.mdx', sub: { en: 'COMPOSITION', th: 'COMPOSITION', ja: '構成' } },
+                { id: 's', col: 1, label: { en: 'schema check', th: 'schema check', ja: 'スキーマ検査' }, sub: { en: 'BUILD FAILS IF WRONG', th: 'ผิดแล้ว BUILD ไม่ผ่าน', ja: '誤りならビルド失敗' }, core: true },
+                { id: 'b', col: 2, label: 'astro build', sub: { en: 'STATIC HTML', th: 'STATIC HTML', ja: '静的HTML' } },
+                { id: 'g', col: 3, label: 'GitHub Pages', sub: 'VVEB1250.GITHUB.IO' }
+              ]}
+              edges={[
+                { from: 'y', to: 's', active: true },
+                { from: 'm', to: 's', active: true },
+                { from: 's', to: 'b', active: true },
+                { from: 'b', to: 'g', label: 'GitHub Actions' }
+              ]} />
+          </Specimen>
+          <Specimen name="ScrubFrames" pad={false}>
+            <div data-cat="game" class="trace-demo"><ScrubFrames src="vaja/strip-boss-deer-idle.webp" frames={13} name="Crystal deer boss · idle" fps={12} /></div>
+          </Specimen>
+          <Specimen name="PortraitSwap">
+            <div style="max-width:240px"><PortraitSwap items={[
+              { src: 'portrait/github-avatar.jpg', alt: { en: 'Web’s GitHub picture: a drawn face, smiling' }, label: 'GitHub · VVeb1250', href: 'https://github.com/VVeb1250' },
+              { src: 'portrait/instagram-avatar.webp', alt: { en: 'Web’s Instagram picture: a drawn face, crying' }, label: 'Instagram · web_1250', href: 'https://www.instagram.com/web_1250/' },
+              { src: 'portrait/photo-2025.webp', alt: { en: 'Web in a navy shirt, holding a clapperboard that says CoE 34' }, label: { en: 'Photo · 2025' } }
+            ]} /></div>
+          </Specimen>
+          <Specimen name="PhotoCard" pad={false}>
+            <p class="sample trace-note">PLACEHOLDER PICTURES — generated gradients in four shapes (portrait, square, wide, tall) until the hobby drawings and photos are chosen. Tap a card.</p>
+            <div class="pc-row trace-demo" data-cat="game">
+              <PhotoCard src="placeholder/portrait.webp" alt={{ en: 'Placeholder, portrait 3:4' }} caption={{ en: 'Placeholder · portrait' }} meta="3 : 4" tilt={-2} size="sm" />
+              <PhotoCard src="placeholder/wide.webp" alt={{ en: 'Placeholder, landscape 7:4' }} caption={{ en: 'Placeholder · landscape' }} meta="7 : 4" tilt={1.5} />
+              <PhotoCard src="placeholder/square.webp" alt={{ en: 'Placeholder, square' }} caption={{ en: 'Placeholder · square' }} meta="1 : 1" tilt={-0.8} size="sm" />
+              <PhotoCard src="placeholder/tall.webp" alt={{ en: 'Placeholder, tall 7:12' }} caption={{ en: 'Placeholder · tall' }} meta="7 : 12" tilt={2.5} size="sm" />
+            </div>
+            <p class="sample trace-note">A SERIES — the same cards inside a HorizontalStrip (swipe / wheel / drag / ← →)</p>
+            <div class="strip-demo" data-cat="game">
+              <HorizontalStrip bleed={false} title={{ en: 'Placeholder series', th: 'ชุดตัวอย่าง', ja: 'サンプルのシリーズ' }} description={{ en: 'Four passes of one picture.', th: 'ภาพเดียว 4 ขั้น', ja: '1枚の絵の4段階。' }}>
+                <PhotoCard src="placeholder/portrait.webp" alt={{ en: 'Placeholder, portrait' }} caption={{ en: 'Pass 1' }} meta="3 : 4" tilt={-1.5} size="sm" />
+                <PhotoCard src="placeholder/square.webp" alt={{ en: 'Placeholder, square' }} caption={{ en: 'Pass 2' }} meta="1 : 1" tilt={1.2} size="sm" />
+                <PhotoCard src="placeholder/wide.webp" alt={{ en: 'Placeholder, landscape' }} caption={{ en: 'Pass 3' }} meta="7 : 4" tilt={-0.8} />
+                <PhotoCard src="placeholder/tall.webp" alt={{ en: 'Placeholder, tall' }} caption={{ en: 'Pass 4' }} meta="7 : 12" tilt={2} size="sm" />
+              </HorizontalStrip>
+            </div>
+          </Specimen>
+          <Specimen name="Pictogram">
+            <div class="pg-demo">
+              <div data-cat="ai"><Pictogram grid={['######', '###+##', '######', '####+#', '#+####', '######']} label="Memory Base store" /><span class="eyebrow">MEMORY BASE · GRID</span></div>
+              <div data-cat="dev"><Pictogram grid={['##########', '#.#......#', '#.#.++++.#', '#.#......#', '#.#......#', '#.########', '#.#......#', '##########']} label="Z80 Workspace screen" /><span class="eyebrow">Z80 WORKSPACE · GRID</span></div>
+              <div data-cat="game"><Pictogram from="vaja/object.webp" cols={12} label="Vaja" /><span class="eyebrow">VAJA · TRACED FROM THE CUTOUT</span></div>
+            </div>
+          </Specimen>
+          <Specimen name="IsoObject">
+            <div data-cat="ai" class="narrow">
+              <IsoObject label={{ en: 'Memory Base object sketch: Claude Code writes and reads, Codex reads, a harness compares three baseline arms' }}
+                caption={{ en: 'Memory Base — object sketch', th: 'Memory Base — ภาพร่างวัตถุ', ja: 'Memory Base — オブジェクトのスケッチ' }}
+                note={{ en: 'System sketch — not the final architecture.', th: 'ภาพร่างของระบบ — ยังไม่ใช่ architecture สุดท้าย', ja: 'システムのスケッチ — 最終的な構成ではない。' }}
+                parts={[
+                  { box: [-24, -24, 0, 70, 70, 8] }, { box: [-24, -24, 13, 70, 70, 8] }, { box: [-24, -24, 26, 70, 70, 8] }, { box: [-30, -30, 0, 82, 82, 44], mat: 'w' },
+                  { box: [-70, 150, 0, 80, 80, 30] },
+                  { box: [10, 182, 22, 100, 16, 8], mat: 'c' },
+                  { box: [110, 110, 0, 150, 150, 48], mat: 'c' },
+                  { box: [116.5 + 3 * 24, 116.5 + 1 * 24, 48, 19, 19, 8], mat: 'a' }, { box: [116.5 + 4 * 24, 116.5 + 3 * 24, 48, 19, 19, 8], mat: 'a' }, { box: [116.5 + 1 * 24, 116.5 + 4 * 24, 48, 19, 19, 8], mat: 'a' },
+                  { box: [260, 141, 12, 52, 12, 6], mat: 'c' },
+                  { box: [312, 110, 0, 76, 76, 30] }
+                ]}
+                grids={[{ z: 48, x: 116.5, y: 116.5, cols: 6, rows: 6, size: 19, gap: 5 }]}
+                flows={[{ z: 30, d: 'M16 190 H106' }, { z: 18, d: 'M264 147 H308', read: true }]}
+                callouts={[
+                  { at: [11, 11, 34], label: 'Harness', sub: { en: 'BASELINE ARMS ×3', th: 'BASELINE ARMS ×3', ja: 'ベースライン ×3' }, x: 356, y: 40 },
+                  { at: [-30, 230, 12], label: 'Claude Code', sub: { en: 'HOST · WRITE / READ', th: 'HOST · WRITE / READ', ja: 'ホスト · 書く / 読む' }, x: 20, y: 262 },
+                  { at: [235, 160, 48], label: 'Memory Base', sub: { en: 'RELEVANCE · BELIEF', th: 'RELEVANCE · BELIEF', ja: '関連性 · 信念' }, x: 452, y: 196 },
+                  { at: [388, 186, 14], label: 'Codex', sub: { en: 'READ CLIENT', th: 'READ CLIENT', ja: '読み取りクライアント' }, x: 440, y: 398 },
+                  { at: [185, 260, 20], label: { en: 'Status', th: 'สถานะ', ja: '状態' }, sub: 'M1 · M2A CLOSED', x: 60, y: 372, minor: true }
+                ]} />
+            </div>
+          </Specimen>
+          <Specimen name="SketchReveal">
+            <div data-cat="dev" class="narrow">
+              <SketchReveal tag={{ en: 'SCREEN', th: 'หน้าจอ', ja: '画面' }} realAlt={{ en: 'The real Z80 Workspace screen: explorer, editor, console', th: 'หน้าจอ Z80 Workspace จริง: explorer, editor, console', ja: '実際のZ80 Workspace画面:エクスプローラー、エディタ、コンソール' }}>
+                <IsoObject label={{ en: 'Z80 Workspace sketched as a screen lying on the desk: explorer, editor, console and the Run Z80sim button' }} origin={[262, 120]}
+                  parts={[
+                    { box: [0, 0, 0, 300, 190, 12], mat: 'k' },
+                    { box: [6, 6, 12, 288, 7, 2] },
+                    { box: [6, 14, 12, 45, 170, 3] },
+                    { box: [53, 14, 12, 241, 130, 3], mat: 'c' },
+                    { box: [53, 145, 12, 241, 39, 3] },
+                    { box: [61, 7, 14, 17, 5, 3], mat: 'a' }
+                  ]}
+                  screens={[{ src: 'z80/workspace.webp', face: 'top', x: 6, y: 6, z: 15.5, w: 288, h: 178, reveal: true }]}
+                  callouts={[
+                    { at: [28, 60, 15], label: 'Explorer', sub: { en: 'FILES', th: 'FILES', ja: 'ファイル' }, x: 24, y: 300 },
+                    { at: [69, 9, 17], label: 'Run Z80sim', sub: 'ET-BOARD', x: 330, y: 60 },
+                    { at: [170, 165, 15], label: 'Console', sub: 'C16.EXE · DOSBOX → WASM', x: 330, y: 400 }
+                  ]} />
+              </SketchReveal>
+            </div>
+            <div data-cat="ai" class="narrow" style="margin-top: 56px">
+              <p class="sample">RENDER + PLATE — abstract work. The picture is a placeholder until the owner's render exists.</p>
+              <SketchReveal kind="render" plate="center" tag="PLACEHOLDER" real={{ src: 'placeholder/render.webp', alt: { en: 'Placeholder render of the memory store', th: 'ภาพเรนเดอร์ชั่วคราวของ memory store', ja: 'メモリストアの仮レンダー' } }}>
+                <IsoObject label={{ en: 'A memory store sketched as a slab of cells; three cells are active' }} origin={[300, 149]} scale={1.5}
+                  parts={[
+                    { box: [0, 0, 0, 150, 150, 48], mat: 'c' },
+                    { box: [6.5 + 3 * 24, 6.5 + 1 * 24, 48, 19, 19, 6], mat: 'a' }, { box: [6.5 + 1 * 24, 6.5 + 4 * 24, 48, 19, 19, 6], mat: 'a' }, { box: [6.5 + 4 * 24, 6.5 + 3 * 24, 48, 19, 19, 6], mat: 'a' }
+                  ]}
+                  grids={[{ z: 48, x: 6.5, y: 6.5, cols: 6, rows: 6, size: 19, gap: 5 }]} />
+              </SketchReveal>
+            </div>
+            <p class="sample" style="margin-top: 64px">GLYPH MODE: the glyph and opened artifact depict the same subject. Real images are tagged REAL; system sketches are tagged SYSTEM. Reduced motion switches instantly.</p>
+            <div class="gm-demo">
+              <SketchReveal cat="game" glyphFrom="vaja/object.webp" glyphCols={12} glyphScale={0.9} index="01" plate="step-right" tag={{ en: 'CHARACTER', th: 'ตัวละคร', ja: 'キャラクター' }} real={{ src: 'vaja/object.webp', alt: { en: 'Vaja, the player character, holding the crystal staff', th: 'Vaja ตัวละครผู้เล่น ถือคทาคริสตัล', ja: 'クリスタルの杖を持つプレイヤーキャラクター、Vaja' } }} />
+              <SketchReveal cat="ai" kind="system" glyph={['######', '###+##', '######', '####+#', '#+####', '######']} index="02" plate="center" realAlt={{ en: 'Memory Base system sketch: Claude Code writes and reads, Codex reads, a harness compares three baseline arms' }}>
+                <IsoObject slot="real" label={{ en: 'Memory Base: Claude Code writes and reads, Codex reads, a harness compares three baseline arms' }}
+                  parts={[
+                    { box: [-24, -24, 0, 70, 70, 8] }, { box: [-24, -24, 13, 70, 70, 8] }, { box: [-24, -24, 26, 70, 70, 8] }, { box: [-30, -30, 0, 82, 82, 44], mat: 'w' },
+                    { box: [-70, 150, 0, 80, 80, 30] },
+                    { box: [10, 182, 22, 100, 16, 8], mat: 'c' },
+                    { box: [110, 110, 0, 150, 150, 48], mat: 'c' },
+                    { box: [116.5 + 3 * 24, 116.5 + 1 * 24, 48, 19, 19, 8], mat: 'a' }, { box: [116.5 + 4 * 24, 116.5 + 3 * 24, 48, 19, 19, 8], mat: 'a' }, { box: [116.5 + 1 * 24, 116.5 + 4 * 24, 48, 19, 19, 8], mat: 'a' },
+                    { box: [260, 141, 12, 52, 12, 6], mat: 'c' },
+                    { box: [312, 110, 0, 76, 76, 30] }
+                  ]}
+                  grids={[{ z: 48, x: 116.5, y: 116.5, cols: 6, rows: 6, size: 19, gap: 5 }]}
+                  flows={[{ z: 30, d: 'M16 190 H106' }, { z: 18, d: 'M264 147 H308', read: true }]}
+                  callouts={[
+                    { at: [11, 11, 34], label: 'Harness', sub: { en: 'BASELINE ARMS ×3', th: 'BASELINE ARMS ×3', ja: 'ベースライン ×3' }, x: 356, y: 40 },
+                    { at: [-30, 230, 12], label: 'Claude Code', sub: { en: 'HOST · WRITE / READ', th: 'HOST · WRITE / READ', ja: 'ホスト · 書く / 読む' }, x: 20, y: 262 },
+                    { at: [235, 160, 48], label: 'Memory Base', sub: { en: 'RELEVANCE · BELIEF', th: 'RELEVANCE · BELIEF', ja: '関連性 · 信念' }, x: 452, y: 196 },
+                    { at: [388, 186, 14], label: 'Codex', sub: { en: 'READ CLIENT', th: 'READ CLIENT', ja: '読み取りクライアント' }, x: 440, y: 398 }
+                  ]} />
+              </SketchReveal>
+            </div>
+          </Specimen>
+          <Specimen name="ObjectReveal">
+            <div class="gm-demo">
+              <div data-object-host data-cat="ai" tabindex="0" role="group" aria-label="Shared Memory Base column"><WorkObject work="memory" /></div>
+            </div>
+          </Specimen>
+          <Specimen name="WorkObject">
+            <div class="gm-demo">
+              <div data-object-host data-cat="ai" tabindex="0" role="group" aria-label="Memory Base object preview"><WorkObject work="memory" /></div>
+              <div data-object-host data-cat="dev" tabindex="0" role="group" aria-label="YASM object preview"><WorkObject work="yasm" /></div>
+              <div data-cat="ai"><WorkObject work="memory" glyphOnly /><p class="sample">STATIC GLYPH · Archive desktop</p></div>
+            </div>
+          </Specimen>
+          <Specimen name="BeforeAfter" live={false} note="No real before/after pair exists yet. Good first use: the same page built by a plain agent vs. with WhipUI (same size, same framing) — put both in src/assets/works/whipui/." />
+        </section>
+
+        <!-- ================= BLOCKS ================= -->
+        <section id="g-blocks" class="grp" data-mark="Blocks">
+          <SectionHeader index="04" title="Blocks" description={GROUPS[3].note} />
+          <Specimen name="AttributionBlock">
+            <div data-cat="dev"><AttributionBlock rows={[
+              { who: 'me', did: { en: 'Noticed the problem, set the direction, integrated the real tools into one workspace, decided what counted as done.', th: 'เห็นปัญหา ตั้งทิศทาง รวมเครื่องมือจริงเข้าเป็น workspace เดียว และตัดสินว่าแค่ไหนคือเสร็จ', ja: '問題に気づき、方向を決め、本物のツールを1つのワークスペースに統合し、完成の基準を決めた。' } },
+              { who: 'ai', did: { en: 'Most of the implementation, heavily AI-assisted, under my steering.', th: 'implementation ส่วนใหญ่ ทำด้วย AI อย่างหนักภายใต้การกำกับของผม', ja: '実装の大部分。AIを多用し、自分が舵を取った。' } },
+              { who: 'upstream', did: { en: 'C16.EXE and the Z80 ET-Board simulator (the course’s tools), DOSBox, the Monaco editor.', th: 'C16.EXE และ Z80 ET-Board simulator (เครื่องมือของวิชา), DOSBox, Monaco editor', ja: 'C16.EXEとZ80 ET-Boardシミュレータ(授業のツール)、DOSBox、Monacoエディタ。' } }
+            ]} /></div>
+          </Specimen>
+          <Specimen name="ContributionBlock">
+            <div data-cat="game"><ContributionBlock areas={[
+              { area: { en: 'Art', th: 'Art', ja: 'アート' }, did: { en: 'Map art, UI and the crystal staff, drawn by hand. Map sheets up to 4000 × 4000 px.', th: 'map art, UI และไม้เท้าคริสตัล วาดเองทั้งหมด map แต่ละแผ่นใหญ่สุด 4000 × 4000 px', ja: 'マップアート、UI、水晶の杖を手描き。マップは最大 4000 × 4000 px。' } },
+              { area: { en: 'Animation', th: 'Animation', ja: 'アニメーション' }, did: { en: '20 clips for Vaja with Unity 2D skeletal animation and IK.', th: 'Vaja 20 clip ใช้ Unity 2D skeletal animation กับ IK', ja: 'Vajaに20クリップ(Unity 2Dスケルタル+IK)。' } },
+              { area: { en: 'Player control', th: 'Player control', ja: '操作' }, did: { en: 'Player control and scene scroll in C#.', th: 'player control และ scene scroll ด้วย C#', ja: 'プレイヤー操作とシーンスクロールをC#で。' }, evidence: [{ label: 'PlayerController.cs', shows: { en: '370 lines', th: '370 บรรทัด', ja: '370行' }, kind: 'file' }] }
+            ]} /></div>
+          </Specimen>
+          <Specimen name="ConstraintBlock">
+            <div data-cat="tool"><ConstraintBlock label={{ en: 'Maintainer constraint' }} statement={{ en: 'The maintainer kept check on its fast checksum path.' }} why={{ en: 'So the stale-output detection I kept had to be a read-only follow-up, not part of the fast check.' }} source="AgentsMesh PR #99 → #102" /></div>
+          </Specimen>
+          <Specimen name="OutcomeBlock">
+            <div data-cat="dev"><OutcomeBlock outcome={{ en: 'Used in 2 labs. 69 visits and 11 assembles between 20 July and 26 September 2026.', th: 'ใช้จริง 2 แลป · 69 visits และ assemble 11 ครั้ง ระหว่าง 20 ก.ค. – 26 ก.ย. 2026', ja: '2回の実習で使用。2026年7月20日–9月26日に69訪問、アセンブル11回。' }} current={{ en: 'The web version is online on GitHub Pages.', th: 'เวอร์ชันเว็บยังออนไลน์อยู่บน GitHub Pages', ja: 'Web版はGitHub Pagesで公開中。' }} /></div>
+          </Specimen>
+          <Specimen name="ProcessLine">
+            <div class="col gap"><ProcessLine /><div data-cat="tool"><ProcessLine steps={[
+              { key: 'usage', label: { en: 'Real usage', th: 'ใช้งานจริง', ja: '実際に使う' } },
+              { key: 'problem', label: { en: 'Real problem', th: 'ปัญหาจริง', ja: '実際の問題' } },
+              { key: 'investigation', label: { en: 'Investigation', th: 'ตามหาต้นเหตุ', ja: '調査' } },
+              { key: 'constraints', label: { en: 'Maintainer constraints', th: 'เงื่อนไขของ maintainer', ja: 'メンテナの制約' } },
+              { key: 'merged', label: { en: 'Merged', th: 'Merged', ja: 'マージ' } }
+            ]} reached="merged" notes={{ merged: { en: 'agentsmesh #102 · ai-config-sync-manager #28', th: 'agentsmesh #102 · ai-config-sync-manager #28', ja: 'agentsmesh #102 · ai-config-sync-manager #28' } }} /></div></div>
+          </Specimen>
+          <Specimen name="Timeline">
+            <div data-cat="tool" class="col gap"><Timeline items={[
+              { date: '2026-08-11', label: '0.1.0', note: { en: 'First npm release.', th: 'ปล่อยบน npm ครั้งแรก', ja: 'npmで初リリース。' } },
+              { date: '2026-08-12', label: { en: 'First use', th: 'ใช้ครั้งแรก', ja: '初使用' }, note: { en: 'In the MSU final: .whipui/project-dna.json in the team repo.', th: 'ใน MSU รอบชิง: .whipui/project-dna.json อยู่ใน repo ของทีม', ja: 'MSU決勝で:チームのリポジトリに .whipui/project-dna.json。' } },
+              { date: '2026-09-14', label: '1.2.0', status: 'ACTIVE', note: { en: 'Six npm versions and five GitHub releases so far.', th: 'npm 6 เวอร์ชัน และ GitHub 5 release', ja: 'npm 6バージョン、GitHub 5リリース。' } }
+            ]} /><Timeline layout="horizontal" items={[{ date: '2025-02', label: { en: 'Start', th: 'เริ่ม', ja: '開始' } }, { date: '2025-03-22', label: { en: 'Demo in class', th: 'demo ในห้องเรียน', ja: '授業でデモ' } }]} /></div>
+          </Specimen>
+          <Specimen name="ClaimLedger">
+            <div data-cat="ai"><ClaimLedger exists={[{ en: 'M1 (core mechanics) and M2A (safe control plane) are closed.', th: 'ปิด M1 (core mechanics) และ M2A (safe control plane) แล้ว', ja: 'M1(コア機構)とM2A(安全な制御プレーン)は完了。' }]} unproven={[{ en: 'Whether compact understanding beats episodic recall.', th: 'compact understanding ชนะ episodic recall จริงไหม', ja: 'コンパクトな理解がエピソード想起に勝るか。' }]} /></div>
+          </Specimen>
+          <Specimen name="Retrospective">
+            <p class="sample">SAMPLE WORDING — proposed lines from an earlier draft, not confirmed by the owner</p>
+            <div data-cat="dev"><Retrospective keep={[{ en: 'Running the real assembler instead of reimplementing it.', th: 'รัน assembler ตัวจริงแทนการเขียนใหม่', ja: '作り直さず本物のアセンブラを動かす。' }]} /></div>
+          </Specimen>
+          <Specimen name="Trace" pad={false}>
+            <p class="sample trace-note">TEXT-ONLY REASONING TRACE (Memory Base) — the chaptered version with media, a FlowDiagram slot and Readouts is on /work/z80 and /work/vaja</p>
+            <div data-cat="ai" class="trace-demo"><Trace label={{ en: 'Reasoning trace', th: 'Reasoning trace', ja: '推論の跡' }} steps={[
+              { type: 'ASSUMPTION', short: 'token / compression', text: { en: 'Token / compression advantage', th: 'ได้เปรียบเรื่อง token / compression', ja: 'トークン/圧縮の優位' }, status: 'FAILED' },
+              { type: 'ASSUMPTION', short: 'path proximity', text: { en: 'Path / symbol proximity = relevance', th: 'ความใกล้ของ path / symbol = ความเกี่ยวข้อง', ja: 'パス/シンボルの近さ = 関連性' }, status: 'FAILED' },
+              { type: 'ASSUMPTION', short: 'cross-session', text: { en: 'Existing memory systems can’t keep continuity across sessions.', th: 'ระบบ memory ที่มีอยู่ทำ continuity ข้าม session ไม่ได้', ja: '既存のメモリシステムはセッションをまたぐ継続性を保てない。' }, status: 'FAILED' },
+              { type: 'NEW MODEL', short: 'relevance & belief', text: { en: 'Relevance and belief layer — remember as little as possible, but the right thing at the right time.', th: 'relevance and belief layer — จำให้น้อยที่สุด แต่ถูกเรื่องถูกเวลา', ja: '関連性と信念のレイヤー — 最小限だけ覚え、正しいことを正しいときに。' }, status: 'ACTIVE' }
+            ]} /></div>
+          </Specimen>
+          <Specimen name="Inspector">
+            <div data-cat="dev" class="col gap">
+              <p class="sample">FOCUS MODE — one shared screenshot</p>
+              <Inspector image="z80/workspace.webp" imageAlt={{ en: 'Z80 Workspace welcome screen, Thai UI', th: 'หน้าแรกของ Z80 Workspace, UI ภาษาไทย', ja: 'Z80 Workspaceのウェルカム画面(タイ語UI)' }} frame="screen" items={[
+                { name: 'Explorer', meta: { en: 'FILES', th: 'FILES', ja: 'ファイル' }, text: { en: 'Explorer and files of the lab, in the browser.', th: 'explorer และไฟล์ของแลป อยู่ในเบราว์เซอร์', ja: '実習のエクスプローラーとファイルをブラウザで。' }, focus: { x: 4, y: 9.4, zoom: 2.6 } },
+                { name: 'Console', meta: 'C16.EXE', text: { en: 'The console runs the real C16.EXE (Cross-16) inside DOSBox compiled to WebAssembly.', th: 'console รัน C16.EXE (Cross-16) ตัวจริง ใน DOSBox ที่ compile เป็น WebAssembly', ja: 'コンソールはWebAssemblyにコンパイルしたDOSBox内で本物のC16.EXE(Cross-16)を実行する。' }, focus: { x: 16.8, y: 88.6, zoom: 2.4 } },
+                { name: 'Run Z80sim', meta: 'ET-BOARD', text: { en: 'Run Z80sim opens the course’s Z80 ET-Board simulator. Compiled files load into it on their own.', th: 'Run Z80sim เปิด Z80 ET-Board simulator ของวิชา ไฟล์ที่ compile แล้วโหลดเข้าไปเอง', ja: 'Run Z80simで授業のZ80 ET-Boardシミュレータを開く。コンパイル済みファイルは自動で読み込まれる。' }, focus: { x: 20.6, y: 2.6, zoom: 2.4 } }
+              ]} />
+              <p class="sample">SWAP MODE — each part has its own media</p>
+              <Inspector frame="screen" items={[
+                { name: { en: 'Autocomplete', th: 'Autocomplete', ja: '補完' }, meta: 'COMPLETION', text: { en: 'Inside a memory bracket it offers symbols that fit there.', th: 'ใน memory bracket จะเสนอ symbol ที่ใช้ตรงนั้นได้', ja: 'メモリ括弧の中では、そこで使えるシンボルを出す。' }, src: 'yasm/autocomplete.webp', alt: { en: 'Autocomplete list inside a memory bracket' } },
+                { name: { en: 'Hover', th: 'Hover', ja: 'ホバー' }, meta: 'LANGUAGE SERVER', text: { en: 'Hover shows a label’s doc comment; numbers also get hex and binary.', th: 'hover แล้วเห็น doc comment ของ label และตัวเลขแปลงเป็น hex/binary ให้ด้วย', ja: 'ホバーでラベルのドキュメントコメント。数値は16進と2進も表示。' }, src: 'yasm/hover.webp', alt: { en: 'Hover card showing a label and its doc comment' } },
+                { name: { en: 'Check on save', th: 'ตรวจตอน save', ja: '保存時チェック' }, meta: 'YASM', text: { en: 'The status bar reads “YASM: ok” with 0 errors and 0 warnings.', th: 'status bar ขึ้น “YASM: ok” error 0 warning 0', ja: 'ステータスバーに「YASM: ok」、エラー0・警告0。' }, src: 'yasm/preview.webp', alt: { en: 'VS Code with YASM highlighting and the status bar showing YASM ok' } }
+              ]} />
+            </div>
+          </Specimen>
+          <Specimen name="ScrollStepper" pad={false}>
+            <div data-cat="game" class="trace-demo"><ScrollStepper label={{ en: 'Scene', th: 'ฉาก', ja: 'シーン' }} states={[
+              { src: 'vaja/scene-westbrook.webp', label: 'Westbrook Stonescape', alt: { en: 'Westbrook Stonescape scene' }, note: { en: 'Composed from my map art.', th: 'จัดจาก map art ที่วาดเอง', ja: '自分のマップアートから構成。' } },
+              { src: 'vaja/scene-celestia-grounded.webp', label: 'Celestia Crystal Cavern', alt: { en: 'Vaja standing in Celestia Crystal Cavern' }, note: { en: 'Frame from the recorded build.', th: 'เฟรมจาก build ของเกมที่อัดไว้', ja: '録画したゲームビルドの一コマ。' } }
+            ]} /></div>
+          </Specimen>
+          <Specimen name="SplitScroll" pad={false}>
+            <div data-cat="dev" class="ss-demo"><SplitScroll steps={[
+              { title: { en: 'Autocomplete', th: 'Autocomplete', ja: '補完' }, text: { en: 'Inside a memory bracket it offers symbols that fit there.', th: 'ใน memory bracket จะเสนอ symbol ที่ใช้ตรงนั้นได้', ja: 'メモリ括弧の中では、そこで使えるシンボルを出す。' }, src: 'yasm/autocomplete.webp', alt: { en: 'Autocomplete list inside a memory bracket' } },
+              { title: { en: 'Hover from the language server', th: 'hover จาก language server', ja: '言語サーバーのホバー' }, text: { en: 'Hover shows a label’s doc comment; numbers also get hex and binary.', th: 'hover แล้วเห็น doc comment ของ label และตัวเลขแปลงเป็น hex/binary ให้ด้วย', ja: 'ホバーでラベルのドキュメントコメント。数値は16進と2進も表示。' }, src: 'yasm/hover.webp', alt: { en: 'Hover card showing a label and its doc comment' } },
+              { title: { en: 'Compiler check on save', th: 'ตรวจด้วย compiler ตอน save', ja: '保存時のコンパイラチェック' }, text: { en: 'The status bar reads “YASM: ok” with 0 errors and 0 warnings.', th: 'status bar ขึ้น “YASM: ok” error 0 warning 0', ja: 'ステータスバーに「YASM: ok」、エラー0・警告0。' }, src: 'yasm/preview.webp', alt: { en: 'VS Code with YASM highlighting and the status bar showing YASM ok' } }
+            ]} /></div>
+          </Specimen>
+          <Specimen name="CodeExcerpt">
+            <CodeExcerpt file="scripts/tokens.config.mjs" lang="js" from={8} code={tokensCode} note={{ en: 'Real code from this site: the identity hue and the recipe every kind of work shares.', th: 'โค้ดจริงของเว็บนี้: hue ตัวตนและสูตรที่ทุกประเภทงานใช้ร่วมกัน', ja: 'このサイトの実際のコード:アイデンティティの色相と、全種類共通のレシピ。' }} />
+          </Specimen>
+          <Specimen name="HorizontalStrip" pad={false}>
+            <div class="strip-demo">
+              <HorizontalStrip bleed={false} title={{ en: 'Lab', th: 'Lab', ja: 'ラボ' }} description={{ en: 'Open questions. Not proven yet.', th: 'คำถามที่ยังเปิดอยู่ ยังไม่พิสูจน์', ja: '開いた問い。まだ証明されていない。' }}>
+                <LabItem work="memory" variant="card" question={{ en: 'Does compact understanding beat episodic recall?', th: 'compact understanding ชนะ episodic recall จริงไหม', ja: 'コンパクトな理解は、エピソード記憶の想起に勝るのか。' }}
+                  glyph={['######', '###+##', '######', '####+#', '#+####', '######']}>
+                  <IsoObject slot="real" label={{ en: 'Memory Base: Claude Code writes and reads, Codex reads, a harness compares three baseline arms' }}
+                    parts={[
+                      { box: [-24, -24, 0, 70, 70, 8] }, { box: [-24, -24, 13, 70, 70, 8] }, { box: [-24, -24, 26, 70, 70, 8] }, { box: [-30, -30, 0, 82, 82, 44], mat: 'w' },
+                      { box: [-70, 150, 0, 80, 80, 30] },
+                      { box: [10, 182, 22, 100, 16, 8], mat: 'c' },
+                      { box: [110, 110, 0, 150, 150, 48], mat: 'c' },
+                      { box: [116.5 + 3 * 24, 116.5 + 1 * 24, 48, 19, 19, 8], mat: 'a' }, { box: [116.5 + 4 * 24, 116.5 + 3 * 24, 48, 19, 19, 8], mat: 'a' }, { box: [116.5 + 1 * 24, 116.5 + 4 * 24, 48, 19, 19, 8], mat: 'a' },
+                      { box: [260, 141, 12, 52, 12, 6], mat: 'c' },
+                      { box: [312, 110, 0, 76, 76, 30] }
+                    ]}
+                    grids={[{ z: 48, x: 116.5, y: 116.5, cols: 6, rows: 6, size: 19, gap: 5 }]}
+                    flows={[{ z: 30, d: 'M16 190 H106' }, { z: 18, d: 'M264 147 H308', read: true }]} />
+                </LabItem>
+                <LabItem work="whipui" variant="card" />
+                <LabItem work="combo" variant="card" />
+                <LabItem work="portawhip" variant="card" />
+                <LabItem work="thaitone" variant="card" />
+              </HorizontalStrip>
+            </div>
+          </Specimen>
+        </section>
+
+        <!-- ================= LISTS ================= -->
+        <section id="g-lists" class="grp" data-mark="Lists">
+          <SectionHeader index="05" title="Lists" description={GROUPS[4].note} />
+          <Specimen name="ArchiveRow">
+            <ul class="rows"><ArchiveRow work="z80" /><ArchiveRow work="fpga" /></ul>
+          </Specimen>
+          <Specimen name="ArchiveList">
+            <ArchiveList filter works={['whipui', 'memory', 'z80', 'yasm', 'vaja', 'fpga', 'teach', 'planner', 'rop']} />
+          </Specimen>
+          <Specimen name="TimelineRow">
+            <ol class="tl-rows"><TimelineRow work="icpc" /><TimelineRow work="icpc25" /><TimelineRow work="portawhip" /></ol>
+          </Specimen>
+          <Specimen name="TimelineList">
+            <p class="muted">The whole list is the Timeline page (one per site — its year-current state watches the page). <a href={href('/timeline/', langOf(Astro.url))}>Open /timeline/</a></p>
+          </Specimen>
+          <Specimen name="RelatedWork">
+            <RelatedWork work="z80" />
+          </Specimen>
+          <Specimen name="EvidenceRow">
+            <ul class="rows"><EvidenceRow work="planner" situation={{ en: 'Team of 7 · course project' }} result={{ en: 'Deployed on Vercel so the team could collect questionnaire feedback.' }} roles={['Primary backend / application logic', 'Integration fixes']} share={{ value: 39, total: 80, unit: { en: 'commits' }, label: { en: 'mine, of the team repo' }, source: { en: 'team repo' } }} /></ul>
+          </Specimen>
+          <Specimen name="TrailRow">
+            <ul class="rows"><TrailRow work="yasm" /><TrailRow work="z80prep" /></ul>
+          </Specimen>
+          <Specimen name="MilestoneItem">
+            <ul class="rows"><MilestoneItem date="2026-08" kind="award" title={{ en: 'Informatics MSU Hackathon 2026 — Winner, AI track (Higher Education)', th: 'Informatics MSU Hackathon 2026 — ชนะเลิศสาย AI (อุดมศึกษา)', ja: 'Informatics MSU Hackathon 2026 — AI部門優勝(高等教育)' }} /><MilestoneItem date="2025" kind="community" title={{ en: 'CESCa #20 — academic staff', th: 'CESCa #20 — staff ฝ่ายวิชาการ', ja: 'CESCa #20 — 学習担当スタッフ' }} /></ul>
+          </Specimen>
+          <Specimen name="LabItem">
+            <div class="rows"><LabItem work="memory" reached="use" question={{ en: 'Does compact understanding beat episodic recall?', th: 'compact understanding ชนะ episodic recall จริงไหม', ja: 'コンパクトな理解は、エピソード記憶の想起に勝るのか。' }} /><LabItem work="portawhip" /></div>
+          </Specimen>
+        </section>
+
+        <!-- ================= PROJECT ================= -->
+        <section id="g-project" class="grp" data-mark="Project">
+          <SectionHeader index="06" title="Project page" description={GROUPS[5].note} />
+          <Specimen name="WorkNav"><div data-cat="dev"><WorkNav work="z80" order={['vaja', 'z80']} /></div></Specimen>
+          <Specimen name="ProjectHeader"><div data-cat="dev"><ProjectHeader work="z80" layout="text" roles={['Problem', 'Direction', 'Integration']} /></div></Specimen>
+          <Specimen name="ProjectContext"><div data-cat="dev"><ProjectContext label={{ en: 'Friction', th: 'ความติดขัด', ja: '不便' }} lead={{ en: 'The original workflow was cumbersome.', th: 'workflow เดิมยุ่งยาก', ja: '元のワークフローは面倒だった。' }}><p>Z80 Workspace brings the course’s real assembler, C16.EXE (Cross-16), and the Z80 ET-Board simulator into the browser.</p></ProjectContext></div></Specimen>
+          <Specimen name="RefBoard">
+            <div data-cat="tool"><RefBoard items={[
+              { ref: '#102', repo: 'AgentsMesh', state: { en: 'merged · 21 Jul 2026' }, merged: true, text: { en: 'The follow-up the maintainer asked for: a read-only check that finds generated files gone stale.' }, to: '#c-RefBoard' },
+              { ref: '#28', repo: 'ai-config-sync-manager', state: { en: 'merged · 9 Jul 2026' }, merged: true, text: { en: 'On Windows, backups went to the wrong place. Fixed, with regression tests.' }, to: '#c-RefBoard' },
+              { ref: '#878', repo: 'context-mode', state: { en: 'open · root cause found' }, text: { en: 'Oversized Markdown paragraphs slipped past the chunk cap.' }, to: '#c-RefBoard' }
+            ]} /></div>
+          </Specimen>
+          <Specimen name="PRCard">
+            <div data-cat="tool" class="col gap">
+              <PRCard repo="sampleXbro/agentsmesh" number={102} state="merged" href="https://github.com/sampleXbro/agentsmesh/pull/102"
+                title="fix(check): detect stale generated outputs" issues={['#98', '#99']}
+                problem={{ en: 'Obsolete files in the configured targets were not flagged when they were missing from the lock file’s outputs registry.', th: 'ไฟล์เก่าในปลายทางที่ตั้งไว้ไม่ถูกแจ้ง ถ้าไม่ได้อยู่ใน outputs registry ของ lock file', ja: 'ロックファイルの出力レジストリにない古いファイルが検出されなかった。' }}
+                change={{ en: '`check` now detects stale generated outputs without running the generation pipeline, so the fast path stays fast.', th: '`check` ตรวจเจอไฟล์ที่ gen ไว้แล้วแต่ค้างเก่า โดยไม่ต้องรัน generation pipeline ทาง fast path เลยยังเร็วอยู่', ja: '`check` が生成パイプラインを実行せずに古い生成物を検出するようになり、高速経路は速いまま。' }}
+                maintainer={{ who: 'sampleXbro', quote: 'Thanks for the PR. I added a few corrections and merge it' }} />
+              <PRCard repo="slash9494/ai-config-sync-manager" number={28} state="merged" date="2026-07-09" href="https://github.com/slash9494/ai-config-sync-manager/pull/28"
+                title="fix: sanitize Windows backup paths"
+                problem={{ en: 'Backups silently broke on Windows drive-letter paths: stripping leading slashes never removed a C:\ root.', th: 'backup พังเงียบๆ บน path ที่มี drive letter ของ Windows เพราะการตัด / นำหน้าไม่เคยตัด C:\ ออก', ja: 'Windowsのドライブレター付きパスでバックアップが黙って壊れていた。先頭のスラッシュ除去では C:\ が消えない。' }}
+                change={{ en: 'Backup paths are derived root-aware with parse() + relative() and a sanitized root label; POSIX layouts stay identical.', th: 'คำนวณ path ของ backup แบบรู้จัก root ด้วย parse() + relative() และชื่อ root ที่ sanitize แล้ว ฝั่ง POSIX ได้ผลเหมือนเดิม', ja: 'parse() + relative() とサニタイズしたルート名でルートを考慮してパスを導出。POSIXのレイアウトは同じ。' }}
+                maintainer={{ who: 'slash9494', quote: 'The bug is real … Moving to parse + relative + a sanitized root label is the correct cross-platform fix.' }} />
+            </div>
+          </Specimen>
+          <Specimen name="NextWork"><NextWork work="z80" /></Specimen>
+        </section>
+
+        <!-- ================= HOME ================= -->
+        <section id="g-home" class="grp" data-mark="Home">
+          <SectionHeader index="07" title="Home compositions" description={GROUPS[6].note} />
+          <Specimen name="HomeCover">
+            <HomeCover study={{ en: 'Computer Engineering (CoE)' }} school={{ en: 'Khon Kaen University · year 3 · expected 2028' }} looking={{ en: 'An AI engineering internship.' }} workCount={SHOWCASE.length}>
+              <Draft slot="available"><span class="muted">Available: [months] · [on-site / remote]</span></Draft>
+            </HomeCover>
+          </Specimen>
+          <Specimen name="ContactCard">
+            <ContactCard looking={{ en: 'A game dev or AI engineering internship.', th: 'ที่ฝึกงานสาย game dev หรือ AI engineering', ja: 'ゲーム開発またはAIエンジニアリングのインターン。' }} />
+          </Specimen>
+          <Specimen name="IntroHero">
+            <IntroHero statement='Teethawat “Web” Kumying' who={{ en: 'Computer Engineering (CoE), Khon Kaen University · year 3 · expected 2028' }} />
+          </Specimen>
+          <Specimen name="NowBar">
+            <NowBar items={[{ label: { en: 'Now', th: 'ตอนนี้', ja: 'いま' }, status: 'ACTIVE', cat: 'ai', text: { en: 'Memory Base: testing whether compact understanding beats episodic recall.', th: 'Memory Base: ทดสอบว่า compact understanding ชนะ episodic recall จริงไหม', ja: 'Memory Base:コンパクトな理解がエピソード想起に勝るかを検証中。' } }, { label: { en: 'Looking for', th: 'กำลังหา', ja: '募集' }, text: { en: 'A game dev or AI engineering internship.', th: 'ที่ฝึกงานสาย game dev หรือ AI engineering', ja: 'ゲーム開発またはAIエンジニアリングのインターン。' } }]} />
+          </Specimen>
+          <Specimen name="SelectedWork" live={false} note="The container holding the three compositions below on the home page — see / for it in place." />
+          <Specimen name="VajaFeature"><VajaFeature /></Specimen>
+          <Specimen name="Z80Feature"><Z80Feature /></Specimen>
+          <Specimen name="OSSFeature"><OSSFeature /></Specimen>
+        </section>
+
+        <!-- ================= WORK SHOWCASE ================= -->
+        <section id="g-showcase" class="grp" data-mark="Showcase">
+          <SectionHeader index="08" title="Work showcase" description={GROUPS[7].note} />
+          <Specimen name="WorkReel" live={false} note="The track on /work/: scroll down on a desktop and the works travel sideways; on touch, narrow screens or reduced motion they stack. Not repeated here — a second pinned track would fight this page's scroll." />
+          <Specimen name="ReelPanel"><ReelOSS /></Specimen>
+          {['ReelVaja', 'ReelZ80', 'ReelOSS', 'ReelMSU', 'ReelMemory', 'ReelWhipUI', 'ReelYASM', 'ReelPrep', 'ReelDrawing'].map((n, i) => (
+            <Specimen name={n} live={false} note={`Panel ${String(i + 1).padStart(2, '0')} on /work/ (order: SHOWCASE in src/lib/site.ts).`} />
+          ))}
+        </section>
+      </div>
+    </div>
+  </div>
+</PageShell>
+
+<style>
+  .kit-top { padding-block: clamp(40px, 7vw, 88px) 24px; display: grid; gap: 14px; max-width: 900px; }
+  .kit-top h1 { font-size: clamp(36px, 5.2vw, 68px); line-height: 1.02; text-wrap: balance; }
+  .kit-lead { font-size: 17px; color: var(--ink2); max-width: 70ch; }
+  .kit-lead code, .kit-lead b { color: var(--ink); }
+  .kit-lead code { font: 400 14px var(--f-mono); }
+  .kit-tools { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+  .kit-b { background: var(--ink); color: var(--bg); border: 0; padding: 8px 12px; font: 500 12px/1 var(--f-mono); letter-spacing: 0.06em; cursor: pointer; }
+  .kit-tip { font-size: 13px; color: var(--ink3); }
+  .kit-grid { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
+  .kit-nav { position: sticky; top: calc(var(--hdr-h) + 20px); max-height: calc(100vh - var(--hdr-h) - 40px); overflow: auto; font-size: 13px; scrollbar-width: thin; }
+  .kit-nav summary { cursor: pointer; margin-bottom: 8px; }
+  .kit-nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .kit-nav ol ol { padding: 2px 0 8px 10px; }
+  .kit-nav a { color: var(--ink2); text-decoration: none; }
+  .kit-nav a:hover { color: var(--ink); }
+  .kit-nav > details > ol > li > a { color: var(--ink); font-weight: 600; }
+  .grp { padding-top: 48px; scroll-margin-top: calc(var(--hdr-h) + 16px); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+  .col { display: grid; gap: 14px; justify-items: start; }
+  .col.gap { gap: 40px; justify-items: stretch; }
+  .demo-link { color: inherit; text-decoration: none; }
+  .demo-text { max-width: 60ch; display: grid; gap: 10px; }
+  .narrow { max-width: 640px; }
+  .plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+  .plates figure { margin: 0; display: grid; gap: 6px; }
+  .plate-box { position: relative; aspect-ratio: 4 / 3; border: 1px solid var(--rule); }
+  .sample { font: 500 10px/1.4 var(--f-mono); letter-spacing: 0.08em; color: var(--ink3); margin-bottom: 12px; }
+  .trace-demo, .ss-demo { padding: clamp(16px, 3vw, 32px); }
+  .trace-note { padding: clamp(16px, 3vw, 32px) clamp(16px, 3vw, 32px) 0; margin: 0; }
+  .strip-demo { padding-inline: clamp(16px, 3vw, 32px); overflow: clip; }
+  .gm-demo { display: flex; flex-wrap: wrap; gap: 56px 48px; align-items: start; }
+  .pg-demo { display: flex; flex-wrap: wrap; gap: 40px; align-items: end; }
+  .pg-demo > div { display: grid; gap: 10px; justify-items: start; }
+  .pg-demo :global(.pg) { width: 96px; }
+  .strip-demo :global(.hs) { margin-top: 24px; }
+  @media (max-width: 1000px) {
+    .kit-grid { grid-template-columns: minmax(0, 1fr); }
+    .kit-nav { position: static; max-height: none; border: 1px solid var(--rule); padding: 10px 12px; }
+    .kit-nav details:not([open]) summary { margin: 0; }
+  }
+</style>

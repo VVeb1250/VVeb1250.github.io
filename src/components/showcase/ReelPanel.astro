@@ -1,0 +1,104 @@
+---
+/**
+ * @component ReelPanel
+ * @group showcase
+ * @summary One work on the Work reel: the big outlined number, the plain text column from the work's YAML (type · year, title, strongest fact, one line, links), and the visual — which is the work's own composition, passed in the slot.
+ * @use Only inside WorkReel, one per work, wrapped by that work's own panel component in src/components/showcase/ (ReelVaja, ReelZ80 …). The panel component writes the visual; this frame keeps the text, the number and the click behaviour the same everywhere.
+ * @avoid Using it outside the reel; filling the visual slot with the same picture-plus-caption for every work (then it is a template); repeating who-did-what here (it belongs on the work page, Story §0.3).
+ * @behavior A work with a page: the title is a link; aimed at, a signal-colored line draws across under each line of it (the title itself never fills with color); "// Open project ——" sits under the text; the whole panel opens the page on click (WorkReel), and with `aim` the visual gets four corner brackets that close in and an unfilled "// OPEN PROJECT" tag while the pointer is on the panel or a link in it has keyboard focus. The current panel (WorkReel's `.is-cur`) fills its number with the work's pale color. Reduced motion: the same states, no movement.
+ * @example
+ * <ReelPanel work="z80" aim>
+ *   <div class="my-composition">…</div>
+ * </ReelPanel>
+ */
+import MetaLine from '../primitives/MetaLine.astro';
+import StatusTag from '../primitives/StatusTag.astro';
+import GoLink from '../primitives/GoLink.astro';
+import ExternalLink from '../primitives/ExternalLink.astro';
+import { langOf, tx, t, type L } from '../../lib/i18n';
+import { work, workHref, vtLabel, ctxOf } from '../../lib/works';
+import { SHOWCASE } from '../../lib/site';
+export interface Props {
+  /** Work id (src/content/works/<id>.yaml). */
+  work: string;
+  /** The strongest fact under the title. Default: the work's `fact`; `null` hides it. */
+  fact?: L | null;
+  /** Show the work's YAML links (GitHub, Marketplace, Live…). Default true. */
+  links?: boolean;
+  /** Corner brackets + OPEN PROJECT tag over the visual on hover (works with a page whose visual is not itself made of links). */
+  aim?: boolean;
+}
+const { work: id, fact, links = true, aim = false } = Astro.props;
+const lang = langOf(Astro.url);
+const w = await work(id);
+const d = w.data;
+const no = String(SHOWCASE.indexOf(id as (typeof SHOWCASE)[number]) + 1).padStart(2, '0');
+const page = d.page;
+const open = page ? { href: workHref(id, lang), 'data-vt': 'deeper', 'data-vt-cat': ctxOf(w), 'data-vt-label': vtLabel(w), 'data-work': id } : null;
+const strong = fact === null ? null : fact ?? d.fact ?? null;
+---
+<article class:list={['rp', { 'rp-open': page }]} id={`w-${id}`} data-panel data-work={id} data-cat={ctxOf(w)} data-go={page ? '' : undefined}>
+  <div class="rp-txt">
+    <span class="rp-no disp num" aria-hidden="true">{no}</span>
+    <p class="eyebrow rp-eb">{d.type} · {d.year}{d.status === 'ACTIVE' && <StatusTag status="ACTIVE" />}</p>
+    <h2 class="disp rp-t">
+      {open ? <a {...open} data-panel-go><span class="rp-tt">{d.title}</span></a> : d.title}
+    </h2>
+    {strong && <MetaLine items={[strong]} tone="ink" />}
+    <p class="rp-line">{tx(d.line, lang)}</p>
+    <slot name="txt" />
+    <div class="rp-links">
+      {open && <a class="rp-go" {...open} tabindex="-1" aria-hidden="true"><GoLink /></a>}
+      {links && d.links.map((l) => <ExternalLink href={l.url} bare>{l.label}</ExternalLink>)}
+    </div>
+  </div>
+  <div class="rp-vis">
+    <slot />
+    {aim && <span class="rp-aim" aria-hidden="true"><i></i><i></i><i></i><i></i><b><span class="rp-sl2" aria-hidden="true">//</span> {t('open', lang)}</b></span>}
+  </div>
+</article>
+
+<style>
+  .rp { position: relative; display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.5fr); gap: clamp(28px, 4vw, 72px); align-items: center; }
+  .rp-open { cursor: pointer; }
+  .rp-txt { position: relative; display: grid; gap: 14px; justify-items: start; align-content: center; z-index: 1; }
+  .rp-no { position: absolute; left: -0.06em; top: -0.62em; z-index: -1; font-size: clamp(120px, 15vw, 230px); line-height: 1; color: transparent; -webkit-text-stroke: 1px var(--rule); transition: color var(--t-enter) var(--e-enter), -webkit-text-stroke-color var(--t-enter); pointer-events: none; }
+  :global(.is-cur) > .rp-txt > .rp-no { color: color-mix(in srgb, var(--ctxp) 70%, transparent); -webkit-text-stroke-color: var(--ctxm); }
+  .rp-eb { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .rp-t { font-size: clamp(44px, 5.4vw, 92px); line-height: 0.92; letter-spacing: -0.01em; text-wrap: balance; }
+  /* the title as a link: underlined at rest (a link looks like a link), full on hover; text-decoration follows each line,
+     so a two-line title never gets a bar across the next element */
+  .rp-t a { color: inherit; text-decoration: none; }
+  /* the title as a link: aimed at, a line in the signal color draws across under every line of the title, left to right
+     (a background per line box, cloned at each break, set at the underline's height so it never reaches the next element) */
+  .rp-tt { -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    background: linear-gradient(var(--ctxs), var(--ctxs)) 0 calc(100% - var(--ul-y, 0.26em)) / 0 0.06em no-repeat;
+    transition: background-size var(--t-enter) var(--e-enter); }
+  .rp-open:hover .rp-tt, .rp-t a:focus-visible .rp-tt { background-size: 100% 0.06em; }
+  .rp-t a:active .rp-tt { background-size: 100% 0.1em; transition-duration: var(--t-exit); }
+  .rp-line { color: var(--ink2); font-size: clamp(16px, 1.25vw, 19px); max-width: 40ch; text-wrap: pretty; }
+  .rp-links { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+  .rp-go { color: inherit; text-decoration: none; }
+  .rp-vis { position: relative; min-width: 0; }
+
+  /* aim: Endfield's lock-on — four brackets close in on the visual and the tag sweeps in, while the panel is pointed at */
+  .rp-aim { position: absolute; inset: -12px; pointer-events: none; z-index: 3; --s: var(--ctxs); }
+  .rp-sl2 { color: var(--ctxs); letter-spacing: 0; }
+  .rp-aim i { position: absolute; width: 18px; height: 18px; border: 0 solid var(--s); opacity: 0; transition: transform var(--t-enter) var(--e-enter), opacity var(--t-line); }
+  .rp-aim i:nth-child(1) { left: 0; top: 0; border-width: 2px 0 0 2px; transform: translate(-10px, -10px); }
+  .rp-aim i:nth-child(2) { right: 0; top: 0; border-width: 2px 2px 0 0; transform: translate(10px, -10px); }
+  .rp-aim i:nth-child(3) { right: 0; bottom: 0; border-width: 0 2px 2px 0; transform: translate(10px, 10px); }
+  .rp-aim i:nth-child(4) { left: 0; bottom: 0; border-width: 0 0 2px 2px; transform: translate(-10px, 10px); }
+  .rp-aim b { position: absolute; right: 0; top: -30px; padding: 4px 0; color: var(--ink); font: 600 10px/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+    clip-path: inset(0 100% 0 0); transition: clip-path var(--t-line) var(--e-enter); }
+  @media (hover: hover) {
+    .rp-open:hover .rp-aim i, .rp-open:focus-within .rp-aim i { opacity: 1; transform: none; }
+    .rp-open:hover .rp-aim b, .rp-open:focus-within .rp-aim b { clip-path: inset(0); }
+  }
+
+  @media (max-width: 1023px) {
+    .rp { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    .rp-no { font-size: clamp(96px, 26vw, 160px); top: -0.5em; }
+    .rp-aim { display: none; }
+  }
+</style>

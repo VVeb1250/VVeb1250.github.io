@@ -1,0 +1,54 @@
+---
+import FallbackNotice from '../components/primitives/FallbackNotice.astro';
+/**
+ * WorkPage — the stable frame around a work's story: page shell in the work's context color, WorkNav on top,
+ * the story (any composition) in the middle, RelatedWork + NextWork at the end.
+ * It deliberately does NOT decide the story's structure — that is the MDX story's job (docs/STORY-RECIPES.md).
+ */
+import PageShell from './PageShell.astro';
+import WorkNav from '../components/project/WorkNav.astro';
+import NextWork from '../components/project/NextWork.astro';
+import RelatedWork from '../components/lists/RelatedWork.astro';
+import { langOf, tx, type L } from '../lib/i18n';
+import { work, ctxOf } from '../lib/works';
+export interface Props {
+  work: string;
+  /** Work ids with pages, in reading order (for ↑ ↓ and Next). */
+  order: string[];
+  base?: string;
+  back?: string;
+  /** The back link's label (default "All work"). */
+  backLabel?: L;
+  /** Which nav item is current (default work; event pages: timeline). */
+  nav?: string;
+  /** Tint the fog with this work's color. Default true on work pages (it is this work's own area). */
+  fog?: boolean;
+  /** Set when the story is shown in a fallback language (e.g. 'en' on /th/ while the Thai story is not written). */
+  storyLang?: string;
+}
+const { work: id, order, base, back, backLabel, nav = 'work', fog = true, storyLang } = Astro.props;
+const lang = langOf(Astro.url);
+const w = await work(id);
+const i = order.indexOf(id);
+const next = i >= 0 && i < order.length - 1 ? order[i + 1] : null;
+---
+<PageShell title={w.data.title} description={tx(w.data.line, lang)} cat={ctxOf(w)} fog={fog} nav={nav}>
+  <div class="wrap">
+    <WorkNav work={id} order={order} base={base} back={back} backLabel={backLabel} />
+    <!-- the stage: moving between works, the content moves inside it and is cut off under WorkNav, which holds still -->
+    <div class="work-body" data-vt-stage>
+      {storyLang && <FallbackNotice shown={storyLang as 'en'} />}
+      <article class="story" data-mark={w.data.title} lang={storyLang}>
+        <slot />
+      </article>
+      <div class="work-end">
+        <RelatedWork work={id} />
+        {next && <NextWork work={next} base={base} />}
+      </div>
+    </div>
+  </div>
+</PageShell>
+
+<style>
+  .work-end { display: grid; gap: var(--space-block); margin-top: var(--space-section); }
+</style>

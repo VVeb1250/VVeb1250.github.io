@@ -1,0 +1,141 @@
+---
+/**
+ * @component ScrubFrames
+ * @group media
+ * @summary A real animation clip scrubbed by scroll: the sprite holds still under the header and every bit of scrolling moves it one frame forward — or back. Reversibility is the point: you can study a swing frame by frame.
+ * @use One signature clip on a game / motion work page (an attack, a run cycle) whose in-between frames are worth seeing. 8–24 frames from the real build.
+ * @avoid Clips that read as nothing when reversed; two pinned blocks back to back; frames that are not from the build.
+ * @behavior ~6% of a screen of scrolling per frame. Counter `05 / 10`, clip name and fps below. Loading: the sprite is fetched when the block is a screen away; while it comes, the bar under the counter shows the real download progress (then becomes the scroll position), the counter holds at 01 and, after 150ms, the loading HUD sits on the frame. Reduced motion: no scrubbing — first, middle and last frames are shown side by side instead.
+ * @example
+ * <ScrubFrames src="vaja/strip-attack1-padded.webp" frames={10} name="Vaja · attack1" fps={12} />
+ */
+import { getImage } from 'astro:assets';
+import { img } from '../../lib/media';
+export interface Props {
+  /** Sprite strip key: one horizontal image with equal-width frames. */
+  src: string;
+  frames: number;
+  name: string;
+  fps?: number;
+}
+const { src, frames, name, fps = 12 } = Astro.props;
+const m = img(src);
+const url = (await getImage({ src: m, format: 'webp', width: Math.min(m.width, 4800) })).src;
+const ar = `${m.width / frames}/${m.height}`;
+const keys = [0, Math.floor((frames - 1) / 2), frames - 1];
+const p = (n: number) => String(n).padStart(2, '0');
+---
+<section class="scrub" style={`--n:${frames}`} data-n={frames}>
+  <div class="scrub-pin">
+    <div class="scrub-v" role="img" aria-label={`${name}, ${frames} frames`} data-src={url} style={`--sprite:url(${url});aspect-ratio:${ar};--i:0`}></div>
+    <div class="scrub-meta">
+      <span class="num scrub-c"><b class="disp">{p(1)}</b> / {p(frames)}</span>
+      <span class="eyebrow">{name} · {fps} fps</span>
+      <span class="scrub-bar" aria-hidden="true"><i></i></span>
+    </div>
+  </div>
+  <div class="scrub-keys" aria-hidden="true">
+    {keys.map((k) => <div style={`background-image:url(${url});aspect-ratio:${ar};--i:${k}`}><span class="num">{p(k + 1)}</span></div>)}
+  </div>
+</section>
+
+<style>
+  .scrub { position: relative; height: calc(100svh + var(--n) * 6svh); }
+  .scrub-pin { position: sticky; top: calc(var(--hdr-h) + 24px); display: grid; gap: 12px; justify-items: center; background: var(--sunk); border: 1px solid var(--rule); padding: clamp(12px, 3vw, 28px); }
+  .scrub-v { background-image: var(--sprite); }
+  /* with JS the sprite is fetched by the script (progress + HUD) and shown once it is whole */
+  :global(:root.js) .scrub-v:not(.ready) { background-image: none; }
+  .scrub-v, .scrub-keys > div { width: min(100%, 460px); background-repeat: no-repeat; background-size: calc(var(--n) * 100%) 100%; background-position-x: calc(var(--i) / (var(--n) - 1) * 100%); }
+  .scrub-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: center; }
+  .scrub-c { font: 500 13px/1 var(--f-mono); color: var(--ink2); display: inline-flex; gap: 6px; align-items: flex-end; }
+  .scrub-c b { font-size: 34px; line-height: 0.9; color: var(--ink); }
+  .scrub-bar { position: relative; width: 140px; height: 2px; background: repeating-linear-gradient(90deg, var(--ink3) 0 2px, transparent 2px 6px); }
+  .scrub-bar i { position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0); background: var(--ctxs); }
+  .scrub.loading .scrub-bar i { transition: transform var(--t-cursor) linear; }
+  .scrub-keys { display: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .scrub { height: auto; }
+    .scrub-pin { display: none; }
+    .scrub-keys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; background: var(--sunk); border: 1px solid var(--rule); padding: 12px; }
+    .scrub-keys > div { width: 100%; position: relative; }
+    .scrub-keys span { position: absolute; left: 4px; top: 4px; font: 500 11px var(--f-mono); color: var(--ink2); }
+  }
+</style>
+
+<script>
+  import { onPage, reducedMotion } from '../../scripts/lifecycle';
+  import { onScroll } from '../../scripts/scroll';
+  import { hud, type Hud } from '../../scripts/lq';
+
+  /** Fetch the sprite with real progress on the bar; the frame shows only once the whole strip is there. */
+  async function load(root: HTMLElement, alive: () => boolean): Promise<string | null> {
+    const v = root.querySelector<HTMLElement>('.scrub-v')!, bar = root.querySelector<HTMLElement>('.scrub-bar i')!;
+    root.classList.add('loading');
+    const w: { h: Hud | null } = { h: null };
+    const t = window.setTimeout(() => { if (alive() && !v.classList.contains('ready')) w.h = hud(v, { preview: false }); }, 150);
+    try {
+      const res = await fetch(v.dataset.src!);
+      if (!res.ok || !res.body) throw new Error(String(res.status));
+      const total = +(res.headers.get('content-length') ?? 0), parts: Uint8Array[] = [];
+      const rd = res.body.getReader();
+      for (let got = 0; ;) {
+        const { done, value } = await rd.read();
+        if (done) break;
+        parts.push(value); got += value.length;
+        if (total && alive()) bar.style.transform = `scaleX(${Math.min(1, got / total).toFixed(3)})`;
+      }
+      if (!alive()) return null;
+      const u = URL.createObjectURL(new Blob(parts as BlobPart[], { type: res.headers.get('content-type') ?? 'image/webp' }));
+      const im = new Image(); im.src = u; await im.decode();
+      clearTimeout(t);
+      v.style.setProperty('--sprite', `url(${u})`);
+      v.classList.add('ready');
+      // the bar glides from "downloaded" to the scroll position, then follows scrolling 1:1 again
+      window.setTimeout(() => root.classList.remove('loading'), 400);
+      w.h?.done();
+      return u;
+    } catch {
+      clearTimeout(t);
+      root.classList.remove('loading');
+      // could not stream it: let the browser load it the plain way
+      v.classList.add('ready');
+      w.h?.done();
+      return null;
+    }
+  }
+
+  onPage(() => {
+    const roots = [...document.querySelectorAll<HTMLElement>('.scrub')];
+    if (!roots.length || reducedMotion()) return;
+    let alive = true;
+    const urls: string[] = [];
+    const ready = new Set<HTMLElement>();
+    // start fetching a screen before the block arrives
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const root = e.target as HTMLElement;
+      io.unobserve(root);
+      load(root, () => alive).then((u) => { if (u) urls.push(u); if (alive) { ready.add(root); dispatchEvent(new Event('scroll')); } });
+    }), { rootMargin: '100% 0px' });
+    roots.forEach((r) => io.observe(r));
+    const hdr = () => document.querySelector<HTMLElement>('.site-hdr')?.offsetHeight ?? 61;
+    const last = new Map<HTMLElement, number>();
+    const off = onScroll((_, vh) => {
+      for (const root of roots) {
+        if (!ready.has(root)) continue; // the bar shows download progress until the sprite is whole
+        const r = root.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) continue;
+        const pin = root.querySelector<HTMLElement>('.scrub-pin')!;
+        const run = Math.max(1, root.offsetHeight - pin.offsetHeight - 24);
+        const p = Math.min(1, Math.max(0, (hdr() + 24 - r.top) / run));
+        const n = +root.dataset.n!, f = Math.round(p * (n - 1));
+        root.querySelector<HTMLElement>('.scrub-bar i')!.style.transform = `scaleX(${p.toFixed(3)})`;
+        if (last.get(root) === f) continue;
+        last.set(root, f);
+        root.querySelector<HTMLElement>('.scrub-v')!.style.setProperty('--i', String(f));
+        root.querySelector('.scrub-c b')!.textContent = String(f + 1).padStart(2, '0');
+      }
+    });
+    return () => { alive = false; io.disconnect(); off(); urls.forEach((u) => URL.revokeObjectURL(u)); };
+  });
+</script>

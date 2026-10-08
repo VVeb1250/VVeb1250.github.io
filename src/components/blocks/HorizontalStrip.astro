@@ -1,0 +1,180 @@
+---
+/**
+ * @component HorizontalStrip
+ * @group blocks
+ * @summary A section whose items run sideways, and it moves sideways with every input: swipe left/right on touch, the mouse wheel while the pointer rests on the strip, drag with the mouse, ← → buttons, or Tab. The page itself never gets locked. Header, counter and progress live inside.
+ * @use Lab preview, a photo series (PhotoCard — each card keeps its own size and tilt), Lab cards with an object (LabItem `glyph` + `real` slot: a pixel glyph at rest, the detailed object opens inside the card on point — Endfield's database row), a series of small items people browse rather than read. 4–8 items of the same kind.
+ * @avoid Primary work (the first two minutes must not depend on sideways scrolling); more than one per page; mixing item types; putting it inside a narrower box that clips overflow (overflow: hidden/clip) without `bleed={false}` — the last card ends up in the clipped part and can never be scrolled into view.
+ * @props-note By default the track bleeds past the content column to the screen's right edge (a hint that there is more). That is right only when the strip sits in the full-width page column. Anywhere narrower — a card, a sidebar layout, a specimen box — pass `bleed={false}` so the track ends at its own box.
+ * @behavior While the strip moves (wheel glide, drag, swipe) it carries data-moving and fires `hs:move`: cards with an object never open meanwhile, and an open one closes. Mouse: the wheel moves the strip only after the pointer has actually moved onto it (a page scrolling under a still cursor is never captured), and hands the wheel back to the page at either end. Drag moves it too (a drag never opens a card). Touch: native sideways swipe with snap. Counter `[03] – [06]` and the progress line follow the position. Reduced motion: wheel and buttons jump instead of gliding.
+ * @example
+ * <HorizontalStrip id="lab" title={{ en: 'Lab', th: 'Lab' }} description={{ en: 'Open questions. Not proven yet.' }}>
+ *   <LabItem work="memory" variant="card" />
+ *   <LabItem work="whipui" variant="card" />
+ * </HorizontalStrip>
+ */
+import SectionHeader from '../shell/SectionHeader.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import type { CatOrSelf } from '../../lib/vocab';
+export interface Props {
+  id?: string;
+  title: L;
+  index?: string;
+  description?: L;
+  mark?: L;
+  cat?: CatOrSelf;
+  /** Let the track run to the screen's right edge (default true). Set false whenever the strip is not in the full-width page column. */
+  bleed?: boolean;
+}
+const { id, title, index, description, mark, cat, bleed = true } = Astro.props;
+const lang = langOf(Astro.url);
+const prev = tx({ en: 'Previous', th: 'ก่อนหน้า', ja: '前へ' }, lang);
+const next = tx({ en: 'Next', th: 'ถัดไป', ja: '次へ' }, lang);
+---
+<section id={id} class:list={['hs sec', { 'no-bleed': !bleed }]} data-cat={cat} data-mark={tx(mark ?? title, lang)}>
+  <SectionHeader title={title} index={index} description={description}>
+    <span class="hs-meta">
+      <span class="eyebrow num hs-count"></span>
+      <span class="hs-btns">
+        <button type="button" class="hs-b" data-d="-1" aria-label={prev}>←</button>
+        <button type="button" class="hs-b" data-d="1" aria-label={next}>→</button>
+      </span>
+    </span>
+  </SectionHeader>
+  <div class="hs-view" tabindex="0" role="region" aria-label={tx(title, lang)}><div class="hs-track"><slot /></div></div>
+  <div class="hs-bar" aria-hidden="true"><i></i></div>
+</section>
+
+<style is:global>
+  .hs { position: relative; margin-top: var(--space-section); display: grid; gap: 18px; }
+  .hs-meta { display: flex; gap: 14px; align-items: center; }
+  .hs-btns { display: flex; gap: 6px; }
+  .hs-b { width: 34px; height: 30px; display: grid; place-items: center; background: none; border: 1px solid var(--rule); color: var(--ink); font: 500 14px/1 var(--f-mono); cursor: pointer; transition: background-color var(--t-cursor) var(--e-enter), color var(--t-cursor), border-color var(--t-cursor); }
+  .hs-b:hover:not(:disabled) { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .hs-b:disabled { opacity: 0.35; cursor: default; }
+  .hs-view { margin-right: calc((min(100vw, var(--maxw)) - 100vw) / 2 - var(--gut)); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; outline-offset: 4px; }
+  .hs-view::-webkit-scrollbar { display: none; }
+  .hs.no-bleed .hs-view { margin-right: 0; }
+  .hs-view.drag { cursor: grabbing; user-select: none; }
+  .hs-view.drag * { pointer-events: none; }
+  @media (pointer: coarse) { .hs-view { scroll-snap-type: x proximity; } .hs-track > * { scroll-snap-align: start; } .hs-btns { display: none; } }
+  .hs-track { display: flex; gap: 16px; width: max-content; padding: 4px var(--gut) 4px 0; }
+  /* photo cards keep their own width and need room for tilt + shadow */
+  .hs-track:has(> .pc) { align-items: flex-start; gap: clamp(24px, 3vw, 40px); padding-block: 18px 30px; padding-left: 6px; }
+  .hs-track > .pc { flex: 0 0 auto; }
+  .hs-track > * { flex: 0 0 clamp(250px, 27vw, 340px); transition: opacity var(--t-cursor) var(--e-enter); }
+  .hs.armed .hs-track > :not([data-cur]) { opacity: 0.78; }
+  .hs-bar { position: relative; height: 2px; background: repeating-linear-gradient(90deg, var(--ink3) 0 2px, transparent 2px 6px); }
+  .hs-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; transform-origin: 0 50%; transform: scaleX(0); background: var(--ctxs); }
+</style>
+
+<script>
+  import { onPage, finePointer, reducedMotion } from '../../scripts/lifecycle';
+
+  onPage(() => {
+    const offs: Array<() => void> = [];
+    document.querySelectorAll<HTMLElement>('.hs').forEach((hs) => {
+      const view = hs.querySelector<HTMLElement>('.hs-view')!, track = hs.querySelector<HTMLElement>('.hs-track')!;
+      const bar = hs.querySelector<HTMLElement>('.hs-bar i')!, count = hs.querySelector<HTMLElement>('.hs-count')!;
+      const [bPrev, bNext] = [...hs.querySelectorAll<HTMLButtonElement>('.hs-b')];
+      // Astro may place a child component's module script in the slot. Only content counts as an item.
+      const items = ([...track.children] as HTMLElement[]).filter((el) => !['SCRIPT', 'STYLE', 'TEMPLATE'].includes(el.tagName));
+      const N = items.length, pad = (n: number) => String(n).padStart(2, '0');
+      const max = () => Math.max(0, view.scrollWidth - view.clientWidth);
+
+      // position → counter, progress, buttons
+      const show = () => {
+        const m = max(), x = view.scrollLeft, left = view.getBoundingClientRect().left;
+        let n = items.findIndex((c) => c.getBoundingClientRect().left >= left - 8);
+        if (n < 0 || x >= m - 2) n = N - 1;
+        count.textContent = `[${pad(n + 1)}] – [${pad(N)}]`;
+        items.forEach((c, i) => c.toggleAttribute('data-cur', i === n));
+        bar.style.transform = `scaleX(${m ? (x / m).toFixed(3) : 1})`;
+        bPrev.disabled = x <= 1; bNext.disabled = x >= m - 1;
+      };
+
+      // one glide loop (lerp like the page's smooth scroll) shared by wheel and buttons
+      let target = view.scrollLeft, raf = 0;
+      // scrollLeft is whole pixels in most browsers: sub-pixel steps would never arrive, so step at least 1px and
+      // finish exactly on the target; if the browser refuses to move (edge), stop instead of spinning forever.
+      const glide = () => {
+        const x = view.scrollLeft, d = target - x;
+        if (Math.abs(d) < 1) { view.scrollLeft = target; raf = 0; return; }
+        const st = d * 0.16;
+        view.scrollLeft = x + (Math.abs(st) < 1 ? Math.sign(d) : st);
+        if (view.scrollLeft === x) { target = x; raf = 0; return; }
+        raf = requestAnimationFrame(glide);
+      };
+      const goTo = (x: number) => {
+        target = Math.max(0, Math.min(max(), x));
+        if (reducedMotion()) { view.scrollLeft = target; return; }
+        if (!raf) raf = requestAnimationFrame(glide);
+      };
+
+      // wheel: only after the pointer has really moved onto the strip (never when the page scrolls under a still cursor)
+      let armed = false;
+      const move = (e: PointerEvent) => { if (e.pointerType === 'mouse' && (e.movementX || e.movementY)) { armed = true; hs.classList.add('armed'); } };
+      const leave = () => { armed = false; hs.classList.remove('armed'); };
+      const wheel = (e: WheelEvent) => {
+        if (!armed || e.ctrlKey) return;
+        const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        const unit = e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? view.clientWidth : 1;
+        const from = raf ? target : view.scrollLeft;
+        if ((d < 0 && from <= 0) || (d > 0 && from >= max())) return; // at the end: the page takes the wheel back
+        e.preventDefault();
+        e.stopPropagation(); // keep the page's smooth scroll from also moving
+        goTo(from + d * unit);
+      };
+
+      // drag with the mouse; a drag never becomes a click on a card
+      let down: { x: number; s: number } | null = null, dragged = false;
+      const pDown = (e: PointerEvent) => { if (e.pointerType !== 'mouse' || e.button !== 0) return; down = { x: e.clientX, s: view.scrollLeft }; dragged = false; };
+      const pMove = (e: PointerEvent) => {
+        if (!down) return;
+        const dx = e.clientX - down.x;
+        if (!dragged && Math.abs(dx) > 6) { dragged = true; view.classList.add('drag'); view.setPointerCapture(e.pointerId); cancelAnimationFrame(raf); raf = 0; }
+        if (dragged) { view.scrollLeft = down.s - dx; target = view.scrollLeft; }
+      };
+      const pUp = () => { down = null; if (dragged) requestAnimationFrame(() => view.classList.remove('drag')); };
+      const click = (e: MouseEvent) => { if (dragged) { e.preventDefault(); e.stopPropagation(); dragged = false; } };
+
+      // buttons: one card per press
+      const step = (dir: number) => {
+        const w = (items[1]?.offsetLeft ?? 0) - (items[0]?.offsetLeft ?? 0) || view.clientWidth * 0.8;
+        goTo(Math.round(((raf ? target : view.scrollLeft) + dir * w) / w) * w);
+      };
+      const btn = (e: Event) => step(+((e.currentTarget as HTMLElement).dataset.d || 1));
+
+      // moving: set while it scrolls (and ~160ms after); objects inside read it so nothing reveals under a passing cursor
+      let still = 0;
+      const moving = () => {
+        if (!hs.hasAttribute('data-moving')) { hs.setAttribute('data-moving', ''); hs.dispatchEvent(new CustomEvent('hs:move')); }
+        clearTimeout(still); still = window.setTimeout(() => {
+          hs.removeAttribute('data-moving');
+          hs.dispatchEvent(new CustomEvent('hs:still'));
+        }, 160);
+      };
+      const onScroll = () => { if (!raf && !dragged) target = view.scrollLeft; moving(); show(); };
+      view.addEventListener('scroll', onScroll, { passive: true });
+      bPrev.addEventListener('click', btn); bNext.addEventListener('click', btn);
+      if (finePointer()) {
+        hs.addEventListener('pointermove', move); hs.addEventListener('pointerleave', leave);
+        view.addEventListener('wheel', wheel, { passive: false });
+        view.addEventListener('pointerdown', pDown); view.addEventListener('pointermove', pMove);
+        view.addEventListener('pointerup', pUp); view.addEventListener('pointercancel', pUp);
+        view.addEventListener('click', click, true);
+      }
+      const ro = new ResizeObserver(show); ro.observe(view);
+      show();
+      offs.push(() => {
+        cancelAnimationFrame(raf); clearTimeout(still); ro.disconnect();
+        view.removeEventListener('scroll', onScroll);
+        bPrev.removeEventListener('click', btn); bNext.removeEventListener('click', btn);
+        hs.removeEventListener('pointermove', move); hs.removeEventListener('pointerleave', leave);
+        view.removeEventListener('wheel', wheel); view.removeEventListener('pointerdown', pDown); view.removeEventListener('pointermove', pMove);
+        view.removeEventListener('pointerup', pUp); view.removeEventListener('pointercancel', pUp); view.removeEventListener('click', click, true);
+      });
+    });
+    return () => offs.forEach((f) => f());
+  });
+</script>

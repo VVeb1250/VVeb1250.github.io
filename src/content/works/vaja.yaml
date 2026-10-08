@@ -1,0 +1,38 @@
+# Facts only: _note/portfolio-facts.md §2.1. Cover media is a placeholder until the owner picks final art.
+title: Journey of Vaja
+cat: game
+theme: vaja
+year: 2025
+date: "2025-02"
+type: GAME · UNITY 6
+status: COMPLETED
+idx: "01"
+page: true
+line:
+  en: A 2D action RPG made by a team of three. I drew most of the main art, composed the scenes, did the rigging and animation, and wrote the player control.
+  ja: "チーム3人で作った2Dアクション RPG。メインのアートの大半、シーン構成、リギングとアニメーション、プレイヤー操作の実装を担当しました。"
+  th: "เกม action RPG 2 มิติ ทำเป็นทีม 3 คน ผมวาดภาพหลักส่วนใหญ่ จัดฉาก ทำ rigging กับ animation และเขียนระบบควบคุมผู้เล่น"
+fact:
+  en: Project head · team of 3 · 2025
+  th: หัวหน้าโปรเจกต์ · ทีม 3 คน · 2025
+  ja: プロジェクトリーダー · 3人チーム · 2025
+meta:
+  - k: type
+    v: { en: Course project · team of 3, th: โปรเจกต์วิชา · ทีม 3 คน, ja: 授業課題 · 3人チーム }
+  - k: role
+    v: { en: Project head · art · animation · player control, th: หัวหน้าโปรเจกต์ · art · animation · player control, ja: リーダー · アート · アニメーション · 操作 }
+  - k: engine
+    v: Unity 6 · 2D Animation + IK
+  - k: when
+    v: 2025-02 → 2025-03
+cover:
+  src: ../../assets/works/vaja/object.webp
+  alt: { en: Vaja, the player character, holding the crystal staff, th: Vaja ตัวละครผู้เล่น ถือไม้เท้าคริสตัล, ja: 水晶の杖を持つプレイヤーキャラクターのVaja }
+  plate: step-right
+  note: { en: Sprite from the game build, th: sprite จาก build ของเกม, ja: ゲームビルドのスプライト }
+  callouts:
+    - { x: 86, y: 9, label: { en: Crystal staff, th: ไม้เท้าคริสตัล, ja: 水晶の杖 }, sub: { en: DRAWN BY HAND, th: วาดเอง, ja: 手描き }, side: right, key: true }
+    - { x: 30, y: 30, label: Vaja, sub: { en: 20 ANIMATION CLIPS, th: ANIMATION 20 CLIP, ja: アニメーション20クリップ }, side: left }
+related: []
+tags: [coursework, team]
+sources: [portfolio-facts §2.1, "Owner game source art: VajaWeapon.png (media-candidates index, 2026-09-30)"]

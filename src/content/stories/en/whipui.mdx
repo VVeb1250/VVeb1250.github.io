@@ -1,0 +1,38 @@
+---
+work: whipui
+recipe: free
+summary: WhipUI — two skills in one thin package for coding agents. WhipUI builds from a spec; WhipDesign turns a rough request into UX and visual work.
+---
+
+{/* Facts §2.4. The package's own tagline, the split, where it stands. No measured quality claim. Moved from the old Notes page (/lab). */}
+
+<ProjectHeader work="whipui" layout="text" />
+
+<div class="pair">
+  <div>
+    <h3>WhipDesign</h3>
+    <p>Reads the brief: whether a page is needed, what goes on it, the concept, UX intent, art and asset direction, motion.</p>
+  </div>
+  <div>
+    <h3>WhipUI</h3>
+    <p>Carries it out: routing, a design fingerprint (Project DNA), specialist skills loaded as needed, and rendered critique.</p>
+  </div>
+</div>
+
+## Install
+
+Installs into the project, not into global settings, for Codex, Claude Code and VS Code agents.
+
+<CopyText text="npx whipui init" />
+
+## Where it stands
+
+It started as help for following a design brief and grew toward a fuller design harness. Newer models handle more on their own, so some layers may no longer be needed.
+
+<ClaimLedger
+  exists={[{ en: 'npm 0.1.0 → 1.2.0 (11 Aug – 14 Sep 2026), 5 GitHub releases; installs per project with npx whipui init for Codex, Claude Code and VS Code agents.' }]}
+  useful={[{ en: 'In my own use it helps AI follow the brief, give elements a reason, and think about UX more explicitly.' }]}
+  unproven={[{ en: 'Any measured drop in generic output, or a measured quality gain.' }, { en: 'That the current architecture is the right one.' }]}
+  unnecessary={[{ en: 'Layers that newer models already handle on their own.' }]} />
+
+<EvidenceLink href="https://github.com/VVeb1250/WhipUI" label="GitHub · WhipUI" kind="page" shows={{ en: '5 releases' }} />

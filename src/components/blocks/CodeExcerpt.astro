@@ -1,0 +1,42 @@
+---
+/**
+ * @component CodeExcerpt
+ * @group blocks
+ * @summary A short excerpt of real code with its file name and starting line, highlighted to match the theme.
+ * @use When the code itself is the evidence (a tricky rule, a core loop). 5–25 lines, copied from the real file.
+ * @avoid Rewritten "cleaner" versions presented as the original; whole files; code screenshots.
+ * @example
+ * <CodeExcerpt file="PlayerController.cs" lang="csharp" from={120} code={`…real lines…`} note={{ en: 'Ledge grab → climb.' }} />
+ */
+import { Code } from 'astro:components';
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  code: string;
+  /** Shiki language id: ts, js, csharp, go, cpp, c, asm, vhdl, verilog, python, bash, json, yaml… */
+  lang: string;
+  file?: string;
+  /** Line number of the first line in the real file. */
+  from?: number;
+  note?: L;
+  /** Link to the file in the repo (if public). */
+  href?: string;
+}
+const { code, lang: codeLang, file, from, note, href } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<figure class="code">
+  {(file || from) && <figcaption class="code-h"><span class="mono">{href ? <a href={href}>{file}</a> : file}</span>{from != null && <span class="mono num">L{from}–{from + code.trimEnd().split('\n').length - 1}</span>}</figcaption>}
+  <Code code={code.replace(/^\n/, '').trimEnd()} lang={codeLang as any} themes={{ light: 'github-light', dark: 'github-dark-dimmed' }} defaultColor={false} />
+  {note && <p class="code-n">{tx(note, lang)}</p>}
+</figure>
+
+<style>
+  .code { display: grid; gap: 0; border: 1px solid var(--rule); background: var(--surface); max-width: 100%; }
+  .code-h { display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--rule); font-size: 12px; color: var(--ink2); }
+  .code-h a { color: inherit; text-decoration-color: var(--ctxs); }
+  .code :global(pre) { margin: 0; padding: 14px 16px; overflow-x: auto; font: 400 13px/1.6 var(--f-mono); background: transparent !important; }
+  .code :global(.shiki span) { color: var(--shiki-light); }
+  :global(:root[data-theme='dark']) .code :global(.shiki span) { color: var(--shiki-dark); }
+  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme='light'])) .code :global(.shiki span) { color: var(--shiki-dark); } }
+  .code-n { padding: 8px 12px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--ink2); }
+</style>

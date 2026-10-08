@@ -1,0 +1,11 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §4.6.
+title: "teach-me-all"
+cat: ai
+year: 2026
+type: SIDE PROJECT
+status: ARCHIVED
+line:
+  en: "Generating exam questions without hallucination. Paused: it grew more engineering than the job needed."
+  th: "สร้างข้อสอบโดยไม่ให้ AI สร้างข้อมูลขึ้นเอง · พักไว้เพราะพัฒนาเกินความต้องการ"
+  ja: "ハルシネーションなしで試験問題を作る。必要以上に作り込んだので休止。"
+sources: [portfolio-facts §4.6]

@@ -1,0 +1,70 @@
+---
+work: z80
+recipe: tool-in-use
+summary: A browser IDE that runs the course's real Z80 toolchain — built in about 9 days because the original workflow was cumbersome.
+---
+
+{/* The integrated workspace leads; the four-step capture sequence proves its workflow. Facts §2.2. */}
+<ProjectHeader work="z80" layout="split" roles={['Problem', 'Direction', 'Integration']}>
+  <MediaFrame slot="media" src="z80/live-compile-to-simulator.webp" alt={{ en: 'Workspace: lab1.asm, the C16 console and Z80sim memory at 2000h' }} frame="screen" width="wide" eager
+    caption={{ en: 'Source, assembly output and simulator memory in one workspace.' }} source={{ en: 'Live site' }} />
+</ProjectHeader>
+
+<ProjectContext label={{ en: 'Friction' }} lead={{ en: 'The original workflow was cumbersome.' }}>
+  <p>The old setup took a lot before it worked, and I had to remember commands I didn’t need. So I built one place to write, assemble and run.</p>
+</ProjectContext>
+
+## End to end, on the live site
+
+Captured on the live site. The run to HALT is the built-in sample program.
+
+<SplitScroll steps={[
+  { title: { en: 'Assemble: no errors' }, text: { en: 'The real C16.EXE runs in the console and ends with “End of Assembly -- No Errors”.' },
+    src: 'z80/live-assemble-success.webp', alt: { en: 'Console: End of Assembly -- No Errors' }, source: { en: 'Live site' } },
+  { title: { en: 'Load into the simulator' }, text: { en: 'Z80sim reports “File load success at 2000h”: the HEX file is in the simulator.' },
+    src: 'z80/live-simulator-loaded.webp', alt: { en: 'Z80sim: File load success at 2000h' }, source: { en: 'Live site' } },
+  { title: { en: 'Source to memory, in one screen' }, text: { en: 'The source, the console’s “No Errors” and the machine code at 2000h, side by side. This shows compile → simulator; it does not show the program running.' },
+    src: 'z80/live-compile-to-simulator.webp', alt: { en: 'Workspace: lab1.asm, the C16 console and Z80sim memory at 2000h' }, source: { en: 'Live site' } },
+  { title: { en: 'Run to HALT' }, text: { en: 'The built-in sample lab1.asm, loaded at 8000h and run with G 8000: “Program halted”, PC 800B, 48 machine cycles.' },
+    src: 'z80/live-program-halted.webp', alt: { en: 'Z80sim: Program halted, PC 800B' }, source: { en: 'Live site · sample program' } }
+]} />
+
+## The real toolchain, in the browser
+
+The course's own assembler and simulator run in DOSBox compiled to WebAssembly.
+
+<FlowDiagram n="01" caption={{ en: 'Toolchain' }} nodes={[
+  { id: 'ed', col: 0, label: 'Monaco editor', sub: '.ASM' },
+  { id: 'as', col: 1, label: 'C16.EXE', sub: 'DOSBOX → WASM', core: true },
+  { id: 'hx', col: 2, label: 'Intel HEX', sub: '+ LISTING' },
+  { id: 'sim', col: 3, label: 'Z80sim', sub: 'ET-BOARD SIMULATOR' }
+]} edges={[
+  { from: 'ed', to: 'as', active: true },
+  { from: 'as', to: 'hx', active: true },
+  { from: 'hx', to: 'sim', active: true, label: { en: 'loads on its own' } }
+]} />
+
+A multi-file workspace kept in the browser; assemble to Intel HEX and a listing; compiled files load into Z80sim on their own; each file shows its build state in one of 3 colors; TH / EN with an interface tour.
+
+An Electron desktop build too, which I actually used.
+
+<EvidenceLink href="https://github.com/VVeb1250/z80-workspace/releases/tag/v0.1.4" label="Desktop downloads" kind="release" shows={{ en: 'GitHub Releases · v0.1.4' }} />
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Noticed the problem, set the direction, integrated the real tools into one workspace, decided what counted as done.' } },
+  { who: 'ai', did: { en: 'Most of the implementation, heavily AI-assisted, under my steering.' } },
+  { who: 'upstream', did: { en: 'C16.EXE and the Z80 ET-Board simulator (the course’s tools), DOSBox, the Monaco editor.' } }
+]} />
+
+<OutcomeBlock outcome={{ en: 'Complete: it does what I wanted it to do. Used by me and a few others; the course needed this workflow for only 2 labs.' }}
+  current={{ en: 'The web version is online on GitHub Pages.' }} />
+
+<details>
+  <summary>Usage notes · GoatCounter</summary>
+  <MediaFrame src="z80/goatcounter.webp" alt={{ en: 'GoatCounter pages panel: 69 visits, /z80-workspace 54, assemble-toolbar 8, download-export-lst 3, assemble-console-command 3' }} frame="screen" width="text"
+    caption={{ en: '69 visits, 11 assembles (8 from the toolbar, 3 from the console), 20 Jul – 26 Sep 2026. The counts may include my own testing.' }} source="GoatCounter" />
+</details>
+
+<Draft>
+  <p>An earlier tool of mine, DOSBox Handmade, only wrapped DOSBox and the KKU Z80 simulator: detecting DOSBox, mounting the workspace, launching the simulator. Z80 Workspace replaced the whole loop.</p>
+</Draft>

@@ -1,0 +1,55 @@
+---
+work: icpc
+recipe: free
+summary: ICPC Thailand, the national programming contest — 2024 with team Eeg E Eeg Eeg (first to solve problem G, 19th of 56) and 2025 with team Egg E Egg Egg.
+---
+
+import '../../../styles/stories/icpc.css';
+
+{/* Facts §6.3, §6.4; the 2024 scoreboard (checked 2026-10-01). Dates and venue of 2024 are on the event poster in the
+    owner's photo; KMITL hosted 2025 (badge, media-candidates README). Do not generalise G to "first solve overall".
+    The two years are one page; the Timeline's 2025 row opens #y2025. */}
+
+<ProjectHeader work="icpc" layout="stack" roles={['Reading the problems', 'The approach', 'Some coding']}>
+  <MediaFrame slot="media" src="icpc/first-to-solve-2024.webp" alt={{ en: 'Team Eeg E Eeg Eeg on stage holding the First to Solve board at ICPC Thailand 2024' }} width="full" eager ratio="16/9" focus="50% 62%"
+    caption={{ en: 'First to Solve · problem G · ICPC Thailand National Competition 2024' }} />
+</ProjectHeader>
+
+<div id="y2024" class="icpc-year">
+  <div class="icpc-y-head">
+    <span class="icpc-y disp num">2024</span>
+    <p>Team Eeg E Eeg Eeg, Khon Kaen University · Chulalongkorn University, 7–8 September</p>
+  </div>
+  <div class="readouts">
+    <Readout value={12} unit={{ en: 'minutes' }} label={{ en: 'problem G, first try — the earliest of the 40 teams that solved it (the next: 17)' }} source={{ en: 'Scoreboard 2024' }} size="lg" />
+    <Readout value={19} unit={{ en: 'of 56 teams' }} label={{ en: 'final place' }} source={{ en: 'Scoreboard 2024' }} />
+    <Readout value={3} unit={{ en: 'solved' }} label={{ en: 'B · G · K' }} source={{ en: 'Scoreboard 2024' }} />
+  </div>
+  <div class="icpc-2024">
+    <MediaFrame src="icpc/team-banner-2024.webp" alt={{ en: 'Contestants in front of the ICPC Thailand 2024 banner at Chula Engineering' }} width="wide" caption={{ en: 'In front of the banner, Chula Engineering, 2024' }} />
+    <div>
+      <p>We were the first team to solve G. It went in at 12 minutes, on the first try. Another KKU team, KKU48, solved it at 30.</p>
+      <EvidenceLink href="https://icpc-chula.github.io/scoreboard-archive/2024/" label="Final standings 2024" kind="page" shows={{ en: 'Eeg E Eeg Eeg · 19th · B, G, K' }} />
+    </div>
+  </div>
+</div>
+
+## My part
+
+Mostly before the code: reading the problems, translating parts of the statements, finding an approach and explaining it to teammates who were faster at implementing it. I wrote some of the code too.
+
+<div id="y2025" class="icpc-year" data-cat="icpc25">
+  <div class="icpc-y-head">
+    <span class="icpc-y disp num">2025</span>
+    <p>Team Egg E Egg Egg · KMITL</p>
+  </div>
+  <div class="icpc-2025">
+    <div>
+      <p>The national contest again, with a different team name. It went less well than 2024: the teammate who was strongest at implementation did not take part that year. No award.</p>
+    </div>
+    <MediaFrame src="icpc/badge-2025.webp" alt={{ en: 'Contestant badge, ICPC Thailand National Contest 2025: Teethawat Kumying, Khon Kaen University, team Egg E Egg Egg' }} width="text" caption={{ en: 'Contestant badge · 2025' }} />
+  </div>
+</div>
+
+<OutcomeBlock outcome={{ en: '2024: first to solve problem G; 19th of 56. 2025: took part, no award.' }}
+  evidence={[{ label: 'Final standings 2024', href: 'https://icpc-chula.github.io/scoreboard-archive/2024/', kind: 'page', shows: 'Eeg E Eeg Eeg' }]} />

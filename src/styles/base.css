@@ -1,0 +1,170 @@
+/* Global base: motion + type tokens, reset, layout helpers, reveal. Colors come from tokens.css (generated). */
+:root {
+  /* type */
+  /* families come from <Font> in PageShell (astro.config.mjs → fonts); order matters — see the note there */
+  --f-disp: var(--font-saira), var(--font-bai), 'IBM Plex Sans JP', system-ui, sans-serif;
+  --f-body: var(--font-plex-th), 'IBM Plex Sans JP', var(--font-plex);
+  --f-mono: var(--font-mono);
+  --disp-stretch: 78%; --disp-w: 700;
+
+  /* motion — measured from Endfield at 30fps, converted to web (spec §24). Use these names only. */
+  --e-exit: cubic-bezier(0.4, 0, 1, 1);
+  --e-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --e-open: cubic-bezier(0.87, 0, 0.13, 1);
+  --e-glide: cubic-bezier(0.37, 0, 0.63, 1); /* something crossing the whole screen (the light ↔ dark plane): even speed, no whip */
+  --t-exit: 60ms; --t-enter: 500ms; --t-line: 300ms; --t-thicken: 140ms; --t-hold: 60ms; --t-open: 250ms;
+  --t-stagger: 35ms; --t-cursor: 240ms; --t-push: 460ms; --t-roll: 500ms; --t-fog: 700ms;
+  --slide: 32px;
+
+  /* layout */
+  --maxw: 1280px;
+  --gut: clamp(16px, 4vw, 48px);
+  --hdr-h: 69px; /* real value is kept in sync by SiteNav; these defaults only cover the first paint */
+  --space-section: clamp(88px, 12vw, 160px);
+  --space-block: clamp(48px, 7vw, 96px);
+}
+@media (max-width: 760px) { :root { --hdr-h: 92px; } }
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-exit: 0ms; --t-enter: 0ms; --t-line: 0ms; --t-thicken: 0ms; --t-hold: 0ms; --t-open: 0ms; --t-stagger: 0ms; --t-cursor: 0ms; --t-push: 0ms; --t-roll: 0ms; --t-fog: 0ms; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--bg); -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--hdr-h) + 16px); }
+html.page-scrollbar-ready { scrollbar-width: none; }
+@media (forced-colors: active) { html.page-scrollbar-ready { scrollbar-width: auto; } }
+body {
+  margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.7 var(--f-body); -webkit-font-smoothing: antialiased; overflow-x: clip;
+}
+:root[lang='th'] body { line-height: 1.75; }
+:root[lang='ja'] body { line-break: strict; word-break: auto-phrase; overflow-wrap: anywhere; }
+h1, h2, h3, h4, p, figure, blockquote, dl, dd, ol, ul { margin: 0; }
+ol, ul { padding: 0; }
+img, video, svg { display: block; max-width: 100%; }
+img, video { height: auto; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+/* <main> takes focus after a page change (scripts/transitions.ts) and from the skip link: no ring around the whole page */
+main[tabindex='-1']:focus { outline: none; }
+::selection { background: var(--ctxp); color: var(--ink); }
+
+/* ---------- type helpers ---------- */
+.disp { font-family: var(--f-disp); font-stretch: var(--disp-stretch); font-weight: var(--disp-w); letter-spacing: -0.005em; }
+.mono { font-family: var(--f-mono); }
+/* eyebrow: small mono uppercase label (types, dates, section names) */
+.eyebrow { font: 500 11px/1.4 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
+:root[lang='th'] .eyebrow.l10n, :root[lang='ja'] .eyebrow.l10n { font: 500 12px/1.4 var(--f-body); letter-spacing: 0.02em; }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink2); }
+.nw { white-space: nowrap; }
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- layout ---------- */
+.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gut); }
+.stack { display: grid; gap: var(--space-block); }
+.prose { display: grid; gap: 1em; max-width: 64ch; font-size: 17px; }
+.prose p { text-wrap: pretty; }
+.prose a { text-decoration-color: var(--ctxs); text-underline-offset: 3px; }
+.prose a:hover { text-decoration-thickness: 2px; }
+:root[lang='th'] .prose { line-height: 1.8; }
+
+/* ---------- reveal: [data-reveal] enters once when it scrolls into view (src/scripts/reveal.ts) ---------- */
+:root.js [data-reveal]:not(.is-in) { opacity: 0; transform: translate3d(0, 12px, 0); }
+:root.js [data-reveal='left']:not(.is-in) { transform: translate3d(calc(var(--slide) * -1), 0, 0); }
+:root.js [data-reveal='fade']:not(.is-in) { transform: none; }
+:root.js [data-reveal].is-in {
+  transition: opacity var(--t-enter) var(--e-enter), transform var(--t-enter) var(--e-enter);
+  transition-delay: calc(var(--i, 0) * var(--t-stagger));
+}
+@media (prefers-reduced-motion: reduce) { :root.js [data-reveal]:not(.is-in) { opacity: 1; transform: none; } }
+/* the page script did not run (PageShell safety net): show everything */
+:root.rv-off [data-reveal]:not(.is-in) { opacity: 1; transform: none; }
+
+/* ---------- draft content (visible in dev only; stripped from production builds) ---------- */
+.is-draft { position: relative; outline: 1px dashed var(--ink3); outline-offset: 6px; }
+.is-draft::after {
+  content: attr(data-draft-label); position: absolute; top: -18px; right: 0;
+  font: 500 10px/1 var(--f-mono); letter-spacing: 0.06em; color: var(--ink2); background: var(--bg); padding: 2px 4px;
+}
+
+/* ---------- story flow: a work page's MDX body (layouts/WorkPage.astro → article.story) ---------- */
+.story > * + * { margin-top: var(--space-block); }
+.story > p, .story > ul, .story > ol { max-width: 64ch; font-size: 17px; }
+.story > p + p, .story > p + ul, .story > p + ol, .story > ul + p, .story > ol + p { margin-top: 1em; }
+.story > h2 { font: 500 12px/1.4 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink2); border-top: 1px solid var(--rule); padding-top: 14px; }
+.story > h2 + * { margin-top: 18px; }
+.story > h3 { font-family: var(--f-disp); font-stretch: var(--disp-stretch); font-weight: 600; font-size: clamp(24px, 2.6vw, 32px); line-height: 1.12; }
+.story > h3 + * { margin-top: 12px; }
+.story a { text-decoration-color: var(--ctxs); text-underline-offset: 3px; }
+.story > ul, .story > ol { padding-left: 1.2em; }
+.story > ul li + li, .story > ol li + li { margin-top: 0.3em; }
+.story > .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.story > .pair > * + * { margin-top: 0; }
+/* a command or a source right under the text it belongs to (CopyText after a paragraph, an EvidenceLink after a ledger) */
+.story > p + .copy { margin-top: 14px; }
+.story > .ledger + .ev { margin-top: 28px; }
+:root[lang='th'] .story > p { line-height: 1.8; }
+/* a row of Readouts */
+.readouts { display: flex; flex-wrap: wrap; gap: 24px clamp(28px, 5vw, 64px); align-items: flex-start; }
+
+/* image loading: the blurred preview (lqStyle) is dropped once the real picture is in (src/scripts/lq.ts) */
+img[data-lq].lq-done, video[data-lq].lq-done { background-image: none !important; }
+:root:not(.js) img[data-lq] { background-image: none !important; }
+/* ---------- selection: one of many (spec §15 + Endfield's tabs) ----------
+   Put .sel on the control; "selected" = aria-selected="true" | aria-pressed="true" | aria-current.
+   hover  → a light plate sweeps in from the left.
+   press  → the plate snaps back to the left at once (the click is acknowledged before the state changes).
+   select → a charcoal block (ink mixed into the page: 78% in light, 66% in dark — monochrome, softer than a full
+            black / white inversion; text on it ≥ 7:1) sweeps in left → right with a slanted leading edge (the
+            image-swap block grammar at button scale) and a bar in the context color (--ctx, ≈ 3:1 on the fill; the
+            strong --ctxs would vanish on it); the text turns light as the block passes. The one that loses the state
+            retracts right → left at the same time — both are plain transitions, no script.
+   Knobs: --sel-ease (a stepped linear() fills a leading cell first, e.g. Inspector's number column), --sel-shadow
+   (the bar: default a 3px left bar in --ctx), --sel-inset (cover the control's own border). Reduced motion: instant.
+   Folded shapes sit 2px outside the box: an edge exactly on it leaks a hairline on fractional pixel positions. */
+:root { --sel-k: 78%; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) { --sel-k: 66%; } }
+:root[data-theme='dark'] { --sel-k: 66%; }
+.sel { position: relative; isolation: isolate; --sl: 10px; transition: color calc(var(--t-thicken) * 0.5) linear; }
+.sel::before, .sel::after { content: ''; position: absolute; inset: var(--sel-inset, 0); z-index: -1; pointer-events: none; border-radius: inherit;
+  clip-path: polygon(-2px 0, -2px 0, calc(-2px - var(--sl)) 100%, -2px 100%); }
+.sel::before { background: var(--surface); transition: clip-path calc(var(--t-exit) * 1.5) var(--e-exit); }
+.sel:hover::before { clip-path: polygon(0 0, calc(100% + var(--sl)) 0, 100% 100%, 0 100%); transition-timing-function: var(--e-enter); }
+.sel:active::before { clip-path: polygon(-2px 0, -2px 0, calc(-2px - var(--sl)) 100%, -2px 100%); transition-duration: var(--t-exit); }
+.sel::after { background: var(--sel-fill, color-mix(in srgb, var(--ink) var(--sel-k), var(--bg))); box-shadow: var(--sel-shadow, inset 3px 0 0 var(--ctx, var(--band))); transition: clip-path calc(var(--t-thicken) * 0.7) var(--e-exit); }
+.sel:is([aria-selected='true'], [aria-pressed='true'], [aria-current]:not([aria-current='false'])) { color: var(--bg); transition-delay: calc(var(--t-thicken) * 0.35); }
+.sel:is([aria-selected='true'], [aria-pressed='true'], [aria-current]:not([aria-current='false']))::after {
+  clip-path: polygon(0 0, calc(100% + var(--sl)) 0, 100% 100%, 0 100%); transition: clip-path var(--t-thicken) var(--sel-ease, var(--e-enter)); }
+
+/* loading HUD (src/scripts/lq.ts) — spec §14/§15: one moving part (the scan), an explicit state (the tag), brackets
+   that close in once when it appears. The veil carries the blurred preview and wipes away when the picture arrives,
+   the brackets fading with it — no accent after (pictures often arrive together). No colored line, no pulsing. */
+.lq-hud { position: absolute; pointer-events: none; --s: var(--ctxs, var(--acc)); }
+/* scrolling (scripts/scroll.ts): content ignores the resting cursor until the scroll stops, preventing hover
+   reveals from starting mid-scroll. Keep the header interactive so its navigation can be used during a glide. */
+@media (hover: hover) { html.scrolling main, html.scrolling .insp-pane { pointer-events: none; } }
+/* light ↔ dark plane (scripts/theme.ts): the new mode's ground (.tone-light / .tone-dark on it), soft ramps --r wide
+   on both sides; it is moved and skewed by transform only (the GPU moves it, no page capture) */
+.theme-plane { position: fixed; top: 0; bottom: 0; left: 0; z-index: 95; pointer-events: none; will-change: transform;
+  background: linear-gradient(162deg, var(--atmo1) 0%, var(--atmo2) 48%, var(--atmo3) 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--r), #000 calc(100% - var(--r)), transparent 100%); }
+/* blockSwap's block (scripts/wipe.ts): the context signal with the plate's lean of light — a touch lighter at the top,
+   a touch deeper at the bottom (low chroma, one hue: the plate gradient exception) — so it reads as material, not a flat fill */
+.wipe-block { background: linear-gradient(176deg, color-mix(in oklab, var(--ctxs), var(--bg) 16%) 0%, var(--ctxs) 58%, color-mix(in oklab, var(--ctxs), var(--ink) 8%) 100%); }
+.lq-hud .lq-veil { position: absolute; inset: 0; overflow: hidden; background-repeat: no-repeat; }
+.lq-hud .lq-veil::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in srgb, var(--bg) 16%, transparent) 3px 4px); }
+.lq-hud .lq-scan { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 55%, color-mix(in srgb, var(--bg) 30%, transparent) 100%); transform: translateY(-100%); opacity: 0; }
+.lq-hud.wait .lq-scan { opacity: 1; animation: lq-scan 1.4s var(--e-open) infinite; }
+@keyframes lq-scan { to { transform: translateY(100%); } }
+.lq-hud .c { position: absolute; width: 12px; height: 12px; border: 0 solid var(--s); }
+.lq-hud .c1 { left: 6px; top: 6px; border-width: 2px 0 0 2px; } .lq-hud .c2 { right: 6px; top: 6px; border-width: 2px 2px 0 0; }
+.lq-hud .c3 { right: 6px; bottom: 6px; border-width: 0 2px 2px 0; } .lq-hud .c4 { left: 6px; bottom: 6px; border-width: 0 0 2px 2px; }
+.lq-hud .lq-tag { position: absolute; left: 22px; bottom: 6px; }
+.lq-hud:not(.wait):not(.err) .lq-tag { display: none; }
+.lq-hud.err .lq-scan, .lq-hud.err .lq-tag::after { display: none; }
+/* the LOADING tag, shared by the HUD and a swap block that is waiting (wipe.ts) */
+.lq-tag { padding: 3px 6px; background: var(--ink); color: var(--bg); font: 600 9px/1.2 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap; }
+.lq-tag::after { content: ''; display: inline-block; width: 6px; height: 7px; margin-left: 5px; background: var(--s, var(--ctxs, var(--acc))); vertical-align: -1px; animation: lq-blink 0.9s steps(1) infinite; }
+@keyframes lq-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .lq-hud *, .lq-tag::after { animation: none !important; } }

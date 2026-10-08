@@ -1,0 +1,12 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §3.5.
+title: "Slot machine on FPGA"
+cat: hw
+year: 2026
+type: DIGITAL LOGIC
+status: COMPLETED
+line:
+  en: "Team final project for a Digital course: a slot machine on an FPGA with a 7-segment display, buttons and LEDs. My clearest part was the random-number logic. 49 of 67 commits."
+  ja: "デジタル回路の授業のチーム最終課題。FPGA 上のスロットマシンで、7セグメント表示、ボタン、LED を使います。私が最も明確に担当したのは乱数生成のロジックです。67コミット中49コミット。"
+  th: "งาน final project ของทีมในวิชา Digital: slot machine บน FPGA มี 7-segment display ปุ่ม และ LED ส่วนที่ชัดที่สุดของผมคือ logic สุ่มตัวเลข คิดเป็น 49 จาก 67 commit"
+tags: [coursework, team]
+sources: [portfolio-facts §3.5]

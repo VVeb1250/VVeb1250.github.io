@@ -1,0 +1,23 @@
+title: WhipUI
+cat: tool
+year: 2026
+date: "2026-08"
+type: AGENT TOOLING · NPM
+status: ACTIVE
+idx: "06"
+page: true
+line:
+  en: "Two skills in one thin package for coding agents: WhipUI builds from a spec, WhipDesign turns a rough request into UX and visual work."
+  th: "skill 2 ตัวใน package เดียว สำหรับ coding agent WhipUI สร้างตาม spec ส่วน WhipDesign เปลี่ยนคำขอคร่าวๆ ให้เป็นงาน UX และภาพ"
+  ja: コーディングエージェント向けの薄いパッケージに2つのスキル。WhipUIは仕様から作り、WhipDesignは大まかな依頼をUXとビジュアルに変える。
+fact: { en: 0.1.0 → 1.2.0 in five weeks · I use it myself, th: 0.1.0 → 1.2.0 ใน 5 สัปดาห์ · ผมใช้งานเองจริง, ja: 5週間で 0.1.0 → 1.2.0 · 自分で使用 }
+quote: { en: "Make AI-built frontends feel designed.", th: "ทำให้ frontend ที่ AI สร้างดูเหมือนถูกออกแบบ", ja: "AIが作ったフロントエンドを、デザインされたものに見せる。" }
+meta:
+  - { k: install, v: npx whipui init }
+  - { k: hosts, v: Codex · Claude Code · VS Code Agent }
+  - { k: versions, v: { en: 0.1.0 → 1.2.0 · 11 Aug – 14 Sep 2026, th: 0.1.0 → 1.2.0 · 11 ส.ค. – 14 ก.ย. 2026, ja: 0.1.0 → 1.2.0 · 2026年8月11日–9月14日 } }
+related: [combo, msu]
+tags: [lab, solo]
+links:
+  - { kind: github, url: "https://github.com/VVeb1250/WhipUI", label: GitHub }
+sources: [portfolio-facts §2.4, npm registry, GitHub repo checked 2026-09-30]

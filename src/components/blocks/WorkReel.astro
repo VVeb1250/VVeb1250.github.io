@@ -1,0 +1,188 @@
+---
+/**
+ * @component WorkReel
+ * @group showcase
+ * @summary The Work page's showcase: the works side by side on one long track. On a desktop the track holds under the header and scrolling down carries it sideways (sen's sideways travel); elsewhere the works stack. A counter `[03] – [08]`, a progress line and ← → keep the place.
+ * @use Once, on /work/. Each child is one work's panel (src/components/showcase/, built on ReelPanel), marked `data-panel` with `data-work` and `data-cat`; the reel only moves them and says which one is current (`.is-cur`). Pinned, it gives panels `--rp-vh`: the height a visual may use.
+ * @avoid A second reel on a page; panels that are the same layout with the title and picture swapped; hiding a work's only proof in the reel (its page or links show it openly); anything that moves inside a panel with the scroll (the track is the one moving layer).
+ * @behavior A click anywhere on a panel that has a page (its link marked `data-panel-go`) opens it, except on links, buttons, players and selected text. Pinned (hover + fine pointer, ≥1024px wide, no reduced motion): the section is as tall as the track is long, and the scroll moves the track by transform only. The panel that has reached the left edge of the column is current: `.is-cur` goes on it, the counter follows and the fog takes its color. ← → and keyboard focus inside a panel scroll the page to that panel. The view clips sideways instead of scrolling (so focus can never shift the track) and stays open above and below (a big number over a tall title is never cut). Otherwise (touch, narrow, reduced motion): the panels stack with no pin, the current one is the one across the middle of the screen, and the counter and buttons hide.
+ * @example
+ * <WorkReel>
+ *   <article data-panel data-work="vaja" data-cat="game">…</article>
+ *   <article data-panel data-work="z80" data-cat="dev">…</article>
+ * </WorkReel>
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  /** Accessible name of the region. */
+  label?: L;
+}
+const { label = { en: 'Selected work', th: 'ผลงานที่เลือก', ja: '選んだ作品' } } = Astro.props;
+const lang = langOf(Astro.url);
+const prev = tx({ en: 'Previous work', th: 'งานก่อนหน้า', ja: '前の作品' }, lang);
+const next = tx({ en: 'Next work', th: 'งานถัดไป', ja: '次の作品' }, lang);
+---
+<section class="reel" data-reel aria-label={tx(label, lang)}>
+  <div class="reel-pin">
+    <div class="reel-bar" aria-hidden="true">
+      <span class="eyebrow num reel-count">[<span class="reel-i">01</span>] – [<span class="reel-n">01</span>]</span>
+      <span class="reel-prog"><i></i></span>
+    </div>
+    <div class="reel-btns">
+      <button type="button" class="reel-b" data-d="-1" aria-label={prev}>←</button>
+      <button type="button" class="reel-b" data-d="1" aria-label={next}>→</button>
+    </div>
+    <div class="reel-view">
+      <div class="reel-track"><slot /></div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* stacked (default, and every touch / narrow / reduced-motion screen) */
+  .reel { position: relative; }
+  .reel-bar, .reel-btns { display: none; }
+  .reel-track { display: grid; gap: clamp(88px, 12vw, 150px); }
+  .reel:not(.is-pinned) .reel-track { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gut); }
+  .reel-track > [data-panel] { min-width: 0; }
+
+  /* pinned: the track travels sideways under the header */
+  /* pinned: --rp-vh is the height a panel's visual may use (the panel minus the bar and its own padding) */
+  .reel.is-pinned { height: var(--reel-h, auto); --reel-bar: 48px; --rp-pad-t: clamp(24px, 4vh, 48px); --rp-pad-b: clamp(32px, 6vh, 64px);
+    --rp-vh: calc(100svh - var(--hdr-h) - var(--reel-bar) - var(--rp-pad-t) - var(--rp-pad-b)); }
+  .reel.is-pinned .reel-pin { position: sticky; top: var(--hdr-h); height: calc(100svh - var(--hdr-h)); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  /* clip sideways only (the track runs off both sides; clip never scrolls, so focus can't shift it); up and down stay open,
+     so a panel's big number above a tall title is never cut by the view's top edge while the reel moves */
+  .reel.is-pinned .reel-view { overflow-x: clip; overflow-y: visible; min-height: 0; }
+  .reel.is-pinned .reel-track { display: flex; gap: 0; height: 100%; will-change: transform; padding-left: max(var(--gut), calc((100vw - var(--maxw)) / 2 + var(--gut))); }
+  .reel.is-pinned .reel-track > [data-panel] { flex: 0 0 auto; width: min(1320px, calc(100vw - 2 * var(--gut) - 40px)); height: 100%; padding: var(--rp-pad-t) clamp(64px, 6vw, 112px) var(--rp-pad-b) 0; }
+  .reel.is-pinned .reel-bar { display: flex; align-items: center; gap: 18px; height: var(--reel-bar); padding: 0 max(var(--gut), calc((100vw - var(--maxw)) / 2 + var(--gut))); }
+  .reel.is-pinned .reel-btns { display: flex; gap: 8px; position: absolute; right: max(var(--gut), calc((100vw - var(--maxw)) / 2 + var(--gut))); top: 8px; z-index: 2; }
+  .reel-prog { position: relative; flex: 0 1 240px; height: 2px; background: var(--rule); overflow: hidden; }
+  .reel-prog i { position: absolute; inset: 0; background: var(--ctxs, var(--acc)); transform-origin: 0 50%; transform: scaleX(var(--p, 0)); }
+  .reel-b { width: 34px; height: 34px; border: 1px solid var(--rule); border-radius: 2px; background: none; cursor: pointer; }
+  .reel-b:hover { border-color: var(--ink2); }
+  .reel-b:disabled { opacity: 0.4; cursor: default; }
+</style>
+
+<script>
+  import { onPage, finePointer, reducedMotion } from '../../scripts/lifecycle';
+  import { onScroll, requestFrame } from '../../scripts/scroll';
+  import { scrollToY } from '../../scripts/smooth';
+  onPage(() => {
+    const offs: Array<() => void> = [];
+    document.querySelectorAll<HTMLElement>('[data-reel]').forEach((reel) => {
+      const track = reel.querySelector<HTMLElement>('.reel-track')!;
+      const panels = [...track.querySelectorAll<HTMLElement>(':scope > [data-panel]')];
+      if (!panels.length) return;
+      const idx = reel.querySelector<HTMLElement>('.reel-i')!, tot = reel.querySelector<HTMLElement>('.reel-n')!;
+      const prog = reel.querySelector<HTMLElement>('.reel-prog')!;
+      const btns = [...reel.querySelectorAll<HTMLButtonElement>('.reel-b')];
+      const pad = (n: number) => String(n).padStart(2, '0');
+      tot.textContent = pad(panels.length);
+      const mq = matchMedia('(min-width: 1024px)');
+      let pinned = false, y0 = 0, run = 0, stops: number[] = [], cur = -1, fog: string | null | undefined;
+
+      const want = () => mq.matches && finePointer() && !reducedMotion();
+      // layout: where the pin starts (page y), how far the track travels, and each panel's stop
+      const measure = () => {
+        pinned = want();
+        reel.classList.toggle('is-pinned', pinned);
+        if (!pinned) { reel.style.removeProperty('--reel-h'); track.style.transform = ''; return; }
+        const first = panels[0].offsetLeft;
+        stops = panels.map((p) => p.offsetLeft - first);
+        run = stops[stops.length - 1];
+        const pinH = innerHeight - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr-h')) || 0);
+        reel.style.setProperty('--reel-h', `${Math.round(pinH + run)}px`);
+        const hdr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr-h')) || 0;
+        y0 = reel.getBoundingClientRect().top + scrollY - hdr;
+      };
+      const setCur = (i: number) => {
+        if (i === cur) return;
+        panels[cur]?.classList.remove('is-cur');
+        cur = i;
+        panels[i]?.classList.add('is-cur');
+        idx.textContent = pad(i + 1);
+        btns[0].disabled = i <= 0; btns[1].disabled = i >= panels.length - 1;
+      };
+      const setFog = (cat: string | null) => { if (cat !== fog) { fog = cat; document.dispatchEvent(new CustomEvent('atmo:cat', { detail: cat })); } };
+
+      const onS = (y: number, vh: number) => {
+        if (pinned) {
+          const x = Math.min(run, Math.max(0, y - y0));
+          track.style.transform = `translate3d(${-x}px, 0, 0)`;
+          prog.style.setProperty('--p', run ? String(x / run) : '0');
+          // current: the last panel whose stop the track has reached (a little early, so it turns as it arrives)
+          let i = 0;
+          for (let k = 0; k < stops.length; k++) if (x >= stops[k] - (stops[1] ?? 0) * 0.35) i = k;
+          setCur(i);
+          const inView = y > y0 - vh * 0.5 && y < y0 + run + vh * 0.5;
+          setFog(inView ? panels[i].dataset.cat ?? null : null);
+        } else {
+          // stacked: the panel across the middle of the screen
+          const mid = vh / 2;
+          let best = -1;
+          panels.forEach((p, k) => { const r = p.getBoundingClientRect(); if (r.top <= mid && r.bottom >= mid) best = k; });
+          if (best >= 0) setCur(best);
+          setFog(best >= 0 ? panels[best].dataset.cat ?? null : null);
+        }
+      };
+      const go = (i: number) => {
+        if (!pinned) { panels[i]?.scrollIntoView({ block: 'start', behavior: reducedMotion() ? 'auto' : 'smooth' }); return; }
+        scrollToY(y0 + stops[Math.max(0, Math.min(stops.length - 1, i))]);
+      };
+      const click = (e: Event) => { const d = Number((e.currentTarget as HTMLElement).dataset.d); go(Math.max(0, cur) + d); };
+      btns.forEach((b) => b.addEventListener('click', click));
+      // keyboard (and the return from a work page) focuses something inside a panel: bring that panel to the column
+      const fin = (e: FocusEvent) => {
+        if (!pinned) return;
+        const k = panels.findIndex((p) => p.contains(e.target as Node));
+        if (k >= 0 && k !== cur) scrollToY(y0 + stops[k], reducedMotion());
+      };
+      track.addEventListener('focusin', fin);
+      // links to a panel (#id, e.g. the page's index) travel the reel instead of jumping into the pinned track
+      const anchor = (e: MouseEvent) => {
+        const a = (e.target as Element | null)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
+        if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+        const k = panels.findIndex((p) => p.id && `#${p.id}` === a.getAttribute('href'));
+        if (k < 0) return;
+        e.preventDefault(); e.stopPropagation();
+        go(k);
+      };
+      document.addEventListener('click', anchor, true);
+      // a panel with a page is one big link: a click anywhere that is not itself a control opens it
+      const openPanel = (e: MouseEvent) => {
+        if (e.defaultPrevented || e.button !== 0) return;
+        const t = e.target as Element, p = t.closest<HTMLElement>('[data-panel]');
+        if (!p || !track.contains(p)) return;
+        const ctl = t.closest('a, button, input, select, textarea, label, video[controls], [role="button"], [tabindex]:not([tabindex="-1"])');
+        if (ctl && p.contains(ctl)) return;
+        if (String(getSelection() ?? '').trim()) return;
+        const go = p.querySelector<HTMLAnchorElement>('a[data-panel-go]');
+        if (!go) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey) { window.open(go.href, '_blank', 'noopener'); return; }
+        go.click();
+      };
+      track.addEventListener('click', openPanel);
+
+      measure();
+      // arriving with #id: start at that panel
+      const hk = panels.findIndex((p) => p.id && `#${p.id}` === location.hash);
+      if (hk >= 0) requestAnimationFrame(() => go(hk));
+      const offScroll = onScroll(onS);
+      const re = () => { measure(); requestFrame(); };
+      const ro = new ResizeObserver(re);
+      ro.observe(track);
+      mq.addEventListener('change', re);
+      addEventListener('load', re, { once: true });
+      document.fonts?.ready.then(re);
+      offs.push(() => {
+        offScroll(); ro.disconnect(); mq.removeEventListener('change', re); removeEventListener('load', re);
+        btns.forEach((b) => b.removeEventListener('click', click)); track.removeEventListener('focusin', fin);
+        document.removeEventListener('click', anchor, true); track.removeEventListener('click', openPanel);
+        setFog(null);
+      });
+    });
+    return () => offs.forEach((f) => f());
+  });
+</script>

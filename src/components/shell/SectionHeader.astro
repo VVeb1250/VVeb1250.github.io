@@ -1,0 +1,43 @@
+---
+/**
+ * @component SectionHeader
+ * @group shell
+ * @summary The small title row of a section: optional index, mono title, optional count, optional one-line description. Carries no layout of its own.
+ * @use At the top of any section. <Section> renders one for you; use it directly when a composition needs the header somewhere unusual (inside a pinned strip, beside media).
+ * @avoid Big display headings for sections (one statement per page); descriptions longer than one sentence.
+ * @example
+ * <SectionHeader index="02" title={{ en: 'Sheets, frames, captures' }} />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  title: L;
+  /** Section number, e.g. "02". */
+  index?: string;
+  /** Shows `[04]` at the right end. */
+  count?: number;
+  /** One sentence under the title. */
+  description?: L;
+  /** Heading level. Default h2. */
+  as?: 'h2' | 'h3';
+  /** Register as the SectionMarker trigger of the enclosing [data-mark] element. Default true. */
+  trigger?: boolean;
+}
+const { title, index, count, description, as: H = 'h2', trigger = true } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<div class="sh" data-mark-trigger={trigger ? '' : undefined}>
+  <div class="sh-row">
+    <H class="eyebrow sh-t l10n">{index && <span class="sh-i num">{index}</span>}{tx(title, lang)}</H>
+    {count != null && <span class="eyebrow num">[{String(count).padStart(2, '0')}]</span>}
+    <slot />
+  </div>
+  {description && <p class="sh-d">{tx(description, lang)}</p>}
+</div>
+
+<style>
+  .sh { display: grid; gap: 8px; margin: 0 0 22px; }
+  .sh-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .sh-t { font-size: 12px; letter-spacing: 0.12em; display: flex; gap: 12px; align-items: baseline; }
+  .sh-i { color: var(--ink3); }
+  .sh-d { color: var(--ink2); max-width: 56ch; font-size: 15px; }
+</style>

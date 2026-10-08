@@ -1,0 +1,20 @@
+---
+/** 404 — GitHub Pages serves this for any path that does not exist (the user site has no base). One language: the visitor's is unknown. */
+import PageShell from '../layouts/PageShell.astro';
+import GoLink from '../components/primitives/GoLink.astro';
+---
+<PageShell title="Not found" noindex>
+  <div class="wrap nf">
+    <p class="eyebrow">404</p>
+    <h1 class="disp">This page is not here.</h1>
+    <p class="nf-d">The link may be old, or the page moved.</p>
+    <a class="nf-a" href="/"><GoLink label="Home" /></a>
+  </div>
+</PageShell>
+
+<style>
+  .nf { padding-block: clamp(96px, 22vh, 220px); display: grid; gap: 16px; justify-items: start; }
+  .nf h1 { font-size: clamp(36px, 7vw, 72px); line-height: 1.05; margin: 0; }
+  .nf-d { margin: 0; color: var(--ink2); }
+  .nf-a { text-decoration: none; margin-top: 8px; }
+</style>

@@ -1,0 +1,31 @@
+---
+/**
+ * /timeline/<id>/ — a page for a competition or a teaching role (`kind` ≠ work, `page: true`, a story in
+ * src/content/stories/<lang>/<id>.mdx). The same frame as a work page (WorkPage), but it belongs to the Timeline:
+ * back goes there, ↑ ↓ move between these pages (EVENT_ORDER), and the header carries the year.
+ */
+import { getCollection, render } from 'astro:content';
+import WorkPage from '../../../layouts/WorkPage.astro';
+import { LOCALES, type Lang } from '../../../lib/i18n';
+import { storyComponents } from '../../../lib/story-components';
+import { EVENT_ORDER, isEvent } from '../../../lib/works';
+
+export async function getStaticPaths() {
+  const events = (await getCollection('works')).filter((w) => w.data.page && isEvent(w));
+  const stories = await getCollection('stories');
+  for (const e of events) if (!EVENT_ORDER.includes(e.id)) throw new Error(`[timeline] "${e.id}" has a page but is not in EVENT_ORDER (src/lib/works.ts)`);
+  return LOCALES.flatMap((lang) =>
+    events.map((w) => {
+      const own = stories.find((s) => s.id === `${lang}/${w.id}`);
+      const story = own ?? stories.find((s) => s.id === `en/${w.id}`);
+      if (!story) throw new Error(`[timeline] "${w.id}" has page: true but no src/content/stories/en/${w.id}.mdx`);
+      return { params: { locale: lang === 'en' ? undefined : lang, slug: w.id }, props: { story, fallback: !own, lang } };
+    })
+  );
+}
+const { story, fallback } = Astro.props as { story: any; fallback: boolean; lang: Lang };
+const { Content } = await render(story);
+---
+<WorkPage work={story.data.work} order={EVENT_ORDER} base="/timeline/" back="/timeline/" backLabel={{ en: 'Timeline', th: 'ไทม์ไลน์', ja: '年表' }} nav="timeline" storyLang={fallback ? 'en' : undefined}>
+  <Content components={storyComponents} />
+</WorkPage>

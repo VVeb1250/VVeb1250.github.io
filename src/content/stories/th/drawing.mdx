@@ -1,0 +1,108 @@
+---
+work: drawing
+recipe: art-led
+summary: ภาพวาด ฉาก และหน้าฝึกจากสมุดสเก็ตช์ของผม
+---
+
+import '../../../styles/stories/drawing.css';
+
+{/* The owner supplied this set for the site on 2026-10-08. Descriptions below are visual alt text,
+    not artwork titles. Reference pictures and handwritten study notes remain in the original frames.
+    Filenames mix last-edited dates and story dates, so they are not used as artwork dates. */}
+
+export const pages = [
+  {
+    id: 'illustrations', title: 'ภาพประกอบ',
+    images: [
+      ['03_dec_23', 'ตัวละครผมเขียว ถือธง อยู่ใต้มังกรสีเทอร์ควอยซ์และนกสีทอง', 'wide'],
+      ['18_apr_25', 'ตัวละครผมเงิน ชุดเดรสดำ อยู่หน้าพื้นสีเทาที่ระบายไว้', ''],
+      ['26_apr_68', 'เด็กผู้หญิงถือกล้อง มีท้องฟ้าสีฟ้าและราวกั้นอยู่ข้างหลัง', ''],
+      ['11_may_68', 'เด็กผู้หญิงผมดำ ใส่เสื้อสีเหลือง โน้มตัวไปข้างหน้าอยู่ข้างรั้ว', ''],
+      ['8_may_67', 'ตัวละครสองตัวนั่งอยู่บนป้อมปืนกลไกสีน้ำเงินขนาดใหญ่', 'wide']
+    ]
+  },
+  {
+    id: 'scenes', title: 'ฉาก',
+    images: [
+      ['13_aug_67', 'ก้อนเมฆเหนือทุ่งหญ้าสีเขียว ระบายด้วยพู่กันนุ่มๆ', 'wide'],
+      ['8_aug_25', 'ดาวตกเหนือเนินเขามืดและเมฆสูงตอนพลบค่ำ', 'wide'],
+      ['24_sep_67', 'พลุไฟแท่งสว่างกับท้องฟ้ายามเย็นสีฟ้าและชมพู', 'panorama'],
+      ['18_feb_68', 'ตัวละครยืนหันหน้าเข้าหาหุบเขาสีเขียวใต้ท้องฟ้าสีฟ้าสดใส', 'wide'],
+      ['5_jan_68', 'ตัวละครตัวเล็กในทิวทัศน์ที่มีแดด มีต้นไม้และเนินเขาไกลๆ', 'wide'],
+      ['6_jan_68', 'ฉากเกมที่ระบายสี มีตัวละครตัวเล็ก หมาป่า และสเก็ตช์ UI', 'wide']
+    ]
+  },
+  {
+    id: 'practice', title: 'หน้าฝึก',
+    images: [
+      ['11_aug_25', 'ภาพอ้างอิงถ่ายชุดนักเรียน อยู่ข้างสเก็ตช์คนสามภาพและภาพวาดสี', 'panorama'],
+      ['13_nov_24', 'วาดตัวละครใหม่ มีบันทึกลายมือสีแดงอยู่ข้างๆ', ''],
+      ['29_may_68', 'หน้าสเก็ตช์หัวหลายแบบ มีโน้ตลายมือสีส้ม', 'wide'],
+      ['10_feb_25', 'ลายเส้นตัวละครผมยาวนั่งอยู่', ''],
+      ['21_mar_67', 'ลายเส้นเด็กผู้หญิงผมยาวมีกลีบดอกไม้ลอยอยู่ในอากาศ', ''],
+      ['6_jun_67', 'ลายเส้นระยะใกล้ของเด็กผู้หญิงที่ถือช้อนไว้ใกล้ใบหน้า', ''],
+      ['31_oct_25', 'ลายเส้นเด็กผู้หญิงที่มีหูกระต่าย อยู่ข้างสเก็ตช์ตัวละครตัวเล็ก', ''],
+      ['21_jan_26', 'ลายเส้นเด็กผู้หญิงมีหูแมวถือโทรศัพท์', ''],
+      ['5_mar_26', 'หน้าแบบฝึกมุมมอง วัตถุ และสเก็ตช์ตัวละคร', 'wide']
+    ]
+  }
+];
+
+<ProjectHeader work="drawing" layout="stack">
+  <div slot="media" class="dr-cover">
+    <div class="dr-cover-main">
+      <PhotoCard signed src="drawing/fence.webp" alt={{ en: 'A girl in a sailor uniform by a wire fence, her long black hair blowing, leaves in the wind', th: 'เด็กผู้หญิงในชุดกะลาสี อยู่ข้างรั้วลวด ผมยาวสีดำปลิว มีใบไม้ปลิวในลม' }} tilt={-1} size="lg" sizes="(max-width: 520px) 90vw, (max-width: 1280px) 60vw, 760px" />
+      <PhotoCard signed src="drawing/flashlight.webp" alt={{ en: 'A girl with cat ears against a tiled wall in a flashlight beam, MEOW!! scrawled beside her', th: 'เด็กผู้หญิงที่มีหูแมว อยู่หน้ากำแพงกระเบื้องในลำแสงไฟฉาย มีคำว่า MEOW!! เขียนอยู่ข้างๆ' }} tilt={0.8} size="lg" sizes="(max-width: 520px) 90vw, (max-width: 1280px) 60vw, 760px" />
+    </div>
+    <div class="dr-cover-side">
+      <PhotoCard signed src="drawing/standing.webp" alt={{ en: 'A full-length girl in a black and white dress with a large bag over her shoulder', th: 'เด็กผู้หญิงเต็มตัว ชุดเดรสขาวดำ มีกระเป๋าใบใหญ่พาดไหล่' }} tilt={1.5} size="lg" sizes="(max-width: 520px) 42vw, (max-width: 1280px) 30vw, 380px" />
+      <PhotoCard signed src="drawing/pink.webp" alt={{ en: 'A girl with long silver hair making a peace sign, on pink', th: 'เด็กผู้หญิงผมเงินยาว ทำมือเป็นสัญลักษณ์สันติ บนพื้นสีชมพู' }} tilt={-1.2} size="lg" sizes="(max-width: 520px) 42vw, (max-width: 1280px) 30vw, 380px" />
+    </div>
+    <p class="dr-hint">คลิกภาพใดก็ได้เพื่อดูขนาดใหญ่</p>
+  </div>
+</ProjectHeader>
+
+<div class="dr-intro">
+  <p>วาดเป็นงานอดิเรกมาตั้งแต่ประถม และจริงจังขึ้นมากตั้งแต่ ม.6 ช่วงปี 3 วาดน้อยลง</p>
+  <nav class="dr-index" aria-label="ส่วนของสมุดสเก็ตช์">
+    <a href="#illustrations">ภาพประกอบ</a>
+    <a href="#process">ขั้นตอนการวาด</a>
+    <a href="#scenes">ฉาก</a>
+    <a href="#practice">หน้าฝึก</a>
+  </nav>
+</div>
+
+{pages.map((group) => (
+  <section id={group.id} class={`dr-chapter dr-${group.id}`} aria-labelledby={`dr-${group.id}-title`}>
+    <div class="dr-chapter-heading">
+      <h2 id={`dr-${group.id}-title`}>{group.title}</h2>
+    </div>
+    <div class="dr-pages">
+      {group.images.map(([file, alt, shape], i) => (
+        <div class={`dr-page ${shape}`}>
+          <PhotoCard signed src={`drawing/${file}.webp`} alt={alt} tilt={[-0.7, 1, -1.1, 0.6][i % 4]} size="lg" sizes={shape === 'panorama' || (group.id === 'illustrations' && i === 0) || (group.id === 'scenes' && i === group.images.length - 1) ? '(max-width: 860px) 90vw, (max-width: 1280px) 75vw, 940px' : shape === 'wide' ? '(max-width: 520px) 90vw, (max-width: 860px) 44vw, 460px' : '(max-width: 860px) 44vw, 460px'} />
+        </div>
+      ))}
+    </div>
+    {group.id === 'illustrations' && (
+      <section id="process" class="dr-process" aria-labelledby="dr-process-title">
+        <h2 id="dr-process-title">ขั้นตอนการวาด</h2>
+        <div class="dr-clips">
+          <figure>
+            <VideoEmbed src="drawing/03_dec_23-process.mp4" poster="drawing/03_dec_23.webp" label={{ en: 'Drawing timelapse of the green-haired character, dragon and golden birds', th: 'ไทม์แลปส์การวาดตัวละครผมเขียว มังกร และนกสีทอง' }} />
+          </figure>
+          <figure>
+            <VideoEmbed src="drawing/standing-process.mp4" poster="drawing/standing.webp" label={{ en: 'Drawing timelapse of the full-length character in a black and white dress', th: 'ไทม์แลปส์การวาดตัวละครเต็มตัว ชุดเดรสขาวดำ' }} />
+          </figure>
+        </div>
+      </section>
+    )}
+  </section>
+))}
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Drawings and studies.', th: 'ภาพวาดและสเก็ตช์' } },
+  { who: { en: 'References', th: 'ภาพอ้างอิง' }, did: { en: 'The photo and source images shown beside the studies are reference material.', th: 'ภาพถ่ายและภาพต้นฉบับที่อยู่ข้างสเก็ตช์เป็นภาพอ้างอิง' } }
+]} />
+
+<EvidenceLink href="https://www.pixiv.net/en/users/116719673" label="Pixiv · WhipForAWeeb" kind="page" shows={{ en: 'more drawings', th: 'ภาพวาดเพิ่มเติม' }} />

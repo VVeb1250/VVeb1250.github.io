@@ -1,0 +1,50 @@
+---
+work: msu
+recipe: constraint-product
+summary: Informatics MSU Hackathon 2026、AI トラック、高等教育部門で優勝。3人のチームが、朝食店向けの AI 活用システムを2日間で制作しました。
+---
+
+import '../../../styles/stories/msu.css';
+
+{/* Facts §2.3, §6.1; media: _note/media-candidates/msu (owner, 2026-10-01: all usable). The prototype screens run on demo data with mock OCR — say so on each. */}
+
+<ProjectHeader work="msu" layout="stack" roles={['注文 OCR フロー', 'Chatbot UI', '需要予測', 'ダッシュボード連携']}>
+  <MediaFrame slot="media" src="msu/award-team.webp" alt={{ en: 'The team holding the AI track winner board at Informatics MSU Hackathon 2026', ja: 'Informatics MSU Hackathon 2026 で、AI トラックの優勝ボードを持つチーム' }} width="full" eager ratio="16/9" focus="50% 35%"
+    caption={{ en: 'Winner · AI track · Higher Education · 13–14 August 2026', ja: '優勝 · AI トラック · 高等教育 · 2026年8月13〜14日' }} />
+</ProjectHeader>
+
+<div class="msu-what">
+  <div>
+    <h2>紙の注文で回る朝食店</h2>
+    <p>チーム3人で、この店のためのシステムを1つ作りました。手書きの注文の写真が、構造化された注文になります。AI が判断に迷うものは、人が確認します。その後、注文はレシート、食材と在庫の予測、チャットボット、マーケティング支援、キッチンのダッシュボードにつながります。</p>
+    <p>予選は2026年6月、決勝は8月13〜14日でした。</p>
+  </div>
+  <MediaFrame src="msu/award-stage.webp" alt={{ en: 'The team on stage at Informatics MSU Hackathon 2026, receiving the award', ja: 'Informatics MSU Hackathon 2026 のステージで表彰を受けるチーム' }} width="text" caption={{ en: 'On stage at the final', ja: '決勝のステージにて' }} />
+</div>
+
+## 写真から保存まで、1件の注文
+
+デモデータを使ってローカルで動かしたプロトタイプです。ここでの OCR は組み込みのモック結果で、実際に手書きを読み取ったものではありません。
+
+<SplitScroll steps={[
+  { title: { en: 'Read the order (mock OCR)', ja: '注文を読み取る（モック OCR）' }, text: { en: 'A sample pencil order slip goes in; the mock result comes back at 62% confidence, so the next step stays locked until a person checks it.', ja: 'サンプルの鉛筆書きの注文票を入れると、モックの結果が確信度62%で返ります。人が確認するまで、次の工程はロックされたままです。' },
+    src: 'msu/ocr-review-mock.webp', alt: { en: 'Prototype: mock OCR result at 62% confidence, next step locked until reviewed', ja: 'プロトタイプ：モック OCR の結果、確信度62%。確認されるまで次の工程はロック' }, source: { en: 'Prototype · demo data', ja: 'プロトタイプ · デモデータ' } },
+  { title: { en: 'A person checks it', ja: '人が確認する' }, text: { en: 'After the check, the order total is worked out from the menu prices — ฿80 for this sample.', ja: '確認後、メニューの価格から注文の合計を算出します。このサンプルでは80バーツです。' },
+    src: 'msu/order-total-mock.webp', alt: { en: 'Prototype: order total of 80 baht after review', ja: 'プロトタイプ：確認後の注文合計は80バーツ' }, source: { en: 'Prototype · demo data', ja: 'プロトタイプ · デモデータ' } },
+  { title: { en: 'Saved', ja: '保存しました' }, text: { en: 'The order is saved in the prototype’s session.', ja: '注文はプロトタイプのセッション内に保存されます。' },
+    src: 'msu/order-saved-mock.webp', alt: { en: 'Prototype: order saved confirmation', ja: 'プロトタイプ：注文の保存完了の表示' }, source: { en: 'Prototype · demo data', ja: 'プロトタイプ · デモデータ' } },
+  { title: { en: 'Orders to review', ja: '確認待ちの注文' }, text: { en: 'The review screen with the order slip beside its details.', ja: '注文票を詳細の横に並べた確認画面です。' },
+    src: 'msu/review-demo.webp', alt: { en: 'Prototype: order review screen with a sample slip', ja: 'プロトタイプ：サンプルの注文票を使った確認画面' }, source: { en: 'Prototype · demo data', ja: 'プロトタイプ · デモデータ' } }
+]} />
+
+<MediaFrame src="msu/dashboard-demo.webp" alt={{ en: 'Prototype: shop dashboard with charts from demo data', ja: 'プロトタイプ：デモデータのグラフを表示する店舗ダッシュボード' }} frame="screen" width="wide"
+  caption={{ en: 'The shop dashboard. The numbers are demo data, not real use or a competition result.', ja: '店舗ダッシュボードです。数値はデモデータで、実際の利用量や大会の結果ではありません。' }} source={{ en: 'Prototype · demo data', ja: 'プロトタイプ · デモデータ' }} />
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'In the final: the order OCR workflow and its data integration, the chatbot interface, the marketing assistant, ingredient and stock forecasting, the kitchen dashboard integration, and dashboard / expense fixes. In the qualifier: navigation, event filtering and pagination, animation, and the live-order screen.', ja: '決勝では、注文 OCR のワークフローとデータ連携、チャットボットの画面、マーケティング支援、食材と在庫の予測、キッチンダッシュボードの連携、ダッシュボードと経費の修正を担当しました。予選では、ナビゲーション、イベントの絞り込みとページネーション、アニメーション、リアルタイムの注文画面を担当しました。' } },
+  { who: 'team', did: { en: 'We decided the product, the OCR architecture and the human-review step together.', ja: '製品、OCR のアーキテクチャ、人による確認の工程は、チームで一緒に決めました。' } },
+  { who: 'ai', did: { en: 'Built very AI-heavy, on purpose, to move fast under the deadline. I used WhipUI during the event.', ja: '締め切りに間に合わせるため、意図的に AI を多く使って制作しました。大会中は WhipUI を使いました。' } }
+]} />
+
+<OutcomeBlock outcome={{ en: 'Winner · AI track · Higher Education.', ja: '優勝 · AI トラック · 高等教育' }}
+  current={{ en: 'A two-day prototype; the OCR in these captures is the mock path.', ja: '2日間で作ったプロトタイプです。この画像の OCR はモックによるものです。' }} />

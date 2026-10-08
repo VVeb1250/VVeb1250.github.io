@@ -1,0 +1,308 @@
+---
+/**
+ * @component SketchReveal
+ * @group media
+ * @summary The crafted sketch, and the thing itself: point at it and the picture comes up in Endfield's order — an optional Plate opens as the plane, the picture opens out from the middle, the corner brackets lock on, the tag slides in (REAL, or RENDER for a render). Move away and it folds back, faster than it came. A screen (rectangular screenshot / photo) switches on ON the object's own face (IsoObject `screens` with `reveal`) so it has depth; a cutout or render (transparent PNG / WebP) comes up over the sketch (`real`), and the sketch steps back behind it.
+ * @use Glyph mode (home features, Lab rows): `glyph`/`glyphFrom` + `plate` + either `real` (the photo / cutout — REAL) or an IsoObject in the `real` slot (`kind="system"` — the abstract work's real) — a minimal Pictogram at rest that opens into the thing on its own plate. Otherwise: wrap an IsoObject (or any drawing) when a real photo, screenshot or scan of the same subject exists: the sketch explains, the reveal proves it is real. Abstract work (a memory layer, a skill compiler) may reveal a render instead — `kind="render"`: tagged RENDER, never REAL; the real results stay on the work page, and AttributionBlock says the render is AI-made. Same subject, similar framing. `plate` puts a Plate behind a cutout / render to lift it.
+ * @avoid A rectangular picture flat over an isometric sketch; map it onto a face with IsoObject `screens` instead. A flat Pictogram may directly reveal a rectangular capture in glyph mode. A render tagged as real; a render of a work that has real pictures; a picture of something else than the sketch; the only evidence hidden behind a hover (say so in the caption); multiple independently animated objects without a browsing structure (use hosted rows or HorizontalStrip); a plate when the screen already has one.
+ * @behavior Hosted (`host`, inside an element marked `data-skr-host`): the whole block is the trigger, not just the picture — rest the mouse anywhere on the project, or tab to one of its links (keyboard focus), and it opens; leave the block and it folds back. A click on the picture opens the project (its link marked `data-skr-go`). Touch outside HorizontalStrip: it opens by itself in the middle band of the screen; a tap on the open picture follows its link. Inside HorizontalStrip: the first tap opens the object, the second follows its link; swiping keeps previews closed. Desktop scroll never opens the reveal. `lead` (ms): the glyph gets a prelude before the reveal — the class `skr-lead` goes on first and the rest waits (Z80: the three separate tool windows slide together); it comes off after the reveal has folded back. Otherwise — mouse: after resting ~90ms on it (never while its HorizontalStrip is moving; it folds back when the strip starts to move) (a pointer passing over does nothing): [plate opens left → right 250ms with the shared streaked sweep edge] → picture opens from the middle 250ms, feathered (a screen powers on like a display). Glyph mode: the plate lies under the glyph as its ground and takes its time (opens in 450ms, leaves in ~320ms); the glyph's cells break away left → right while the object comes up in the glyph's own grid and its resolution doubles twice (cuts, 70ms each: glyph → pixels → real); leave: back down the steps while the cells settle back → settles 500ms → brackets + tag (accent last). Leave: folds back in ~140ms. A mouse click does nothing (no pinning — hover is the whole interaction). Touch / pen tap, Enter, Space: toggle it. The picture loads lazily with the loading preview. Reduced motion: instant switch.
+ * @example
+ * <SketchReveal tag={{ en: 'SCREEN' }} realAlt={{ en: 'The real Z80 Workspace screen' }}>
+ *   <IsoObject … screens={[{ src: 'z80/workspace.webp', face: 'top', …, reveal: true }]} />
+ * </SketchReveal>
+ * <SketchReveal kind="render" plate="center" real={{ src: 'memory/render.webp', alt: { en: 'Render of the memory layer' } }}>
+ *   <IsoObject … />
+ * </SketchReveal>
+ */
+import { Image } from 'astro:assets';
+import Plate from './Plate.astro';
+import Pictogram from './Pictogram.astro';
+import type { Plate as Shape } from '../../lib/vocab';
+import { img, lqStyle } from '../../lib/media';
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  /** A cutout (transparent background) shown over the whole sketch. Rectangular pictures go on a face instead (IsoObject screens). */
+  real?: { src: string; alt: L };
+  /** 'real' (default): a photo / screen / scan of the thing itself. 'render': an AI-made or 3D render of an abstract work — tagged RENDER, never REAL. 'system': the detailed IsoObject of an abstract work (in the `real` slot). */
+  kind?: 'real' | 'render' | 'system';
+  /** Glyph mode: the resting face is a minimal Pictogram instead of the default slot (rows: '#' grey, '+' accent). A composed glyph (several Pictograms placed by the feature) goes in the `glyph` slot instead. */
+  glyph?: string[];
+  /** Glyph mode: trace the glyph from this transparent cutout (asset key), `glyphCols` cells across. */
+  glyphFrom?: string;
+  glyphCols?: number;
+  /** Glyph mode: the box shape. Default '4 / 3'. */
+  ratio?: string;
+  /** Glyph mode: where the glyph and the opened object sit — 'center' (default) or 'third' (⅓ across). */
+  focus?: 'center' | 'third';
+  /** Glyph mode: a big outlined index behind the glyph, e.g. "01" (Endfield's database numbers). */
+  index?: string;
+  /** Glyph mode: the glyph's height as a share of the box — match the real picture's size so the switch reads as the same thing. Default 0.55; a traced cutout ≈ 0.9. */
+  glyphScale?: number;
+  /** Glyph mode: box width — sm 260px · md 340px (default) · lg 440px · xl 640px · fill = the whole column (it never grows past its column). */
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'fill';
+  /** Glyph mode: the revealed cutout's width as a share of the box. Default 0.8; a wide scene that should fill the box ≈ 0.96. */
+  realWidth?: number;
+  /** The project block around it (an ancestor marked `data-skr-host`) is the trigger: hover / keyboard focus anywhere in it opens this; it is not a control of its own. */
+  host?: boolean;
+  /** Glyph mode: ms of prelude before the reveal (see @behavior) — the feature styles `.skr-lead` in its own CSS. */
+  lead?: number;
+  /** A Plate (shape) behind the revealed cutout / render; it opens first, as the plane. One plate per screen. */
+  plate?: Shape;
+  /** What the reveal shows, for screen readers, when there is no `real` (e.g. the screen mapped on the object). */
+  realAlt?: L;
+  /** What it is: PHOTO, SCREEN, SCAN, CONCEPT… (shown after REAL / RENDER). */
+  tag?: L;
+  /** One line under the sketch saying the real thing is there. */
+  hint?: L;
+  /** The work's color key when the reveal sits outside that work's context. */
+  cat?: string;
+  /** 'cover' fills the box (crop), 'contain' shows the whole picture on the sunk color. Default 'cover'. */
+  fit?: 'cover' | 'contain';
+}
+const { real, realAlt, tag, hint, fit = 'contain', kind = 'real', plate, cat, glyph, glyphFrom, glyphCols, ratio = '4 / 3', focus = 'center', index, glyphScale = 0.55, size = 'md', realWidth = 0.8, host = false, lead = 0 } = Astro.props;
+const GW = { sm: '260px', md: '340px', lg: '440px', xl: '640px', fill: '100%' }[size];
+const slotGlyph = Astro.slots.has('glyph');
+const glyphMode = !!(glyph || glyphFrom || slotGlyph);
+const slotReal = Astro.slots.has('real');
+const lang = langOf(Astro.url);
+const m = real ? img(real.src) : null;
+const lq = m ? await lqStyle(m, fit) : '';
+const altText = real ? tx(real.alt, lang) : realAlt ? tx(realAlt, lang) : '';
+const render = kind === 'render';
+const H = hint ? tx(hint, lang) : tx(render
+  ? { en: 'Point at it to see the render · tap to switch', th: 'ชี้เพื่อดูภาพเรนเดอร์ · แตะเพื่อสลับ', ja: 'ポイントでレンダーを表示 · タップで切り替え' }
+  : kind === 'system'
+    ? { en: 'Point at it to open the system · tap to switch', th: 'ชี้เพื่อเปิดดูระบบ · แตะเพื่อสลับ', ja: 'ポイントでシステムを開く · タップで切り替え' }
+    : { en: 'Point at it to see the real one · tap to switch', th: 'ชี้เพื่อดูของจริง · แตะเพื่อสลับ', ja: 'ポイントで実物を表示 · タップで切り替え' }, lang);
+const LABEL = tx(render ? { en: 'RENDER', th: 'เรนเดอร์', ja: 'レンダー' } : kind === 'system' ? { en: 'SYSTEM', th: 'ระบบ', ja: 'システム' } : { en: 'REAL', th: 'ของจริง', ja: '実物' }, lang);
+---
+{/* hosted: the block around it is the control — this is only the picture (described once, for screen readers) */}
+<div class:list={['skr', { 'skr-gm': glyphMode }]} style={glyphMode ? `--ar:${ratio};--fx:${focus === 'third' ? '33.3%' : '50%'};--gs:${glyphScale};--gw:${GW};--rw:${realWidth * 100}%` : undefined} data-fit={fit} data-kind={kind} data-cat={cat} data-host={host ? '' : undefined} data-lead={lead || undefined}
+  {...(host ? { role: 'img', 'aria-label': altText || undefined } : { tabindex: '0', role: 'button', 'aria-pressed': 'false', 'aria-label': altText ? `${H} — ${altText}` : H })}>
+  <div class="skr-sketch">{glyphMode ? (
+    <div class="skr-gbox">
+      {index && <span class="skr-idx disp" aria-hidden="true">{index}</span>}
+      {slotGlyph ? <slot name="glyph" /> : <span class="skr-glyph"><Pictogram grid={glyph} from={glyphFrom} cols={glyphCols} /></span>}
+    </div>
+  ) : <slot />}</div>
+  {plate && <div class="skr-plate" aria-hidden="true"><Plate shape={plate} /></div>}
+  {m && real && (
+    <div class="skr-real" aria-hidden="true">
+      <Image style={lq} data-lq src={m} alt={tx(real.alt, lang)} widths={[800, 1200, 1600].filter((w) => w <= m.width).concat(m.width < 800 ? [m.width] : [])} sizes="(max-width: 900px) 92vw, 60vw" loading="lazy" />
+    </div>
+  )}
+  {!real && slotReal && <div class="skr-real skr-slot" aria-hidden="true"><slot name="real" /></div>}
+  <span class="skr-hud" aria-hidden="true"><i class="c c1"></i><i class="c c2"></i><i class="c c3"></i><i class="c c4"></i><b class="skr-tag num">{LABEL}{tag && <span> · {tx(tag, lang)}</span>}</b></span>
+  {(!host || hint) && <span class="skr-hint eyebrow l10n" aria-hidden="true">{H}</span>}
+</div>
+
+<style>
+  .skr { position: relative; display: grid; cursor: pointer; outline: none; touch-action: manipulation; margin-bottom: 26px; }
+  .skr:focus-visible { outline: 2px solid var(--acc); outline-offset: 6px; }
+  .skr-sketch { grid-area: 1 / 1; transition: opacity var(--t-exit) var(--e-exit); }
+  .skr-plate { grid-area: 1 / 1; position: relative; pointer-events: none; visibility: hidden; clip-path: inset(0 100% 0 0); }
+  .skr.real .skr-plate { visibility: visible; clip-path: inset(0 0 0 0); }
+  /* a cutout / render replaces the sketch: the sketch steps back behind it */
+  .skr.real:has(.skr-real) .skr-sketch { opacity: 0.12; }
+  .skr-real { grid-area: 1 / 1; position: relative; overflow: hidden; clip-path: inset(50% 0 50% 0); pointer-events: none; visibility: hidden; }
+  .skr-real :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 16px 14px color-mix(in srgb, var(--shade) calc(var(--sh-o) * 100%), transparent)); }
+  .skr[data-fit='cover'] .skr-real :global(img) { object-fit: cover; }
+  .skr.real .skr-real { clip-path: inset(0 0 0 0); visibility: visible; }
+  .skr-hud { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+  .skr.real .skr-hud { opacity: 1; }
+  .skr-hud .c { position: absolute; width: 16px; height: 16px; border: 0 solid var(--ctxs); }
+  .skr-hud .c1 { left: -6px; top: -6px; border-width: 2px 0 0 2px; } .skr-hud .c2 { right: -6px; top: -6px; border-width: 2px 2px 0 0; }
+  .skr-hud .c3 { right: -6px; bottom: -6px; border-width: 0 2px 2px 0; } .skr-hud .c4 { left: -6px; bottom: -6px; border-width: 0 0 2px 2px; }
+  .skr-tag { position: absolute; left: 10px; top: 10px; padding: 4px 8px; background: var(--ctxs); color: var(--bg); font: 600 10px/1.2 var(--f-mono); letter-spacing: 0.14em; }
+  .skr-hint { position: absolute; left: 0; bottom: -26px; color: var(--ink3); pointer-events: none; }
+  /* ---- glyph mode (home features): Pictogram at rest → Plate opens → the real picture / the iso opens, all on one
+     focus point (--fx: centre or ⅓), oversized and cropped by the box ---- */
+  .skr-gm { width: min(100%, var(--gw)); margin-bottom: 0; }
+  .skr-gm .skr-hint { position: static; grid-area: 2 / 1; margin-top: 10px; }
+  .skr-gm .skr-hud { position: relative; inset: auto; grid-area: 1 / 1; }
+  .skr-gbox { position: relative; aspect-ratio: var(--ar); container-type: inline-size; }
+  /* the glyph is sized like the real picture (height share of the box), so glyph → object reads as one thing */
+  /* max-content: a wide glyph (a scene, 16 cells across) must not be squeezed to the room right of --fx */
+  .skr-glyph { position: absolute; left: var(--fx); top: 50%; height: calc(var(--gs) * 100%); width: max-content; transform: translate(-50%, -50%); }
+  .skr-glyph :global(.pg) { height: 100%; width: auto; }
+  .skr-idx { position: absolute; left: var(--fx); top: 50%; transform: translate(-96%, -88%); font-size: min(34cqw, 170px); line-height: 1; color: transparent; -webkit-text-stroke: 1px var(--rule); pointer-events: none; }
+  /* open: the glyph stays at full strength (its cells break away in JS, scripts/pixels.ts) and the plate is the ground —
+     it lies under the glyph as well as under the object. Reduced motion: the glyph simply hides */
+  .skr.skr-gm.real .skr-idx { opacity: 0.35; transition: opacity var(--t-cursor); }
+  .skr.skr-gm.real .skr-sketch { opacity: 1; transition: none; }
+  .skr-gm { isolation: isolate; }
+  .skr-gm.real .skr-plate { z-index: -1; }
+  @media (prefers-reduced-motion: reduce) { .skr.skr-gm.real .skr-sketch { opacity: 0; } }
+  /* a cutout stands on its plate and overflows the plate (not the box): the whole object stays visible */
+  .skr-gm .skr-real :global(img) { inset: auto; left: var(--fx); top: 50%; width: var(--rw, 80%); height: 100%; transform: translate(-50%, -50%); }
+  .skr-slot > :global(*) { position: absolute; left: var(--fx); top: 50%; width: 104%; max-width: none; margin: 0; transform: translate(-50%, -50%); }
+</style>
+
+<script>
+  import { onPage, reducedMotion, cssMs } from '../../scripts/lifecycle';
+  import { lqWatch } from '../../scripts/lq';
+  import { dissolve, assemble } from '../../scripts/pixels';
+  import { mosaic, type Mosaic } from '../../scripts/mosaic';
+  import { sweep, clearSweep } from '../../scripts/sweep';
+  const ENTER = 'cubic-bezier(0.22, 1, 0.36, 1)', OPEN = 'cubic-bezier(0.87, 0, 0.13, 1)', EXIT = 'cubic-bezier(0.4, 0, 1, 1)';
+  onPage(() => {
+    const offs = [...document.querySelectorAll<HTMLElement>('.skr')].map((el) => {
+      const realL = el.querySelector<HTMLElement>('.skr-real'), plateL = el.querySelector<HTMLElement>('.skr-plate');
+      // the glyph: one Pictogram, or several composed in the glyph slot (they share one cell size; the first sets the grid)
+      const glyphs = [...el.querySelectorAll<SVGSVGElement>('.skr-gbox svg.pg')], glyph = glyphs[0] ?? null;
+      const lead = Number(el.dataset.lead || 0);
+      const hud = el.querySelector<HTMLElement>('.skr-hud')!, tag = el.querySelector<HTMLElement>('.skr-tag')!, pic = realL?.querySelector('img') ?? null;
+      // screens mapped on the object's faces (IsoObject screens with reveal): they switch on in place, like a display
+      const screens = [...el.querySelectorAll<SVGGElement>('.iso-screen[data-reveal]')];
+      const corners = [...hud.querySelectorAll<HTMLElement>('.c')];
+      let on = false, intent = 0, lastType = '';
+      let timers: number[] = [], mz: Mosaic | null = null;
+      const later = (ms: number, f: () => void) => { timers.push(window.setTimeout(f, ms)); };
+      const stop = () => {
+        [plateL, realL, hud, tag, pic, ...corners, ...screens.flatMap((g) => [...g.children])].forEach((x) => x?.getAnimations().forEach((a) => a.cancel()));
+        clearSweep(plateL); clearSweep(realL);
+        timers.forEach(clearTimeout); timers = [];
+        mz?.clear(); mz = null;
+      };
+      // the mosaic grid = the glyph's own grid (cell size and where its corner falls inside the object's layer)
+      const grid = () => {
+        const r = realL!.getBoundingClientRect(), g = glyph!.getBoundingClientRect(), vb = glyph!.viewBox.baseVal;
+        return { c: g.height / (vb.height / 10), ox: g.left - r.left, oy: g.top - r.top, r, g };
+      };
+      const show = () => {
+        if (on) return; on = true;
+        el.classList.add('real'); el.setAttribute('aria-pressed', 'true');
+        lqWatch(pic); // the real picture may still be coming: it opens as its preview with the loading HUD
+        if (reducedMotion()) { if (lead) el.classList.add('skr-lead'); return; }
+        stop();
+        const tOpen = cssMs('--t-open'), tEnter = cssMs('--t-enter'), tCur = cssMs('--t-cursor');
+        // prelude: the glyph's own move (CSS on .skr-lead) runs first; everything below waits for it (L)
+        const L = lead;
+        if (L) el.classList.add('skr-lead');
+        // 1 plane: the plate opens left → right · 2 the picture opens out from the middle · 3 settles · 4 accent: brackets, tag
+        // glyph mode: the plate is the ground the object stands on, so it takes its time (1.8× in, ~2× out); the object
+        // comes up once the plate is half open
+        const tPlate = glyph ? tOpen * 1.8 : tOpen;
+        const d = L + (plateL ? tPlate * (glyph ? 0.5 : 0.6) : 0);
+        let lock = d + tOpen * 0.7; // when the brackets close in (accent last)
+        // the plate and the picture open with the shared sweep edge (scripts/sweep.ts): slanted, feathered, streaked
+        if (plateL && !sweep(plateL, 'r', 'in', { duration: tPlate, delay: L, easing: OPEN })) plateL.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: tPlate, delay: L, easing: OPEN, fill: 'backwards' });
+        if (glyph && realL) {
+          // glyph mode: the glyph's cells break away with the plate's sweep, while the object comes up in the glyph's own
+          // grid and its resolution doubles twice — cuts, no fades (glyph → pixels → the real thing, scripts/mosaic.ts)
+          const step = 70;
+          const m = (mz = mosaic(realL));
+          realL.animate([{ opacity: 0 }, { opacity: 0 }], { duration: d });
+          // the grid is read once the prelude has put the glyph in its place
+          let g = { c: 0, ox: 0, oy: 0 };
+          const start = () => { glyphs.forEach((x) => dissolve(x, tOpen)); g = grid(); m.set(g.c, g.ox, g.oy); };
+          if (L) later(L, start); else start();
+          later(d + step, () => m.set(g.c / 2, g.ox, g.oy));
+          later(d + step * 2, () => m.set(g.c / 4, g.ox, g.oy));
+          later(d + step * 3, () => { m.clear(); if (mz === m) mz = null; });
+          lock = d + step * 2.5;
+        } else {
+          // the picture opens out from the middle
+          if (!sweep(realL, 'mid', 'in', { duration: tOpen, delay: d, easing: OPEN }))
+            realL?.animate([{ clipPath: 'inset(50% 0 50% 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: tOpen, delay: d, easing: OPEN, fill: 'backwards' });
+          pic?.animate([{ scale: '1.06', filter: 'saturate(0.2) brightness(1.2)' }, { scale: '1', filter: 'none' }], { duration: tEnter, delay: d, easing: ENTER, fill: 'backwards' });
+        }
+        // a screen powers on: a wide band opens to full height while it fades in (never a thin strip — that read as a
+        // stray line across the sketch), over-bright at first, then the brightness settles
+        screens.forEach((g) => [...g.children].forEach((c) => {
+          (c as SVGElement).animate([{ clipPath: 'inset(32% 0 32% 0)', opacity: 0, filter: 'brightness(2)' }, { clipPath: 'inset(0 0 0 0)', opacity: 1, filter: 'brightness(1.5)', offset: 0.5 }, { clipPath: 'inset(0 0 0 0)', opacity: 1, filter: 'none' }], { duration: tOpen + tEnter * 0.6, easing: OPEN });
+        }));
+        corners.forEach((c, k) => {
+          const dx = k === 0 || k === 3 ? -10 : 10, dy = k < 2 ? -10 : 10;
+          c.animate([{ transform: `translate(${dx}px, ${dy}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: tCur, delay: lock, easing: ENTER, fill: 'backwards' });
+        });
+        tag.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: tCur, delay: lock + tOpen * 0.2, easing: ENTER, fill: 'backwards' });
+      };
+      const hide = async () => {
+        if (!on) return; on = false;
+        el.setAttribute('aria-pressed', 'false');
+        if (reducedMotion()) { el.classList.remove('real', 'skr-lead'); return; }
+        stop();
+        // back is quieter and faster than going: fold back to the middle
+        hud.animate([{ opacity: 1 }, { opacity: 0 }], { duration: cssMs('--t-exit'), easing: EXIT, fill: 'forwards' });
+        const tOut = cssMs('--t-exit') * 2.4, tPlateOut = glyph ? tOut * 2.2 : tOut;
+        let objOut: Animation | null | undefined = null;
+        if (glyph && realL) {
+          // back down the same steps, quicker, while the glyph's cells settle back
+          glyphs.forEach((x) => assemble(x, tOut * 1.6));
+          const { c, ox, oy } = grid(), step = 45;
+          const m = (mz = mosaic(realL));
+          m.set(c / 4, ox, oy);
+          later(step, () => m.set(c / 2, ox, oy));
+          later(step * 2, () => m.set(c, ox, oy));
+          objOut = realL.animate([{ opacity: 1 }, { opacity: 1, offset: 0.99 }, { opacity: 0 }], { duration: step * 3, fill: 'forwards' });
+        } else {
+          objOut = sweep(realL, 'mid', 'in', { duration: tOut, easing: EXIT, reverse: true }) ?? realL?.animate([{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(50% 0 50% 0)' }], { duration: tOut, easing: EXIT, fill: 'forwards' });
+        }
+        const outs = [
+          sweep(plateL, 'r', 'out', { duration: tPlateOut, easing: EXIT }) ?? plateL?.animate([{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 0 100%)' }], { duration: tPlateOut, easing: EXIT, fill: 'forwards' }),
+          objOut,
+          ...screens.flatMap((g) => [...g.children].map((c) => (c as SVGElement).animate([{ clipPath: 'inset(0 0 0 0)', opacity: 1 }, { clipPath: 'inset(32% 0 32% 0)', opacity: 0 }], { duration: tOut, easing: EXIT, fill: 'forwards' })))
+        ].filter(Boolean) as Animation[];
+        await Promise.all(outs.map((a) => a.finished.catch(() => {})));
+        if (!on) { el.classList.remove('real', 'skr-lead'); stop(); }
+      };
+      // mouse: hover is the whole interaction (a click does nothing — no hidden "pinned" state); touch / pen: tap toggles.
+      // Hosted: the project block around it is the trigger (hover or keyboard focus anywhere in it), and a click on the
+      // picture opens the project, like any project picture
+      const host = (el.hasAttribute('data-host') && el.closest<HTMLElement>('[data-skr-host]')) || el, hosted = host !== el;
+      const go = hosted ? host.querySelector<HTMLAnchorElement>('a[data-skr-go]') : null;
+      const down = (e: PointerEvent) => { lastType = e.pointerType; };
+      // inside a HorizontalStrip: nothing reveals while it moves (a cursor at rest would catch every passing item)
+      const strip = el.closest<HTMLElement>('.hs'), moving = () => !!strip?.hasAttribute('data-moving') || document.documentElement.classList.contains('scrolling');
+      const arm = () => { clearTimeout(intent); intent = window.setTimeout(() => { intent = 0; if (!moving()) show(); }, 90); };
+      const enter = (e: PointerEvent) => { if (e.pointerType !== 'mouse' || moving()) return; arm(); };
+      // the strip stopped under a resting cursor: the first small move over this item reveals it
+      const over = (e: PointerEvent) => { if (e.pointerType === 'mouse' && !on && !intent && !moving()) arm(); };
+      const drift = () => { clearTimeout(intent); intent = 0; hide(); };
+      const leave = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; clearTimeout(intent); intent = 0; hide(); };
+      const toggle = () => { clearTimeout(intent); if (on) hide(); else show(); };
+      const click = (e: MouseEvent) => {
+        if (!hosted) { if (lastType !== 'mouse') toggle(); return; }
+        // hosted: links in the block keep their own job; the picture opens the project (touch: once it is open)
+        const t = e.target as Element;
+        if (t.closest('a, button') || !el.contains(t)) return;
+        if (lastType === 'mouse' || on) go?.click();
+        else toggle();
+      };
+      const key = (e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
+      // hosted, keyboard: tabbing to any link of the project opens it (a focus that only follows a mouse click does not)
+      const fin = (e: FocusEvent) => { if ((e.target as Element).matches(':focus-visible')) { clearTimeout(intent); show(); } };
+      const fout = (e: FocusEvent) => { if (!host.contains(e.relatedTarget as Node | null) && !host.matches(':hover')) hide(); };
+      host.addEventListener('pointerdown', down); host.addEventListener('pointerenter', enter); host.addEventListener('pointerleave', leave);
+      host.addEventListener('pointermove', over); strip?.addEventListener('hs:move', drift);
+      host.addEventListener('click', click);
+      if (hosted) { host.addEventListener('focusin', fin); host.addEventListener('focusout', fout); }
+      else el.addEventListener('keydown', key);
+      // hosted, touch (no hover): it opens while it sits in the middle band of the screen, and folds back once it leaves
+      let io: IntersectionObserver | null = null;
+      let band: (() => void) | null = null;
+      // A strip uses first-tap preview / second-tap follow. Its cards must stay closed while swiping past.
+      if (hosted && !strip && matchMedia('(hover: none)').matches) {
+        // IO percentage margins use root width, so use viewport-height pixels for the middle band.
+        // https://www.w3.org/TR/intersection-observer/#intersectionobserver-root-margin
+        band = () => {
+          io?.disconnect();
+          const edge = Math.round(document.documentElement.clientHeight * 0.32);
+          io = new IntersectionObserver((es) => es.forEach((x) => (x.isIntersecting ? show() : hide())), { rootMargin: `-${edge}px 0px -${edge}px 0px` });
+          io.observe(el);
+        };
+        band(); window.addEventListener('resize', band);
+      }
+      return () => {
+        stop();
+        if (band) window.removeEventListener('resize', band);
+        clearTimeout(intent); io?.disconnect(); strip?.removeEventListener('hs:move', drift);
+        host.removeEventListener('pointermove', over); host.removeEventListener('pointerdown', down); host.removeEventListener('pointerenter', enter);
+        host.removeEventListener('pointerleave', leave); host.removeEventListener('click', click);
+        host.removeEventListener('focusin', fin); host.removeEventListener('focusout', fout); el.removeEventListener('keydown', key);
+      };
+    });
+    return () => offs.forEach((f) => f());
+  });
+</script>

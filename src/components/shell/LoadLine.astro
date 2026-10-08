@@ -1,0 +1,43 @@
+---
+/**
+ * @component LoadLine
+ * @group shell
+ * @summary Floema's loading line: when a page takes a moment to arrive, a thin line runs across the top while the current page stays on screen — never a blank screen or a spinner.
+ * @use Once per page — PageShell renders it. Nothing to configure.
+ * @avoid Loaders, spinners, percentage counters.
+ * @behavior Appears only if the next page takes longer than 150ms (prefetching on hover — scripts/prefetch-media.ts — usually makes it invisible). Completes and fades when the new page is swapped in.
+ * @example
+ * <LoadLine />
+ */
+---
+<div class="ll" aria-hidden="true" transition:persist="load-line"><i></i></div>
+
+<style is:global>
+  .ll { position: fixed; left: 0; right: 0; top: 0; height: 2px; z-index: 95; pointer-events: none; }
+  .ll i { position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0); background: var(--acc); opacity: 0; }
+  .ll.run i { opacity: 1; transform: scaleX(0.8); transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0s; }
+  .ll.done i { opacity: 0; transform: scaleX(1); transition: transform 200ms var(--e-enter), opacity 300ms 200ms; }
+</style>
+
+<script>
+  if (!(window as any).__loadLine) {
+    (window as any).__loadLine = true;
+    let t = 0;
+    const el = () => document.querySelector<HTMLElement>('.ll');
+    // Events come from src/scripts/transitions.ts and wrap only the real page load (not the "deeper" overlay); vt:leave starts the line at once.
+    document.addEventListener('vt:load-start', () => {
+      clearTimeout(t);
+      t = window.setTimeout(() => { const l = el(); if (l) { l.classList.remove('done'); l.classList.add('run'); } }, 150);
+    });
+    // leaving for another site: no 150ms wait — the line is the first sign the click registered (transitions.ts)
+    document.addEventListener('vt:leave', () => {
+      clearTimeout(t);
+      const l = el(); if (l) { l.classList.remove('done'); l.classList.add('run'); }
+    });
+    document.addEventListener('vt:load-end', () => {
+      clearTimeout(t);
+      const l = el();
+      if (l?.classList.contains('run')) { l.classList.replace('run', 'done'); setTimeout(() => l.classList.remove('done'), 520); }
+    });
+  }
+</script>

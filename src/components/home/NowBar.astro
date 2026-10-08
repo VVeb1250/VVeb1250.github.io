@@ -1,0 +1,34 @@
+---
+/**
+ * @component NowBar
+ * @group home
+ * @summary "Now / Looking for" lines: what is live right now, stated plainly.
+ * @use Inside <IntroHero>. 1–3 lines. Update it when the facts change.
+ * @avoid Stale "now" lines; marketing phrasing.
+ * @example
+ * <NowBar items={[
+ *   { label: { en: 'Now', th: 'ตอนนี้' }, status: 'ACTIVE', cat: 'ai', text: { en: 'Memory Base: testing whether compact understanding beats episodic recall.' } },
+ *   { label: { en: 'Looking for', th: 'กำลังหา' }, text: { en: 'A game dev or AI engineering internship.' } }
+ * ]} />
+ */
+import StatusTag from '../primitives/StatusTag.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import type { Status, Cat } from '../../lib/vocab';
+export interface Props {
+  items: { label: L; text: L; status?: Status; cat?: Cat }[];
+}
+const { items } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<dl class="now">
+  {items.map((i) => (
+    <div><dt class="eyebrow l10n">{tx(i.label, lang)}</dt><dd>{i.status && <StatusTag status={i.status} cat={i.cat} />} <span>{tx(i.text, lang)}</span></dd></div>
+  ))}
+</dl>
+
+<style>
+  .now { display: grid; gap: 10px; padding-top: 18px; border-top: 1px solid var(--rule); max-width: 760px; font-size: 15px; }
+  .now div { display: flex; gap: 10px 12px; align-items: baseline; flex-wrap: wrap; }
+  dt { min-width: 96px; }
+  dd { margin: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+</style>

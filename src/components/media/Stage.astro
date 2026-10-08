@@ -1,0 +1,103 @@
+---
+/**
+ * @component Stage
+ * @group media
+ * @summary The subject shot: a real artifact (transparent cutout or a screen) standing on a Plate, overflowing it, with optional callouts that name real parts.
+ * @use One per screen at most — it is the visual hit. Hero of a work page, featured cards, desk objects.
+ * @avoid Stock imagery, mockups of devices that do not exist, callouts with invented labels, two Stages side by side at full size.
+ * @behavior Static (no parallax). Callouts drop their small second line under 600px wide; in size="mini" only callouts marked `key` show.
+ * @example
+ * <Stage src="vaja/object.webp" alt="Vaja, the player character, holding the crystal staff" plate="step-right" size="hero"
+ *   callouts={[{ x: 78, y: 12, label: 'Crystal staff', sub: 'DRAWN BY HAND', side: 'right', key: true }]} />
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Plate from './Plate.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { toImage, lqStyle } from '../../lib/media';
+import type { Plate as Shape, Cat } from '../../lib/vocab';
+
+export interface Callout {
+  /** Position of the pointed spot, in % of the object image (0–100). */
+  x: number;
+  y: number;
+  /** Real name of the part. */
+  label: L;
+  /** Small mono second line (spec, pin, size). */
+  sub?: L;
+  /** Which side the label sits on. Default 'right'. */
+  side?: 'left' | 'right';
+  /** Keep this callout on size="mini". */
+  key?: boolean;
+}
+export interface Props {
+  /** Media key ("vaja/object.webp") or an imported image. Omit to put your own SVG/HTML object in the slot. */
+  src?: string | ImageMetadata;
+  /** What the object is (required with src). */
+  alt?: L;
+  plate?: Shape;
+  /** Override the plate's cut angle (see Plate). */
+  cut?: number;
+  /** hero = work page top; card = featured item; mini = small cards and desk objects. */
+  size?: 'hero' | 'card' | 'mini';
+  /** 'cutout' = transparent PNG/WebP that overflows the plate; 'screen' = a screenshot shown as a lifted panel. */
+  frame?: 'cutout' | 'screen';
+  /** Index label on the plate corner, e.g. "01". */
+  idx?: string;
+  callouts?: Callout[];
+  /** One small line under the stage (source or honesty note, e.g. "Sprite from the game build"). */
+  note?: L;
+  /** Context color if the Stage is not already inside a work's area. */
+  cat?: Cat;
+  /** Load immediately (use for the first Stage on a page). */
+  eager?: boolean;
+}
+const { src, alt, plate = 'step-right', cut, size = 'card', frame = 'cutout', idx, callouts = [], note, cat, eager = false } = Astro.props;
+const lang = langOf(Astro.url);
+const image = src ? toImage(src) : null;
+const lq = image ? await lqStyle(image, 'contain') : '';
+const sizes = { hero: '(max-width: 860px) 92vw, 60vw', card: '(max-width: 820px) 92vw, 55vw', mini: '(max-width: 820px) 92vw, 40vw' }[size];
+const shown = size === 'mini' ? callouts.filter((c) => c.key) : callouts;
+---
+<figure class="stage" data-size={size} data-cat={cat}>
+  <Plate shape={plate} cut={cut} />
+  {idx && <span class="stage-idx num" aria-hidden="true">[{idx}]</span>}
+  <div class="obj" data-frame={frame}>
+    {image ? <Image style={lq} data-lq src={image} alt={tx(alt, lang)} sizes={sizes} widths={[360, 560, 800, 1100, 1400].filter((w) => w <= image.width * 1.01)} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} /> : <slot />}
+    {shown.map((c) => (
+      <span class="co" data-side={c.side ?? 'right'} style={`--x:${c.x}%;--y:${c.y}%`}>
+        <i class="co-dot"></i><i class="co-line"></i>
+        <span class="co-lbl"><b>{tx(c.label, lang)}</b>{c.sub && <small>{tx(c.sub, lang)}</small>}</span>
+      </span>
+    ))}
+  </div>
+  {note && <figcaption class="stage-note">{tx(note, lang)}</figcaption>}
+</figure>
+
+<style is:global>
+  .stage { position: relative; isolation: isolate; display: grid; justify-items: center; padding-block: 4%; }
+  .stage-idx { position: absolute; z-index: 2; top: calc(10% - 20px); left: 7%; font: 500 11px/1 var(--f-mono); letter-spacing: 0.1em; color: var(--ink2); }
+  .obj { position: relative; z-index: 1; width: fit-content; max-width: 100%; }
+  .obj > img, .obj > picture > img { width: auto; max-width: 100%; object-fit: contain; filter: drop-shadow(0 16px 14px color-mix(in srgb, var(--shade) calc(var(--sh-o) * 100%), transparent)); }
+  .stage[data-size='hero'] .obj > img { max-height: min(64vh, 620px); }
+  .stage[data-size='card'] .obj > img { max-height: min(52vh, 480px); }
+  .stage[data-size='mini'] .obj > img { max-height: min(34vh, 300px); }
+  .obj[data-frame='screen'] > img { border: 1px solid var(--rule); background: var(--surface); filter: drop-shadow(0 18px 22px color-mix(in srgb, var(--shade) calc(var(--sh-o) * 80%), transparent)); }
+  .stage[data-size='hero'] .obj[data-frame='screen'] { width: 88%; }
+  .obj[data-frame='screen'] > img { max-height: none !important; width: 100%; }
+  .stage-note { position: relative; z-index: 2; justify-self: end; margin-top: 6px; font: 400 10px/1.3 var(--f-mono); letter-spacing: 0.03em; color: var(--ink3); text-align: right; }
+
+  /* callouts: a dot on the real part, a short leader, the part's real name */
+  .co { position: absolute; left: var(--x); top: var(--y); display: flex; align-items: center; transform: translateY(-50%); pointer-events: none; z-index: 2; }
+  .co[data-side='left'] { flex-direction: row-reverse; transform: translate(-100%, -50%); }
+  .co-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 2px var(--bg); flex: none; }
+  .co[data-side='left'] .co-dot { order: 0; }
+  .co-line { width: clamp(20px, 4vw, 44px); height: 1px; background: var(--ink); flex: none; }
+  .co-lbl { display: grid; gap: 1px; padding-inline: 6px; white-space: nowrap; text-shadow: 0 0 3px var(--bg), 0 0 8px var(--bg), 0 0 1px var(--bg); }
+  .co[data-side='left'] .co-lbl { text-align: right; }
+  .co-lbl b { font: 600 13px/1.2 var(--f-body); color: var(--ink); }
+  .co-lbl small { font: 500 10px/1.2 var(--f-mono); letter-spacing: 0.06em; color: var(--ink2); }
+  .stage[data-size='mini'] .co-lbl b { font-size: 12px; }
+  @media (max-width: 600px) { .co-lbl small { display: none; } .co-line { width: 16px; } }
+</style>
+

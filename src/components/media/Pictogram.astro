@@ -1,0 +1,44 @@
+---
+/**
+ * @component Pictogram
+ * @group media
+ * @summary The minimal level of an object: a flat pixel-block glyph in grey on a faint cell grid (Endfield's database icons) — less detail than an IsoObject, so pointing at it can open the detailed object or the real picture.
+ * @use The resting face of a LabItem card that has an object (`glyph` / `glyphFrom`), or a small marker for a work. Draw the SAME object the card reveals: a slab of cells for a memory store, a screen for an IDE, the character's own silhouette traced from its cutout (`from`).
+ * @avoid Detail (that is IsoObject's job); more than ~16 cells across; decorative glyphs that are not the work's object; more than one accent group.
+ * @behavior Static SVG, no motion of its own; the card around it animates (its cells break away as the object opens and settle back after — scripts/pixels.ts). Quiet colours on purpose: the grey is ink3 mixed ~half into the page and the accent is softened, so the resting glyph never pulls the eye from the work's name. '#' = grey cell, '+' = accent cell (context signal), anything else = empty — transparent by default (`backdrop` draws the empty cells faintly).
+ * @example
+ * <Pictogram grid={['######', '###+##', '######', '####+#', '#+####', '######']} label="Memory Base store" />
+ * <Pictogram from="vaja/object.webp" cols={12} label="Vaja" />
+ */
+import { img, traceAlpha } from '../../lib/media';
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  /** Rows of cells: '#' grey, '+' accent, anything else empty. */
+  grid?: string[];
+  /** Trace this transparent cutout's silhouette instead (asset key). */
+  from?: string;
+  /** Cells across when tracing. Default 12. */
+  cols?: number;
+  /** Draw the empty cells as a faint grid. Default false: empty cells are transparent. */
+  backdrop?: boolean;
+  /** What it depicts (for screen readers); omit when the name is right next to it. */
+  label?: L;
+  class?: string;
+}
+const { grid, from, cols = 12, label, backdrop = false, class: cls } = Astro.props;
+const lang = langOf(Astro.url);
+const rows = grid ?? (from ? await traceAlpha(img(from), cols) : []);
+const W = Math.max(0, ...rows.map((r) => r.length)), H = rows.length, S = 10, g = 1.4;
+const cells = rows.flatMap((r, y) => [...r.padEnd(W, '.')].map((ch, x) => ({ x, y, k: ch === '#' ? 'f' : ch === '+' ? 'a' : 'e' }))).filter((c) => backdrop || c.k !== 'e');
+---
+<svg class:list={['pg', cls]} viewBox={`0 0 ${W * S} ${H * S}`} role={label ? 'img' : undefined} aria-label={label ? tx(label, lang) : undefined} aria-hidden={label ? undefined : 'true'}>
+  {cells.map((c) => <rect class={`pg-${c.k}`} x={c.x * S + g / 2} y={c.y * S + g / 2} width={S - g} height={S - g} />)}
+</svg>
+
+<style>
+  .pg { display: block; width: 100%; height: auto; overflow: visible; }
+  /* quiet on purpose: the glyph is the resting face, it must not pull the eye from the text around it */
+  .pg-f { fill: color-mix(in srgb, var(--ink3) 48%, var(--bg)); }
+  .pg-a { fill: color-mix(in srgb, var(--ctxs) 70%, var(--bg)); }
+  .pg-e { fill: color-mix(in srgb, var(--ink3) 9%, transparent); }
+</style>

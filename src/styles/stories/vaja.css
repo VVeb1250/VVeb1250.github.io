@@ -1,0 +1,11 @@
+/* The game has its own composition: a playable capture beside the code responsibility,
+   then a source sheet beside the scene made from it. Other stories do not inherit this layout. */
+.vaja-build { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); gap: clamp(24px, 5vw, 64px); align-items: start; }
+.vaja-build > div { display: grid; gap: 16px; align-content: start; }
+.vaja-build figure { margin: 0; display: grid; gap: 10px; }
+.vaja-build figcaption { font: 500 11px/1.5 var(--f-mono); color: var(--ink2); }
+.vaja-art { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); align-items: start; }
+.vaja-art > div { display: grid; gap: 28px; }
+.vaja-art > div > :last-child { max-width: 300px; margin-inline: auto; }
+@media (max-width: 820px) { .vaja-build, .vaja-art { grid-template-columns: minmax(0, 1fr); } }
+

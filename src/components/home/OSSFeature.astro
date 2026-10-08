@@ -1,0 +1,172 @@
+---
+/**
+ * @component OSSFeature
+ * @group home
+ * @summary OSS on Home: an isometric sketch of the read-only check added in AgentsMesh #102, with two inputs and four integration surfaces. Its actual issue/proposal/follow-up lineage, the Windows fix and the root-cause report stay separate below.
+ * @use Home → Selected work. Composition-level for this work only. Every step links to the issue or PR it describes; states and dates must match GitHub.
+ * @avoid A GitHub trophy wall (stars, contribution graphs, logos); three identical repository cards; summarizing an issue or PR you cannot link; a block or callout in the object that is not a real repo, issue or PR with its real state.
+ * @behavior Hosted SketchReveal: mouse hover or keyboard focus opens the object over an owner-approved center Plate; leaving closes it. Touch opens in the middle screen band. The data-pj block opens the work; references in the separate evidence threads open their own GitHub targets. Under 900px the composition stacks.
+ * @example
+ * <OSSFeature threads={[{ repo: 'AgentsMesh', place: 'main', steps: [{ ref: '#98', kind: 'issue', state: 'closed', href: '…', text: { en: '…' } }] }]} />
+ */
+import EvidenceLink from '../primitives/EvidenceLink.astro';
+import SketchReveal from '../media/SketchReveal.astro';
+import IsoObject from '../media/IsoObject.astro';
+import GoLink from '../primitives/GoLink.astro';
+import AttributionBlock from '../blocks/AttributionBlock.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { work, workHref, vtLabel, ctxOf } from '../../lib/works';
+
+type Step = { ref: string; kind: 'issue' | 'pr'; state: L; href: string; text: L };
+export interface Props {
+  /** `place`: main = the full lineage; side = a single fix, offset right; low = a report, set below. */
+  threads?: { repo: string; place: 'main' | 'side' | 'low'; steps: Step[] }[];
+  credit?: L;
+  /** The detector at its simplest: two inputs, the shared check, four integration surfaces. */
+  glyph?: string[];
+  base?: string;
+}
+const {
+  threads = [
+    { repo: 'AgentsMesh', place: 'main', steps: [
+      { ref: '#98', kind: 'issue', state: { en: 'closed · completed' }, href: 'https://github.com/sampleXbro/agentsmesh/issues/98',
+        text: { en: 'An edit to generated AGENTS.md still passed check. I reproduced it step by step.' } },
+      { ref: '#99', kind: 'pr', state: { en: 'closed · not merged' }, href: 'https://github.com/sampleXbro/agentsmesh/pull/99',
+        text: { en: 'The maintainer kept check on its fast checksum path and asked for the stale-output part as a follow-up.' } },
+      { ref: '#102', kind: 'pr', state: { en: 'merged · 21 Jul 2026' }, href: 'https://github.com/sampleXbro/agentsmesh/pull/102',
+        text: { en: 'I extracted read-only stale-output detection and exposed it through the core, API, CLI and MCP check.' } }
+    ] },
+    { repo: 'ai-config-sync-manager', place: 'side', steps: [
+      { ref: '#28', kind: 'pr', state: { en: 'merged · 9 Jul 2026' }, href: 'https://github.com/slash9494/ai-config-sync-manager/pull/28',
+        text: { en: 'On Windows, absolute drive paths put backups in the wrong place. I sanitized the path, kept the POSIX layout and added regression tests.' } }
+    ] },
+    { repo: 'context-mode', place: 'low', steps: [
+      { ref: '#878', kind: 'issue', state: { en: 'open' }, href: 'https://github.com/mksglu/context-mode/issues/878',
+        text: { en: 'Oversized Markdown paragraphs bypassed the 4 KiB chunk cap. I traced the root cause with a minimal repro and SQLite evidence; other users later reproduced it on newer versions.' } }
+    ] }
+  ],
+  credit = { en: 'AI helped write the code and tests for #102 and #28; I set the direction and reviewed them.' },
+  glyph = [
+    '###.........##',
+    '###..++++...##',
+    '..#..++++...##',
+    '..###++++###..',
+    '..#..++++...##',
+    '###.........##',
+    '###.........##'
+  ],
+  base
+} = Astro.props;
+const lang = langOf(Astro.url);
+const w = await work('oss');
+const d = w.data;
+const href = d.page ? workHref('oss', lang, base) : undefined;
+const vt = { 'data-vt': 'deeper', 'data-vt-cat': ctxOf(w), 'data-vt-label': vtLabel(w), 'data-work': 'oss' };
+---
+<div class="of" data-feature data-skr-host data-go data-work="oss" data-cat={ctxOf(w)}>
+  <div class="of-pj" data-pj>
+    <div class="of-head">
+      <span class="eyebrow">{d.type} · {d.year}</span>
+      <h2 class="disp" data-vt-title>{href ? <a href={href} {...vt}>{d.title}</a> : d.title}</h2>
+      <p class="of-line">{tx(d.line, lang)}</p>
+      {href && <a class="of-go" href={href} data-skr-go {...vt}><GoLink /></a>}
+    </div>
+    <div class="of-obj">
+      <SketchReveal host plate="center" kind="system" glyph={glyph} glyphScale={0.58} ratio="680 / 380" size="fill" index="03" tag={{ en: 'READ-ONLY CHECK', th: 'ตรวจแบบอ่านอย่างเดียว', ja: '読み取り専用チェック' }}
+        realAlt={{ en: 'Sketch of AgentsMesh #102: source files and generated AGENTS.md, a read-only stale-output check, and its core, API, CLI and MCP integration surfaces', th: 'สเก็ตช์ AgentsMesh #102: source files กับ AGENTS.md ที่ generate แล้ว check แบบอ่านอย่างเดียวที่หา output ค้าง และจุดเชื่อมของ core, API, CLI และ MCP', ja: 'AgentsMesh #102 のスケッチ：ソースファイルと生成された AGENTS.md、読み取り専用の古い出力チェック、core・API・CLI・MCP の連携箇所' }}>
+        <IsoObject slot="real" size={[680, 380]} origin={[310, 72]} scale={0.85}
+          label={{ en: 'AgentsMesh stale-output check: two inputs, one detector and four integration surfaces', th: 'AgentsMesh stale-output check: input สองอย่าง ตัวตรวจจับหนึ่งตัว และจุดเชื่อมสี่จุด', ja: 'AgentsMesh の古い出力チェック：入力2つ、検出器1つ、連携箇所4つ' }}
+          parts={[
+            { box: [0, 0, 0, 72, 60, 3] },
+            { box: [0, 0, 6, 72, 60, 3] },
+            { box: [0, 110, 0, 72, 60, 3] },
+            { box: [0, 110, 6, 72, 60, 3] },
+            { box: [120, 65, 0, 120, 85, 32], mat: 'c' },
+            { box: [130, 75, 32, 18, 18, 4], mat: 'a' },
+            { box: [290, -5, 0, 42, 34, 10] },
+            { box: [290, 55, 0, 42, 34, 10] },
+            { box: [290, 115, 0, 42, 34, 10] },
+            { box: [290, 175, 0, 42, 34, 10] }
+          ]}
+          flows={[
+            { z: 10, d: 'M72 30 H105 V107 H120', read: true },
+            { z: 10, d: 'M72 140 H105 V107', read: true },
+            { z: 10, d: 'M240 107 H272 M272 12 V192 M272 12 H290 M272 72 H290 M272 132 H290 M272 192 H290', read: true }
+          ]}
+          callouts={[
+            { at: [20, 20, 9], label: 'Source files', x: 20, y: 110 },
+            { at: [20, 140, 9], label: 'AGENTS.md', sub: 'GENERATED OUTPUT', x: 20, y: 230 },
+            { at: [180, 107, 32], label: 'Stale-output check', sub: '#102 · MERGED', x: 410, y: 48 },
+            { at: [311, 12, 10], label: 'Core', x: 580, y: 210 },
+            { at: [311, 72, 10], label: 'API', x: 580, y: 250 },
+            { at: [311, 132, 10], label: 'CLI', x: 580, y: 290 },
+            { at: [311, 192, 10], label: 'MCP', x: 580, y: 330 }
+          ]} />
+      </SketchReveal>
+      <p class="of-object-note">{tx({ en: 'Sketch of the check added in AgentsMesh #102', th: 'สเก็ตช์ของ check ที่เพิ่มใน AgentsMesh #102', ja: 'AgentsMesh #102 で追加したチェックのスケッチ' }, lang)}</p>
+    </div>
+  </div>
+  <div class="of-more">
+    <div class="of-threads">
+      {threads.map((t) => (
+        <section class={`of-t of-${t.place}`} aria-label={t.repo}>
+          <h3 class="disp">{t.repo}</h3>
+          <ol class:list={['of-steps', { chain: t.steps.length > 1 }]}>
+            {t.steps.map((st) => (
+              <li>
+                <EvidenceLink label={st.ref} href={st.href} shows={st.state} kind={st.kind} />
+                <p>{tx(st.text, lang)}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </div>
+    {credit && <AttributionBlock rows={[
+      { who: 'me', did: { en: 'Found the problems in use, reproduced and root-caused them, set the direction, reviewed the code and tests.', th: 'เจอปัญหาตอนใช้งาน ทำซ้ำและหาสาเหตุได้ ตั้งทิศทาง รีวิวโค้ดกับ test', ja: '利用中に問題を見つけ、再現して根本原因を特定し、方向性を決め、コードとテストをレビューしました。' } },
+      { who: 'ai', did: credit },
+      { who: 'upstream', did: { en: 'The AgentsMesh maintainer chose the base checksum design and requested the follow-up. Maintainers reviewed and merged #102 and #28.', th: 'maintainer ของ AgentsMesh เลือกดีไซน์ checksum เป็นฐานและขอ follow-up maintainer รีวิวและ merge #102 กับ #28', ja: 'AgentsMesh のメンテナーはチェックサムの基本設計を選び、フォローアップを依頼しました。メンテナーが #102 と #28 をレビューしてマージしました。' } }
+    ]} />}
+  </div>
+</div>
+
+<style>
+  /* the project (heading + object) is one block; the threads run below it, told separately, on their own grid */
+  .of { display: grid; gap: clamp(28px, 4vw, 48px); }
+  .of-pj { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(16px, 2vw, 28px); row-gap: clamp(22px, 3vw, 36px); align-items: center; }
+  .of-head { grid-column: 8 / span 5; grid-row: 1; display: grid; gap: 16px; justify-items: start; max-width: 52ch; }
+  .of-obj { grid-column: 1 / span 6; grid-row: 1; display: grid; gap: 10px; }
+  .of-object-note { font: 500 11px/1.45 var(--f-mono); color: var(--ink3); }
+  .of-more { display: grid; gap: clamp(22px, 3vw, 36px); }
+  h2 { font-size: clamp(34px, 4.4vw, 56px); line-height: 1.02; }
+  h2 a { color: inherit; text-decoration: none; }
+  h2 a:hover { text-decoration: underline; text-decoration-color: var(--ctxs); text-underline-offset: 0.1em; }
+  .of-line { color: var(--ink2); }
+  /* three threads on one grid: the lineage on the left, the single fix offset right and lower, the report set in below */
+  .of-threads { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(16px, 2vw, 28px); row-gap: clamp(28px, 4vw, 48px); }
+  .of-main { grid-column: 1 / -1; grid-row: 1; }
+  .of-side { grid-column: 1 / span 5; grid-row: 2; }
+  .of-low { grid-column: 8 / span 5; grid-row: 2; }
+  .of-t { display: grid; gap: 12px; align-content: start; }
+  h3 { font-size: 22px; line-height: 1.1; overflow-wrap: anywhere; padding-bottom: 8px; border-bottom: 3px solid var(--ctxs); justify-self: start; }
+  .of-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  .of-steps li { display: grid; gap: 6px; font-size: 15px; }
+  .of-steps li p { max-width: 52ch; }
+  /* one line joins the steps of a lineage: issue → proposal → what merged */
+  .of-steps.chain { position: relative; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; padding-top: 22px; }
+  .of-steps.chain::before { content: ''; position: absolute; left: 4px; right: 4px; top: 4px; height: 1px; background: var(--rule); }
+  .of-steps.chain li { position: relative; align-content: start; }
+  .of-steps.chain li::before { content: ''; position: absolute; left: 0; top: -22px; width: 9px; height: 9px; background: var(--bg); border: 1px solid var(--ink2); }
+  .of-steps.chain li:last-child::before { background: var(--ctxs); border-color: var(--ctxs); }
+  .of-credit { font-size: 14px; color: var(--ink2); max-width: 60ch; }
+  .of-go { text-decoration: none; color: inherit; }
+  @media (max-width: 900px) {
+    .of-head, .of-obj { grid-column: 1 / -1; grid-row: auto; }
+    .of-head { grid-row: 1; }
+    .of-obj { width: 100%; max-width: 680px; }
+    .of-main, .of-side, .of-low { grid-column: 1 / -1; grid-row: auto; margin-top: 0; }
+    .of-steps.chain { grid-template-columns: minmax(0, 1fr); padding: 0 0 0 20px; }
+    .of-steps.chain::before { left: 4px; right: auto; top: 8px; bottom: 8px; width: 1px; height: auto; }
+    .of-steps.chain li::before { left: -20px; top: 6px; }
+  }
+</style>

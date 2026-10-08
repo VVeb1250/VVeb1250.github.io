@@ -1,0 +1,137 @@
+---
+/**
+ * /about — the person: who and where now, the way to the path so far (the Timeline), what he does outside software (drawing,
+ * drums, Japanese), and how to reach him. Plain, in the owner's voice (Story §0.3): no slogans, no principles on display.
+ * Facts: §1, §7, §8. The work itself is on /work/; the path by year (work, competitions, teaching) on /timeline/.
+ */
+import PageShell from '../../../layouts/PageShell.astro';
+import Section from '../../../components/shell/Section.astro';
+import MetaList from '../../../components/primitives/MetaList.astro';
+import PortraitSwap from '../../../components/media/PortraitSwap.astro';
+import Signature from '../../../components/primitives/Signature.astro';
+import GoLink from '../../../components/primitives/GoLink.astro';
+import { Image } from 'astro:assets';
+import { img } from '../../../lib/media';
+import { allWorks } from '../../../lib/works';
+import ContactCard from '../../../components/home/ContactCard.astro';
+import ExternalLink from '../../../components/primitives/ExternalLink.astro';
+import { localePaths, langOf, tx, href, type L } from '../../../lib/i18n';
+import { SITE } from '../../../lib/site';
+export const getStaticPaths = () => localePaths();
+const lang = langOf(Astro.url);
+const T = { en: 'About', th: 'เกี่ยวกับ', ja: '概要' };
+const BIO: L[] = [
+  { en: 'I’m Teethawat Kumying — Web. Third-year Computer Engineering (CoE) at Khon Kaen University.', th: 'ผมชื่อ ธีร์ธวัช คำยิ่ง — Web เรียนวิศวกรรมคอมพิวเตอร์ (CoE) ปี 3 ที่มหาวิทยาลัยขอนแก่น', ja: 'Teethawat Kumying（Web）です。タイのコンケン大学でコンピュータ工学を専攻している3年生です。' },
+  { en: 'I love playing games, and that is the whole reason I want to make them. Most of what I build lately is tooling for AI coding agents.', th: 'ผมชอบเล่นเกมมาก และนั่นคือเหตุผลหลักที่อยากพัฒนาเกมด้วยตัวเอง ช่วงหลังผมพัฒนาเครื่องมือสำหรับ AI coding agent เป็นหลัก', ja: 'ゲームで遊ぶのが大好きで、その楽しさが、自分でもゲームを作りたいと思う原動力になっています。最近は、主に AI コーディングエージェント向けのツールを開発しています。' },
+  { en: 'I’m looking for an AI engineering internship.', th: 'ผมกำลังมองหาตำแหน่งฝึกงานสาย AI engineering', ja: 'AIエンジニアリングのインターンシップを探しています。' }
+];
+const CV = [
+  { k: { en: 'Now', th: 'ตอนนี้', ja: 'いま' }, v: { en: 'Memory Base · experiment phase', th: 'Memory Base · เฟสทดลอง', ja: 'Memory Base · 実験フェーズ' } },
+  { k: { en: 'Looking for', th: 'กำลังหา', ja: '募集' }, v: { en: 'AI engineering internship', th: 'ที่ฝึกงานสาย AI engineering', ja: 'AIエンジニアリングのインターン' } },
+  { k: { en: 'Available', th: 'ว่าง', ja: '期間' }, v: SITE.available },
+  { k: { en: 'Education', th: 'การศึกษา', ja: '学歴' }, v: { en: 'Khon Kaen University · Computer Engineering (CoE) · year 3 · expected 2028', th: 'มหาวิทยาลัยขอนแก่น · วิศวกรรมคอมพิวเตอร์ (CoE) · ปี 3 · คาดว่าจบ 2028', ja: 'コンケン大学 · コンピュータ工学 · 3年 · 2028年卒業予定' } },
+  { k: { en: 'AI interests', th: 'สนใจด้าน AI', ja: 'AIの関心' }, v: { en: 'Agent systems · evaluation · memory · harness and workflow design', th: 'ระบบ agent · การประเมิน · ความจำ · การออกแบบ harness และ workflow', ja: 'エージェントシステム · 評価 · メモリ · harness とワークフローの設計' } },
+  { k: { en: 'Tools', th: 'เครื่องมือ', ja: 'ツール' }, v: 'Unity · C# · Go · C++ · VHDL / Verilog' },
+  { k: { en: 'Site', th: 'ภาษาเว็บ', ja: 'サイト' }, v: 'EN · TH · JA' }
+];
+const total = (await allWorks()).length;
+// the sketchbook's four drawings, small, as the way to the Drawing page
+const SKETCH = ['drawing/fence.webp', 'drawing/flashlight.webp', 'drawing/standing.webp', 'drawing/pink.webp'].map((k) => img(k));
+const pixiv = SITE.links.find((l) => l.kind === 'pixiv');
+// the picture: GitHub avatar → Instagram picture → a real photo (owner, 2026-10-08); the photo has no link.
+const github = SITE.links.find((l) => l.kind === 'github');
+const insta = SITE.instagram;
+const PORTRAITS = [
+  { src: 'portrait/github-avatar.jpg', alt: { en: 'Web’s GitHub picture: a drawn face, smiling', th: 'รูปโปรไฟล์ GitHub ของ Web: ใบหน้าที่วาดไว้ กำลังยิ้ม', ja: 'Web の GitHub 用の画像：笑顔の手描きの顔' }, label: `GitHub · ${github?.note.replace('github.com/', '') ?? 'VVeb1250'}`, href: github?.url },
+  { src: 'portrait/instagram-avatar.webp', alt: { en: 'Web’s Instagram picture: a drawn face, crying', th: 'รูปโปรไฟล์ Instagram ของ Web: ใบหน้าที่วาดไว้ กำลังร้องไห้', ja: 'Web の Instagram 用の画像：泣いている手描きの顔' }, label: `Instagram · ${insta.note}`, href: insta.url },
+  { src: 'portrait/photo-2025.webp', alt: { en: 'Web in a navy shirt, holding a clapperboard that says CoE 34', th: 'Web ใส่เสื้อสีกรมท่า ถือแคลปเปอร์บอร์ดที่เขียนว่า CoE 34', ja: '紺色のシャツを着た Web。「CoE 34」と書かれたカチンコを持っている' }, label: { en: 'Photo · 2025', th: 'รูปจริง · 2025', ja: '写真 · 2025' } },
+  { src: 'portrait/photo-front-facing.webp', alt: { en: 'Front-facing photo of Web in a navy shirt', th: 'รูปหน้าตรงของ Web ใส่เสื้อสีกรมท่า', ja: '紺色のシャツを着た Web の正面写真' }, label: { en: 'Photo · 2026', th: 'รูปจริง · 2026', ja: '写真 · 2026' } }
+];
+---
+<PageShell title={tx(T, lang)} nav="about">
+  <div class="wrap">
+    <header class="top" data-mark={tx(T, lang)}>
+      <span class="eyebrow">{tx(T, lang)}</span>
+      <h1 class="disp" data-mark-trigger>{tx(SITE.name, lang)}<Signature name="web-quoted" label={`“${SITE.handle}”`} write delay={250} class="handle" /></h1>
+    </header>
+    <div class="about">
+      <div class="portrait"><PortraitSwap items={PORTRAITS} /></div>
+      <div class="bio prose">{BIO.map((p) => <p>{tx(p, lang)}</p>)}</div>
+      <div class="cv"><MetaList items={CV} layout="table" /></div>
+    </div>
+
+    <Section title={{ en: 'The path so far', th: 'เส้นทางที่ผ่านมา', ja: 'これまで' }} mark={{ en: 'Path', th: 'เส้นทาง', ja: 'これまで' }}>
+      <a class="path-door" href={href('/timeline/', lang)}>
+        <span class="disp pd-t">{tx({ en: 'Timeline', th: 'ไทม์ไลน์', ja: '年表' }, lang)}<span class="num pd-n">[{String(total).padStart(2, '0')}]</span></span>
+        <span class="pd-d">{tx({ en: 'Work, competitions and teaching, year by year — ICPC, CESCa, the hackathons, and what I retired.', th: 'งาน การแข่งขัน และการสอน ไล่ตามปี — ICPC, CESCa, hackathon และสิ่งที่เลิกทำไปแล้ว', ja: '作品、大会、指導を年ごとに — ICPC、CESCa、ハッカソン、続けなかったものも。' }, lang)}</span>
+        <GoLink lineOnly />
+      </a>
+    </Section>
+
+    <Section title={{ en: 'Outside software', th: 'นอกจากซอฟต์แวร์', ja: 'ソフトウェアの外' }} mark={{ en: 'Outside', th: 'นอกงาน', ja: 'ほか' }}>
+      <div class="outside">
+        <div>
+          <h3 class="eyebrow">{tx({ en: 'Drawing', th: 'วาดรูป', ja: '絵' }, lang)}</h3>
+          <p class="big">{tx({ en: 'I drew now and then since primary school and practised much more seriously from Grade 12. It is still a hobby; in year 3 I draw less often.', th: 'วาดเป็นงานอดิเรกมาตั้งแต่ประถม และจริงจังขึ้นมากตั้งแต่ ม.6 ช่วงปี 3 วาดน้อยลง', ja: '小学生の頃から時々描いてきました。高校3年生の頃からは、より本格的に取り組んでいます。今も趣味として続けていますが、大学3年の今は描く頻度が減っています。' }, lang)}</p>
+          <a class="sk" href={href('/work/drawing/', lang)}>
+            <span class="sk-row" aria-hidden="true">{SKETCH.map((m) => <Image src={m} alt="" widths={[160, 320].filter((w) => w <= m.width)} sizes="96px" loading="lazy" />)}</span>
+            <span class="sk-t">{tx({ en: 'The sketchbook', th: 'สมุดวาดรูป', ja: 'スケッチブック' }, lang)} <GoLink lineOnly /></span>
+          </a>
+          {pixiv && <ExternalLink href={pixiv.url}>{`Pixiv · ${pixiv.note}`}</ExternalLink>}
+        </div>
+        <div>
+          <h3 class="eyebrow">{tx({ en: 'Drums', th: 'กลอง', ja: 'ドラム' }, lang)}</h3>
+          <p>{tx({ en: 'I play drums, and have played in a band. Some guitar, too.', th: 'ผมเล่นกลอง และเคยเล่นในวงดนตรี รวมถึงกีตาร์บ้างเล็กน้อย', ja: 'ドラムを演奏し、バンドでの演奏経験もあります。ギターも少し弾きます。' }, lang)}</p>
+        </div>
+        <div>
+          <h3 class="eyebrow">{tx({ en: 'Japanese', th: 'ภาษาญี่ปุ่น', ja: '日本語' }, lang)}</h3>
+          <p>{tx({ en: 'Studying Japanese, with completed coursework through N4 level in FAST OFFER’s program, now studying at N3 level. No JLPT result yet.', th: 'ผมเรียนภาษาญี่ปุ่นและจบคอร์สในโปรแกรมของ FAST OFFER ถึงระดับ N4 ปัจจุบันกำลังเรียนระดับ N3 และยังไม่มีผลสอบ JLPT', ja: '日本語を学習中です。FAST OFFER のプログラムで N4 レベルまでのコースを修了し、現在は N3 レベルを学んでいます。JLPT の結果はまだありません。' }, lang)}</p>
+        </div>
+      </div>
+    </Section>
+
+    <div class="contact">
+      <ContactCard looking={{ en: 'An AI engineering internship.', th: 'ที่ฝึกงานสาย AI engineering', ja: 'AIエンジニアリングのインターン。' }} cv={`${import.meta.env.BASE_URL.replace(/\/?$/, '/')}${SITE.cv}`} />
+    </div>
+  </div>
+</PageShell>
+<style>
+  .top { padding-block: clamp(48px, 6vw, 80px) 36px; display: grid; gap: 16px; }
+  h1 { font-size: clamp(40px, 5.8vw, 80px); line-height: 1.06; max-width: 14ch; }
+  /* his nickname in his own hand between quotes, where the typed “Web” sat: after the surname, as large as the name */
+  h1 :global(.handle) { font-size: 1.1em; margin-left: 0.22em; vertical-align: -0.14em; }
+  .about { display: grid; grid-template-columns: minmax(0, .65fr) minmax(0, 1.5fr) minmax(0, 1.15fr); gap: clamp(24px, 3vw, 48px); align-items: start; }
+  .portrait { max-width: 240px; }
+  .bio p:first-child { font-size: clamp(20px, 2.2vw, 26px); line-height: 1.4; }
+  .path-door { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px 24px; padding-block: 8px 12px; color: inherit; text-decoration: none; }
+  .pd-t { grid-column: 1 / -1; font-size: clamp(56px, 9vw, 140px); line-height: 0.9; display: flex; gap: 0.08em; align-items: flex-start; transition: color var(--t-line) var(--e-enter); }
+  .pd-n { font: 500 clamp(13px, 1.2vw, 16px)/1 var(--f-mono); color: var(--ink3); margin-top: 0.5em; }
+  .pd-d { color: var(--ink2); font-size: 18px; max-width: 48ch; }
+  .path-door:hover .pd-t { color: var(--acc); }
+  .outside { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 72px); }
+  .outside > div { display: grid; gap: 12px; justify-items: start; align-content: start; }
+  .outside p { color: var(--ink2); max-width: 56ch; }
+  .outside .big { color: var(--ink); font-size: clamp(20px, 2.2vw, 26px); line-height: 1.45; }
+  :global(:root[lang='th']) .outside .big { line-height: 1.6; }
+  .contact { margin-top: clamp(56px, 8vw, 96px); max-width: 760px; }
+  .sk { display: grid; gap: 10px; color: inherit; text-decoration: none; }
+  .sk-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+  .sk-row :global(img) { display: block; height: 88px; width: auto; border: 1px solid var(--rule); background: var(--surface); padding: 3px; transition: transform var(--t-cursor) var(--e-enter); }
+  .sk-row :global(img:nth-child(odd)) { transform: rotate(-1.5deg); }
+  .sk-row :global(img:nth-child(even)) { transform: rotate(1.5deg); }
+  .sk:hover .sk-row :global(img), .sk:focus-visible .sk-row :global(img) { transform: none; }
+  .sk-t { display: inline-flex; gap: 10px; align-items: center; font-weight: 600; }
+  @media (max-width: 520px) { .sk-row :global(img) { height: 64px; } }
+  @media (prefers-reduced-motion: reduce) { .sk-row :global(img) { transition: none; } }
+  @media (max-width: 1100px) {
+    .about { grid-template-columns: minmax(0, .65fr) minmax(0, 2fr); }
+    .cv { grid-column: 2; }
+  }
+  @media (max-width: 820px) {
+    .about { grid-template-columns: 88px minmax(0, 1fr); gap: 20px; }
+    .bio { grid-column: 2; }
+    .cv { grid-column: 1 / -1; }
+    .bio p:first-child { font-size: 20px; }
+    .outside { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

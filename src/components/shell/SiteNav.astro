@@ -1,0 +1,197 @@
+---
+/**
+ * @component SiteNav
+ * @group shell
+ * @summary Thin sticky header: name mark (the first name, which turns into the owner's handwriting when pointed at), main nav with a sliding cursor, language switch, theme toggle.
+ * @use Once per page (PageShell renders it). PageShell passes `nav` through as `current`.
+ * @avoid Adding more than ~5 nav items, or icons — on phones the menu is a text button (MENU), never an icon-only hamburger.
+ * @behavior The name mark, pointed at or focused, is written over by the owner's handwriting in the identity blue: one soft edge travels left → right, the typed name giving way behind it (Thai pages: the Thai signature; reduced motion: an instant swap; touch: stays typed). Cursor slides to the hovered item (240ms) and back; a clicked item becomes current at once. Desktop links have a wider click target from 960px. Phones (≤760px): one thin row — name + a MENU button; the button drops a panel under the header (the nav as 48px rows, language and theme below it; items come in one after another), closed by the button, Esc, a tap outside or choosing a page; the page does not scroll while it is open and focus stays inside. On pages that contain the nav's #anchors, it follows the section in view (scroll-spy). Stays still during page transitions.
+ * @example
+ * <SiteNav current="work" />
+ */
+import { langOf, tx, href as hrefOf, t } from '../../lib/i18n';
+import { NAV, SITE } from '../../lib/site';
+import LanguageToggle from './LanguageToggle.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+export interface Props {
+  /** Key of the active nav item: 'work' | 'about' | 'timeline' (see NAV in src/lib/site.ts). Home has none: the name mark is its link. */
+  current?: string;
+}
+const { current } = Astro.props;
+const lang = langOf(Astro.url);
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+// the owner's handwriting (traced from his own writing, _note/media-candidates/handwrite*.svg) and its width : height
+const hand = lang === 'th' ? { src: `${base}hand/teethawat-th.svg`, ar: 495 / 275 } : { src: `${base}hand/teethawat.svg`, ar: 842 / 257 };
+---
+<a class="skip" href="#main">{t('skip', lang)}</a>
+<header class="site-hdr">
+  <div class="hdr-in wrap">
+    <a class="mark" href={hrefOf('/', lang)} aria-label={tx(SITE.name, lang)} style={`--hand:url(${hand.src});--ar:${hand.ar.toFixed(4)}`}>
+      <span class="mark-t">{tx(SITE.first, lang)}</span>
+      <span class="mark-h" aria-hidden="true"><i></i></span>
+    </a>
+    <button class="menu-b" type="button" aria-expanded="false" aria-controls="hdr-menu" data-open={t('menuOpen', lang)} data-close={t('menuClose', lang)}><span class="menu-i" aria-hidden="true"><i></i><i></i></span><span class="menu-l">{t('menuOpen', lang)}</span></button>
+    <div class="hdr-menu" id="hdr-menu">
+      <nav class="nav" aria-label={t('menu', lang)}>
+        {NAV.map((n) => (
+          <a href={hrefOf(n.href, lang)} data-nav={n.key} aria-current={n.key === current ? 'page' : undefined}>{tx(n.label, lang)}</a>
+        ))}
+        <span class="nav-cursor" aria-hidden="true"></span>
+      </nav>
+      <div class="hdr-tools">
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
+    </div>
+    <span class="hdr-scrim" aria-hidden="true"></span>
+  </div>
+</header>
+
+<style is:global>
+  .skip { position: fixed; left: 12px; top: -48px; z-index: 100; background: var(--ink); color: var(--bg); padding: 8px 12px; font: 500 13px/1 var(--f-mono); text-decoration: none; }
+  .skip:focus { top: 12px; }
+  .site-hdr { position: sticky; top: 0; z-index: 40; background: var(--bg); border-bottom: 1px solid var(--rule); }
+  .hdr-in { padding-block: 14px; display: flex; align-items: center; gap: 12px 28px; flex-wrap: wrap; }
+  .mark { font: 500 14px/1 var(--f-mono); letter-spacing: 0.04em; text-decoration: none; padding: 6px 0; margin-right: auto; }
+  :root[lang='th'] .mark, :root[lang='ja'] .mark { font: 500 14px/1.2 var(--f-body); letter-spacing: 0.02em; }
+  /* the name mark → handwriting: both layers share one grid cell (as wide as the wider of the two), and one soft edge
+     (--w, 0 → 1) runs across it: left of the edge the handwriting, right of it the typed name */
+  @property --w { syntax: '<number>'; inherits: true; initial-value: 0; }
+  .mark { --w: 0; --hh: 30px; --edge: calc(var(--w) * (100% + 16px) - 16px); display: inline-grid; align-items: center; color: var(--ink);
+    transition: --w 300ms cubic-bezier(0.4, 0, 0.6, 1); }
+  .mark > span { grid-area: 1 / 1; }
+  .mark-t { -webkit-mask-image: linear-gradient(90deg, transparent var(--edge), #000 calc(var(--edge) + 16px)); mask-image: linear-gradient(90deg, transparent var(--edge), #000 calc(var(--edge) + 16px)); }
+  .mark-h { display: block; height: var(--hh); margin-block: calc((14px - var(--hh)) / 2); pointer-events: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 var(--edge), transparent calc(var(--edge) + 16px)); mask-image: linear-gradient(90deg, #000 var(--edge), transparent calc(var(--edge) + 16px)); }
+  .mark-h i { display: block; height: 100%; width: calc(var(--hh) * var(--ar)); margin-left: -2px; background: var(--acc);
+    -webkit-mask: var(--hand) left center / contain no-repeat; mask: var(--hand) left center / contain no-repeat; }
+  :root[lang='th'] .mark { --hh: 34px; }
+  @media (hover: hover) { .mark:hover { --w: 1; transition-duration: 700ms; transition-timing-function: cubic-bezier(0.45, 0.05, 0.3, 1); } }
+  .mark:focus-visible { --w: 1; }
+  @media (prefers-reduced-motion: reduce) { .mark { transition: none; } }
+  .nav { position: relative; display: flex; gap: 4px; }
+  .nav a { padding: 8px 10px; color: var(--ink2); font-size: 14px; text-decoration: none; white-space: nowrap; }
+  @media (min-width: 960px) { .nav a { min-width: 68px; padding-inline: 16px; text-align: center; } }
+  .nav a[aria-current], .nav a:hover { color: var(--ink); }
+  .nav-cursor { position: absolute; left: 0; bottom: -15px; height: 2px; width: 0; background: var(--acc); opacity: 0; transition: transform var(--t-cursor) var(--e-enter), width var(--t-cursor) var(--e-enter), opacity var(--t-cursor); }
+  .nav-cursor.on { opacity: 1; }
+  .hdr-tools { display: flex; align-items: center; gap: 10px; }
+  /* desktop: the menu wrapper steps aside, nav and tools sit in the header row as before */
+  .hdr-menu { display: contents; }
+  .menu-b, .hdr-scrim { display: none; }
+  /* phones: one thin row (name + MENU); the nav and the tools drop down as a panel under the header */
+  @media (max-width: 760px) {
+    .hdr-in { padding-block: 8px; flex-wrap: nowrap; }
+    .menu-b { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 2px; background: none; color: var(--ink); font: 500 12px/1 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+    .menu-b[aria-expanded='true'] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .menu-i { display: grid; gap: 4px; width: 14px; }
+    .menu-i i { display: block; height: 1.5px; background: currentColor; transition: transform var(--t-cursor) var(--e-enter); }
+    .menu-b[aria-expanded='true'] .menu-i i:first-child { transform: translateY(2.75px) rotate(45deg); }
+    .menu-b[aria-expanded='true'] .menu-i i:last-child { transform: translateY(-2.75px) rotate(-45deg); }
+    .hdr-menu {
+      display: grid; gap: 18px; position: absolute; left: 0; right: 0; top: 100%; z-index: 2;
+      max-height: calc(100dvh - var(--hdr-h, 56px)); overflow: auto; overscroll-behavior: contain;
+      padding: 6px 16px 22px; background: var(--bg); border-bottom: 1px solid var(--rule);
+      visibility: hidden; clip-path: inset(0 0 100% 0);
+      transition: clip-path var(--t-exit) var(--e-exit), visibility 0s linear var(--t-exit);
+    }
+    .site-hdr.open .hdr-menu { visibility: visible; clip-path: inset(0 0 0 0); transition: clip-path var(--t-open) var(--e-open); }
+    .nav { flex-direction: column; gap: 0; }
+    .nav a { display: flex; align-items: center; min-height: 52px; padding: 0 4px; font-size: 18px; color: var(--ink2); border-bottom: 1px solid var(--rule); }
+    .nav a[aria-current] { color: var(--ink); padding-left: 14px; box-shadow: inset 3px 0 0 var(--acc); }
+    .nav-cursor { display: none; }
+    .hdr-tools { justify-content: space-between; }
+    .hdr-scrim { display: block; position: absolute; left: 0; right: 0; top: 100%; height: 100dvh; z-index: 1; background: color-mix(in srgb, var(--bg) 55%, transparent); opacity: 0; visibility: hidden; transition: opacity var(--t-exit) var(--e-exit), visibility 0s linear var(--t-exit); }
+    .site-hdr.open .hdr-scrim { opacity: 1; visibility: visible; transition: opacity var(--t-cursor) var(--e-enter); }
+  }
+  html.menu-open { overflow: hidden; }
+</style>
+
+<script>
+  import { onPage, reducedMotion } from '../../scripts/lifecycle';
+  import { onScroll } from '../../scripts/scroll';
+
+  onPage(() => {
+    const nav = document.querySelector<HTMLElement>('.site-hdr .nav');
+    const cur = nav?.querySelector<HTMLElement>('.nav-cursor');
+    if (!nav || !cur) return;
+    const links = [...nav.querySelectorAll<HTMLAnchorElement>('a[data-nav]')];
+    const place = (a?: HTMLElement | null) => {
+      if (!a) { cur.classList.remove('on'); return; }
+      cur.style.width = `${a.offsetWidth}px`;
+      cur.style.transform = `translateX(${a.offsetLeft}px)`;
+      cur.classList.add('on');
+    };
+    const active = () => nav.querySelector<HTMLElement>('a[aria-current]');
+    place(active());
+    const enter = (e: Event) => place(e.currentTarget as HTMLElement);
+    const leave = () => place(active());
+    links.forEach((a) => { a.addEventListener('pointerenter', enter); a.addEventListener('focus', enter); });
+    nav.addEventListener('pointerleave', leave);
+    nav.addEventListener('focusout', leave);
+
+    // scroll-spy: only for nav items whose #target lives on this page
+    const spied = links
+      .map((a) => ({ a, el: new URL(a.href).pathname === location.pathname && new URL(a.href).hash ? document.querySelector<HTMLElement>(new URL(a.href).hash) : null }))
+      .filter((x): x is { a: HTMLAnchorElement; el: HTMLElement } => !!x.el);
+    const off = spied.length
+      ? onScroll((_, vh) => {
+          let on: HTMLAnchorElement | null = null;
+          for (const s of spied) if (s.el.getBoundingClientRect().top < vh * 0.45) on = s.a;
+          if (on && on !== active()) { links.forEach((l) => l.removeAttribute('aria-current')); on.setAttribute('aria-current', 'page'); if (!nav.matches(':hover')) place(on); }
+        })
+      : () => {};
+    // --hdr-h follows the real header height (it changes with language, wrapping and fonts), so every sticky
+    // element sits exactly under the header. transitions.ts carries the value into the next page on swap.
+    const hdr = nav.closest<HTMLElement>('.site-hdr')!;
+    const syncH = () => document.documentElement.style.setProperty('--hdr-h', `${Math.round(hdr.getBoundingClientRect().height)}px`);
+    syncH();
+    const ro = new ResizeObserver(() => { place(active()); syncH(); });
+    ro.observe(nav);
+    ro.observe(hdr);
+
+    // ---- phones: the MENU button and its panel ----
+    const btn = hdr.querySelector<HTMLButtonElement>('.menu-b')!, panel = hdr.querySelector<HTMLElement>('.hdr-menu')!;
+    const scrim = hdr.querySelector<HTMLElement>('.hdr-scrim'), lbl = btn.querySelector<HTMLElement>('.menu-l')!;
+    const phone = matchMedia('(max-width: 760px)');
+    const focusables = () => [btn, ...panel.querySelectorAll<HTMLElement>('a[href], button')].filter((el) => el.offsetParent !== null);
+    const setOpen = (v: boolean, focusBack = false) => {
+      if (v === hdr.classList.contains('open')) return;
+      hdr.classList.toggle('open', v);
+      document.documentElement.classList.toggle('menu-open', v);
+      btn.setAttribute('aria-expanded', String(v));
+      lbl.textContent = (v ? btn.dataset.close : btn.dataset.open) || '';
+      if (v) {
+        // the rows come in one after another, like a page's blocks
+        if (!reducedMotion()) [...panel.querySelectorAll<HTMLElement>('.nav a, .hdr-tools')].forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, delay: 60 + i * 35, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' }));
+        (panel.querySelector<HTMLElement>('a[aria-current]') ?? panel.querySelector<HTMLElement>('a[href]'))?.focus({ preventScroll: true });
+      } else if (focusBack) btn.focus({ preventScroll: true });
+    };
+    const toggle = () => setOpen(!hdr.classList.contains('open'));
+    const key = (e: KeyboardEvent) => {
+      if (!hdr.classList.contains('open')) return;
+      if (e.key === 'Escape') { e.preventDefault(); setOpen(false, true); return; }
+      if (e.key !== 'Tab') return;
+      // focus stays inside the button + panel while it is open
+      const f = focusables(); if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    const pick = (e: Event) => { if ((e.target as Element).closest('a[href]')) setOpen(false); };
+    const outside = (e: PointerEvent) => { if (hdr.classList.contains('open') && !hdr.contains(e.target as Node)) setOpen(false); };
+    const leavePhone = () => { if (!phone.matches) setOpen(false); };
+    btn.addEventListener('click', toggle);
+    scrim?.addEventListener('click', () => setOpen(false));
+    panel.addEventListener('click', pick);
+    document.addEventListener('keydown', key);
+    document.addEventListener('pointerdown', outside, true);
+    phone.addEventListener('change', leavePhone);
+    return () => {
+      off(); ro.disconnect(); setOpen(false);
+      btn.removeEventListener('click', toggle); panel.removeEventListener('click', pick);
+      document.removeEventListener('keydown', key); document.removeEventListener('pointerdown', outside, true); phone.removeEventListener('change', leavePhone);
+    };
+  });
+</script>

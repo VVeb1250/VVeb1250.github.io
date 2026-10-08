@@ -1,0 +1,44 @@
+---
+/**
+ * @component MilestoneItem
+ * @group lists
+ * @summary A dated milestone or community role in one line: award, event, staff role, talk. `kind="community"` covers what the plan calls CommunityItem.
+ * @use "Milestones & community" on Home or About. Wrap in <ul class="rows">. Real names and dates only.
+ * @avoid Participation certificates padding the list; badges and logos.
+ * @example
+ * <ul class="rows">
+ *   <MilestoneItem date="2026-08" title={{ en: 'Informatics MSU Hackathon 2026 — Winner, AI track (Higher Education)' }} kind="award" />
+ *   <MilestoneItem date="2025" title={{ en: 'CESCa #20 — academic staff' }} kind="community" />
+ * </ul>
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  date: string;
+  title: L;
+  note?: L;
+  kind?: 'award' | 'event' | 'community' | 'talk';
+  href?: string;
+  /** Date and kind on one line, the title under them — for narrow columns (e.g. one column per year). */
+  stack?: boolean;
+}
+const { date, title, note, kind = 'event', href, stack = false } = Astro.props;
+const lang = langOf(Astro.url);
+const K = { award: { en: 'AWARD', th: 'รางวัล', ja: '受賞' }, event: { en: 'EVENT', th: 'กิจกรรม', ja: 'イベント' }, community: { en: 'COMMUNITY', th: 'ชุมชน', ja: 'コミュニティ' }, talk: { en: 'TALK', th: 'บรรยาย', ja: '登壇' } }[kind];
+---
+<li class:list={['ms', { stack }]}>
+  <time class="num" datetime={date}>{date}</time>
+  <span class="eyebrow l10n">{tx(K, lang)}</span>
+  <span class="ms-t">{href ? <a href={href}>{tx(title, lang)}</a> : tx(title, lang)}{note && <small>{tx(note, lang)}</small>}</span>
+</li>
+
+<style>
+  .ms { display: grid; grid-template-columns: 90px 110px minmax(0, 1fr); gap: 6px 16px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--rule); }
+  :global(.rows) > .ms:last-child { border-bottom: 1px solid var(--rule); }
+  time { font: 500 13px/1 var(--f-mono); color: var(--ink2); }
+  .ms-t { display: grid; gap: 2px; }
+  .ms-t a { text-decoration-color: var(--ctxs); text-underline-offset: 3px; }
+  small { color: var(--ink2); font-size: 14px; }
+  .ms.stack { grid-template-columns: auto minmax(0, 1fr); }
+  .ms.stack .ms-t { grid-column: 1 / -1; }
+  @media (max-width: 560px) { .ms { grid-template-columns: 80px minmax(0, 1fr); } .ms-t { grid-column: 1 / -1; } }
+</style>

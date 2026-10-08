@@ -1,0 +1,17 @@
+title: Memory Base
+cat: ai
+year: 2026
+type: AI SYSTEM
+status: ACTIVE
+idx: "05"
+page: true
+line:
+  en: A reusable memory infrastructure that keeps what should be believed, updated and recalled over time.
+  ja: "何を信じるべきか、どう更新するか、何を思い出すかを時間をかけて保つ、再利用可能なメモリ基盤。"
+  th: "โครงสร้างความจำที่ใช้ซ้ำได้ เก็บสิ่งที่ควรเชื่อ อัปเดตเมื่อเปลี่ยน และดึงกลับมาใช้ได้ตามเวลา"
+meta:
+  - { k: status, v: { en: "Experiment phase · M1, M2A closed", th: "เฟสทดลอง · ปิด M1, M2A แล้ว", ja: 実験フェーズ · M1・M2A完了 } }
+  - { k: host, v: Claude Code }
+related: [combo]
+tags: [lab, solo]
+sources: [portfolio-facts §4.1]

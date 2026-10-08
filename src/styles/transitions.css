@@ -1,0 +1,54 @@
+/* View-transition half of the page transitions (the JS half is src/scripts/transitions.ts).
+   The header is its own group and never moves; the page (root, including the fog) carries the grammar.
+   (The fog must stay inside root: a separate opaque full-screen group would be painted above the page.) */
+.site-hdr { view-transition-name: site-hdr; }
+::view-transition-group(site-hdr) { animation: none; }
+::view-transition-old(site-hdr) { display: none; }
+::view-transition-new(site-hdr) { animation: none; }
+
+/* tab-level (default) and back: the old page fades out (60ms); the new one is there at once and its blocks come in one
+   after another (scripts/transitions.ts → cascade). Never the whole new page as one moving picture: that kept a
+   full-screen snapshot animating for 500ms, which was the lag when changing pages. */
+::view-transition-old(root) { animation: var(--t-exit) var(--e-exit) both vt-fade-out; }
+::view-transition-new(root) { animation: none; }
+/* the root never moves or resizes: drop the browser's default 250ms group animation, so the transition (during which
+   the page ignores the pointer) ends with the old page's fade */
+::view-transition-group(root) { animation: none; }
+
+/* deeper: the overlay plane already covers the swap. push / side: the old content has already left before the capture and
+   the new content comes in on the live page (scripts/transitions.ts → pushOut / pushIn) — the swap itself is a cut.
+   (Pushing whole-page snapshots moved the fog too: two skies met in a seam and the screen jumped ~90px a frame.) */
+html[data-vt='deeper']::view-transition-old(root), html[data-vt='deeper']::view-transition-new(root),
+html[data-vt^='push']::view-transition-old(root), html[data-vt^='push']::view-transition-new(root),
+html[data-vt^='side']::view-transition-old(root), html[data-vt^='side']::view-transition-new(root),
+html[data-vt='none']::view-transition-old(root), html[data-vt='none']::view-transition-new(root) { animation: none; }
+
+@keyframes vt-fade-out { to { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  /* nothing moves, but no hard cut either: the old page fades out over the new one (opacity is not motion, WCAG 2.3.3).
+     Every kind becomes 'none' under reduced motion (scripts/transitions.ts). */
+  html[data-vt='none']::view-transition-old(root) { animation: 150ms linear both vt-fade-out !important; }
+}
+
+/* ---------- overlay for "deeper": label bar + plane ---------- */
+.vt-bar {
+  position: fixed; left: 0; right: 0; top: 0; height: 40px; z-index: 90; pointer-events: none; visibility: hidden;
+  background: var(--ctxs); color: var(--acc-ink); display: flex; align-items: center;
+}
+.vt-bar-t {
+  display: flex; gap: 18px; align-items: center; white-space: nowrap; overflow: hidden;
+  font: 500 12px/1 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; clip-path: inset(0 100% 0 0);
+}
+.vt-bar-t b { font: 700 16px/1 var(--f-disp); font-stretch: var(--disp-stretch); letter-spacing: 0.04em; }
+.vt-plane {
+  position: fixed; inset: 0; z-index: 85; pointer-events: none; visibility: hidden;
+  background: linear-gradient(174deg, var(--ctx) 0%, var(--ctxp) 38%, var(--atmo2) 100%);
+}
+
+/* ---------- light ↔ dark ----------
+   Not a View Transition: a plane covers the page, the theme switches under it, the plane leaves (scripts/theme.ts,
+   .theme-plane in base.css). While the page switches no CSS transition runs — nothing fades from the old colors and
+   the fog does not drift on after the plane has passed. */
+html.theme-switch *, html.theme-switch *::before, html.theme-switch *::after { transition: none !important; }

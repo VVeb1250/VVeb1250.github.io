@@ -1,0 +1,53 @@
+---
+/**
+ * @component Signature
+ * @group primitives
+ * @summary The owner's own handwriting (traced from his writing: "WeB", "teethawat.", the Thai first name; `web-quoted` adds quote marks drawn by us to match his pen, owner's request 2026-10-08), inked in the identity blue. It can write itself in once, left → right, the first time it is shown.
+ * @use Only where the owner signs: his name on the main pages (Home cover, About title) and the header's name mark. Size it with `font-size` / `height` on the parent: the signature is 1em tall.
+ * @avoid Inventing handwriting he did not write; signing the same thing twice; work / event pages (owner, 2026-10-08: no ornaments there); any color but the identity blue.
+ * @behavior `write`: the first time it comes into view, one soft edge runs left → right (0.9s, after `delay` ms) and the ink is left behind it — the same edge as the header's name mark. Reduced motion: it is simply there.
+ * @example
+ * <h1>Teethawat Kumying <Signature name="web" label="Web" write /></h1>
+ */
+export interface Props {
+  name: 'web' | 'web-quoted' | 'teethawat' | 'teethawat-th';
+  /** What it says, for screen readers ('' = decorative: the name is already said nearby). */
+  label: string;
+  /** Write it in the first time it is shown. */
+  write?: boolean;
+  /** ms before writing starts (e.g. after a heading's own entrance). */
+  delay?: number;
+  class?: string;
+}
+const { name, label, write = false, delay = 0, class: cls } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+// width : height of each traced file (its viewBox)
+const AR = { web: 564 / 286, 'web-quoted': 664 / 290, teethawat: 842 / 257, 'teethawat-th': 495 / 275 } as const;
+---
+<span class:list={['sig', cls, { 'sig-write': write }]} {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' })}
+  style={`--sig:url(${base}hand/${name}.svg);--ar:${AR[name].toFixed(4)};--delay:${delay}ms`}><i></i></span>
+
+<style>
+  @property --sw { syntax: '<number>'; inherits: true; initial-value: 1; }
+  .sig { --sw: 1; --sedge: calc(var(--sw) * (100% + 0.6em) - 0.6em); display: inline-block; height: 1em; width: calc(1em * var(--ar)); vertical-align: middle;
+    -webkit-mask-image: linear-gradient(90deg, #000 var(--sedge), transparent calc(var(--sedge) + 0.6em)); mask-image: linear-gradient(90deg, #000 var(--sedge), transparent calc(var(--sedge) + 0.6em)); }
+  .sig i { display: block; width: 100%; height: 100%; background: var(--acc);
+    -webkit-mask: var(--sig) center / contain no-repeat; mask: var(--sig) center / contain no-repeat; }
+  /* written in: hidden until it is seen, then the edge runs once */
+  .sig-write { --sw: 0; }
+  .sig-write.is-in { animation: sig-write 900ms cubic-bezier(0.45, 0.05, 0.3, 1) var(--delay) both; }
+  @keyframes sig-write { from { --sw: 0; } to { --sw: 1; } }
+  @media (prefers-reduced-motion: reduce) { .sig-write { --sw: 1; } .sig-write.is-in { animation: none; } }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/lifecycle';
+  onPage(() => {
+    const sigs = [...document.querySelectorAll<HTMLElement>('.sig-write:not(.is-in)')];
+    if (!sigs.length) return;
+    if (!('IntersectionObserver' in window)) { sigs.forEach((s) => s.classList.add('is-in')); return; }
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { threshold: 0.6 });
+    sigs.forEach((s) => io.observe(s));
+    return () => io.disconnect();
+  });
+</script>

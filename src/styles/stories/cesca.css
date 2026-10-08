@@ -1,0 +1,19 @@
+/* CESCa story: each camp is a block — its number, what I did, then the camp's own pictures beside it */
+.cesca-n { scroll-margin-top: calc(var(--hdr-h) + 24px); display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr); gap: clamp(20px, 4vw, 56px); align-items: start; border-top: 1px solid var(--ink); padding-top: 16px; }
+.cesca-txt { display: grid; gap: 12px; align-content: start; position: sticky; top: calc(var(--hdr-h) + 24px); }
+.cesca-no { font-size: clamp(72px, 10vw, 148px); line-height: 0.84; letter-spacing: -0.02em; color: transparent; -webkit-text-stroke: 1px var(--ctxm); }
+.cesca-n:target .cesca-no { color: color-mix(in srgb, var(--ctxp) 70%, transparent); }
+.cesca-meta { font: 500 12px/1.5 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ctxs); }
+:root[lang='th'] .cesca-meta, :root[lang='ja'] .cesca-meta { font: 500 14px/1.5 var(--f-body); letter-spacing: 0; text-transform: none; }
+.cesca-n ul { padding-left: 1.1em; display: grid; gap: 6px; font-size: 17px; max-width: 40ch; }
+.cesca-ph { display: grid; gap: clamp(12px, 1.6vw, 20px); align-items: start; }
+.cesca-ph.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cesca-ph.three > :first-child { grid-column: 1 / -1; }
+.cesca-ph.two { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+@media (max-width: 860px) {
+  .cesca-n { grid-template-columns: minmax(0, 1fr); }
+  .cesca-txt { position: static; }
+  .cesca-ph.two { grid-template-columns: minmax(0, 1fr); }
+}
+@media (hover: none) { .cesca-txt { position: static; } }
+

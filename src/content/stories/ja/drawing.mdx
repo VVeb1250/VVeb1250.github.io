@@ -1,0 +1,108 @@
+---
+work: drawing
+recipe: art-led
+summary: 私のスケッチブックからの作品、シーン、練習ページ。
+---
+
+import '../../../styles/stories/drawing.css';
+
+{/* The owner supplied this set for the site on 2026-10-08. Descriptions below are visual alt text,
+    not artwork titles. Reference pictures and handwritten study notes remain in the original frames.
+    Filenames mix last-edited dates and story dates, so they are not used as artwork dates. */}
+
+export const pages = [
+  {
+    id: 'illustrations', title: 'イラスト',
+    images: [
+      ['03_dec_23', '旗を持つ緑髪のキャラクターが、ターコイズのドラゴンと金色の鳥の下にいる', 'wide'],
+      ['18_apr_25', '灰色の塗り背景の前に立つ、黒いドレスの銀髪のキャラクター', ''],
+      ['26_apr_68', 'カメラを持つ女の子。背後に青空と手すり', ''],
+      ['11_may_68', '黄色いシャツの黒髪の女の子が、柵のそばで前かがみになっている', ''],
+      ['8_may_67', '大きな青いメカニカルなタレットに座る2人のキャラクター', 'wide']
+    ]
+  },
+  {
+    id: 'scenes', title: 'シーン',
+    images: [
+      ['13_aug_67', '緑の野原の上の雲。柔らかい筆のタッチで描かれている', 'wide'],
+      ['8_aug_25', '夕暮れの暗い丘と高い雲の上を流れる流れ星', 'wide'],
+      ['24_sep_67', '青とピンクの夕空を背景にした、明るい線香花火', 'panorama'],
+      ['18_feb_68', '明るい青空の下、緑の谷に向かって立つ人物', 'wide'],
+      ['5_jan_68', '日の差す風景の中の小さなキャラクター。木と遠くの丘がある', 'wide'],
+      ['6_jan_68', '描かれたゲームの場面。小さなキャラクター、オオカミ、UI のスケッチ', 'wide']
+    ]
+  },
+  {
+    id: 'practice', title: '練習ページ',
+    images: [
+      ['11_aug_25', '制服の写真資料の横に、人物の習作3点と彩色画', 'panorama'],
+      ['13_nov_24', '赤い手書きのメモが添えられた、キャラクターの描き直し', ''],
+      ['29_may_68', 'オレンジの手書きのメモがある、頭部の習作のページ', 'wide'],
+      ['10_feb_25', '座っている長髪のキャラクターの線画', ''],
+      ['21_mar_67', '空中に花びらが舞う、長髪の女の子の線画', ''],
+      ['6_jun_67', 'スプーンを顔の近くに持つ女の子のクローズアップの線画', ''],
+      ['31_oct_25', 'うさぎの耳の女の子と、小さなキャラクターのスケッチの線画', ''],
+      ['21_jan_26', '電話を持つ猫耳の女の子の線画', ''],
+      ['5_mar_26', '遠近法の練習、物体、キャラクターのスケッチのページ', 'wide']
+    ]
+  }
+];
+
+<ProjectHeader work="drawing" layout="stack">
+  <div slot="media" class="dr-cover">
+    <div class="dr-cover-main">
+      <PhotoCard signed src="drawing/fence.webp" alt={{ en: 'A girl in a sailor uniform by a wire fence, her long black hair blowing, leaves in the wind', ja: '金網の柵のそばに立つ、セーラー服の女の子。長い黒髪が風になびき、葉が舞っている' }} tilt={-1} size="lg" sizes="(max-width: 520px) 90vw, (max-width: 1280px) 60vw, 760px" />
+      <PhotoCard signed src="drawing/flashlight.webp" alt={{ en: 'A girl with cat ears against a tiled wall in a flashlight beam, MEOW!! scrawled beside her', ja: '懐中電灯の光の中、タイルの壁の前に立つ猫耳の女の子。横に MEOW!! と書かれている' }} tilt={0.8} size="lg" sizes="(max-width: 520px) 90vw, (max-width: 1280px) 60vw, 760px" />
+    </div>
+    <div class="dr-cover-side">
+      <PhotoCard signed src="drawing/standing.webp" alt={{ en: 'A full-length girl in a black and white dress with a large bag over her shoulder', ja: '肩に大きなバッグをかけた、白黒のドレスの全身の女の子' }} tilt={1.5} size="lg" sizes="(max-width: 520px) 42vw, (max-width: 1280px) 30vw, 380px" />
+      <PhotoCard signed src="drawing/pink.webp" alt={{ en: 'A girl with long silver hair making a peace sign, on pink', ja: 'ピンク色の背景の前で、ピースサインをする長い銀髪の女の子' }} tilt={-1.2} size="lg" sizes="(max-width: 520px) 42vw, (max-width: 1280px) 30vw, 380px" />
+    </div>
+    <p class="dr-hint">画像をクリックすると大きく表示されます。</p>
+  </div>
+</ProjectHeader>
+
+<div class="dr-intro">
+  <p>小学生の頃から時々描いてきました。高校3年生の頃からは、さらに本格的に取り組むようになりました。ずっと趣味です。大学3年の今は、描く頻度が減っています。</p>
+  <nav class="dr-index" aria-label="スケッチブックのセクション">
+    <a href="#illustrations">イラスト</a>
+    <a href="#process">描画プロセス</a>
+    <a href="#scenes">シーン</a>
+    <a href="#practice">練習ページ</a>
+  </nav>
+</div>
+
+{pages.map((group) => (
+  <section id={group.id} class={`dr-chapter dr-${group.id}`} aria-labelledby={`dr-${group.id}-title`}>
+    <div class="dr-chapter-heading">
+      <h2 id={`dr-${group.id}-title`}>{group.title}</h2>
+    </div>
+    <div class="dr-pages">
+      {group.images.map(([file, alt, shape], i) => (
+        <div class={`dr-page ${shape}`}>
+          <PhotoCard signed src={`drawing/${file}.webp`} alt={alt} tilt={[-0.7, 1, -1.1, 0.6][i % 4]} size="lg" sizes={shape === 'panorama' || (group.id === 'illustrations' && i === 0) || (group.id === 'scenes' && i === group.images.length - 1) ? '(max-width: 860px) 90vw, (max-width: 1280px) 75vw, 940px' : shape === 'wide' ? '(max-width: 520px) 90vw, (max-width: 860px) 44vw, 460px' : '(max-width: 860px) 44vw, 460px'} />
+        </div>
+      ))}
+    </div>
+    {group.id === 'illustrations' && (
+      <section id="process" class="dr-process" aria-labelledby="dr-process-title">
+        <h2 id="dr-process-title">描画プロセス</h2>
+        <div class="dr-clips">
+          <figure>
+            <VideoEmbed src="drawing/03_dec_23-process.mp4" poster="drawing/03_dec_23.webp" label={{ en: 'Drawing timelapse of the green-haired character, dragon and golden birds', ja: '緑髪のキャラクター、ドラゴン、金の鳥を描くタイムラプス' }} />
+          </figure>
+          <figure>
+            <VideoEmbed src="drawing/standing-process.mp4" poster="drawing/standing.webp" label={{ en: 'Drawing timelapse of the full-length character in a black and white dress', ja: '白黒のドレスの全身のキャラクターを描くタイムラプス' }} />
+          </figure>
+        </div>
+      </section>
+    )}
+  </section>
+))}
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Drawings and studies.', ja: '作品と習作。' } },
+  { who: { en: 'References', ja: '参照資料' }, did: { en: 'The photo and source images shown beside the studies are reference material.', ja: '習作の横に並べた写真や元画像は、参照資料です。' } }
+]} />
+
+<EvidenceLink href="https://www.pixiv.net/en/users/116719673" label="Pixiv · WhipForAWeeb" kind="page" shows={{ en: 'more drawings', ja: 'ほかの作品' }} />

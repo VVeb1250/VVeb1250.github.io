@@ -1,0 +1,28 @@
+---
+/**
+ * @component Footer
+ * @group shell
+ * @summary Contact email with copy button, last-updated month, languages.
+ * @use Once per page (PageShell renders it).
+ * @avoid Social icon rows, newsletter forms.
+ * @example
+ * <Footer />
+ */
+import { langOf, t } from '../../lib/i18n';
+import { SITE } from '../../lib/site';
+import CopyText from '../primitives/CopyText.astro';
+const lang = langOf(Astro.url);
+---
+<footer class="ftr">
+  <div class="wrap ftr-in">
+    <span><b>{t('contact', lang)}</b> · <CopyText text={SITE.email} /></span>
+    <span>{t('updated', lang)} · <span class="num">{SITE.updated}</span></span>
+    <span class="mono">EN · TH · JA</span>
+  </div>
+</footer>
+
+<style>
+  .ftr { position: relative; z-index: 1; border-top: 1px solid var(--rule); margin-top: 120px; }
+  .ftr-in { padding-block: 28px 64px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 32px; font-size: 14px; color: var(--ink2); }
+  b { color: var(--ink); font-weight: 500; }
+</style>

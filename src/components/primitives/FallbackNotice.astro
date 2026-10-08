@@ -1,0 +1,38 @@
+---
+/**
+ * @component FallbackNotice
+ * @group primitives
+ * @summary A thin line that says "this page is not translated yet — you are reading the English version", in the language of the page, with a link to the English URL. Shows up only when a Thai / Japanese page falls back to English.
+ * @use Automatically on work pages (WorkPage renders it when a story has no TH / JA file). Use by hand anywhere else a block is shown in a fallback language.
+ * @avoid Showing it on English pages; machine-translating the story to hide the gap.
+ * @example
+ * <FallbackNotice shown="en" />
+ */
+import { langOf, href } from '../../lib/i18n';
+export interface Props {
+  /** The language the content is actually in. Default 'en'. */
+  shown?: 'en' | 'th' | 'ja';
+}
+const { shown = 'en' } = Astro.props;
+const lang = langOf(Astro.url);
+const TEXT = {
+  th: { msg: 'หน้านี้ยังไม่มีฉบับภาษาไทย — กำลังแสดงฉบับภาษาอังกฤษ', go: 'เปิดหน้าภาษาอังกฤษ' },
+  ja: { msg: 'このページはまだ日本語に翻訳されていません — 英語版を表示しています', go: '英語のページを開く' },
+  en: { msg: 'This page is not available in English yet.', go: 'Open the original' }
+};
+const path = Astro.url.pathname.replace(/^\/(th|ja)(?=\/|$)/, '') || '/';
+const t = TEXT[lang];
+---
+{lang !== shown && (
+  <p class="fbn" role="note">
+    <span class="fbn-tag num">{lang.toUpperCase()} → {shown.toUpperCase()}</span>
+    <span class="fbn-msg">{t.msg}</span>
+    <a class="fbn-go" href={href(path, shown)} hreflang={shown}>{t.go} →</a>
+  </p>
+)}
+
+<style>
+  .fbn { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; padding: 10px 0; border-block: 1px dashed var(--rule); font-size: 14px; color: var(--ink2); }
+  .fbn-tag { font: 500 10px/1 var(--f-mono); letter-spacing: 0.1em; padding: 4px 6px; border: 1px solid var(--ctxs, var(--acc)); color: var(--ctxs, var(--acc)); }
+  .fbn-go { color: var(--ink); font-size: 13px; text-underline-offset: 3px; }
+</style>

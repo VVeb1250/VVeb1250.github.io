@@ -1,0 +1,33 @@
+---
+/**
+ * @component CategoryTick
+ * @group primitives
+ * @summary The kind of work as a tiny slanted bar (the plate in miniature, deep → mid color) + its name.
+ * @use Next to every work title outside its own page (cards, rows, filters) so the color has a reason.
+ * @avoid Using it as decoration without text, or for the owner's own sections.
+ * @example
+ * <CategoryTick cat="game" />
+ * <CategoryTick cat="self" kind="competition" />
+ */
+import { langOf, tx } from '../../lib/i18n';
+import { CAT_LABEL, KIND_LABEL, type Cat, type CatOrSelf, type Kind } from '../../lib/vocab';
+export interface Props {
+  /** Kind of work: game · ai · dev · tool · sys · ui · hw (or `self`, an event in the owner's own color). */
+  cat: CatOrSelf;
+  /** The entry's kind: a competition or teaching role is named as that, not as a kind of work. */
+  kind?: Kind;
+  /** Hide the text (only inside a control that already names the kind). */
+  bare?: boolean;
+}
+// always the kind's color, also on a page in its project's own color: the tick names the kind (owner, 2026-10-08)
+const { cat, kind = 'work', bare = false } = Astro.props;
+const lang = langOf(Astro.url);
+const label = tx(kind !== 'work' || cat === 'self' ? KIND_LABEL[kind] : CAT_LABEL[cat as Cat], lang);
+---
+<span class="ct" data-cat={cat}>{bare ? <span class="sr-only">{label}</span> : label}</span>
+
+<style>
+  .ct { display: inline-flex; align-items: center; gap: 8px; font: 500 11px/1.2 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); white-space: nowrap; }
+  :global(:root[lang='th']) .ct, :global(:root[lang='ja']) .ct { font: 500 12px/1.2 var(--f-body); letter-spacing: 0.02em; }
+  .ct::before { content: ''; width: 16px; height: 7px; flex: none; background: linear-gradient(90deg, var(--ctx), var(--ctxm)); clip-path: polygon(28% 0, 100% 0, 72% 100%, 0 100%); }
+</style>

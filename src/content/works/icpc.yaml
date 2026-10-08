@@ -1,0 +1,23 @@
+# Competition with its own page (/timeline/icpc/): 2024 and 2025 on one page; the 2025 row opens its part.
+# Facts: _note/portfolio-facts.md §6.3, §6.4 (scoreboard checked 2026-10-01). The 2024 dates and venue are on the event
+# poster in the owner's photos (_note/media-candidates/icpc).
+title: ICPC Thailand
+kind: competition
+cat: self
+theme: icpc24
+year: 2024
+date: "2024-09"
+type: COMPETITIVE PROGRAMMING · NATIONAL
+page: true
+line:
+  en: The national ICPC contest, in 2024 and 2025. In 2024 our team was the first to solve problem G.
+  ja: "全国規模のICPC（国際大学対抗プログラミングコンテスト）。2024年と2025年に出場しました。2024年は、私たちのチームが問題Gを最初に解きました。"
+  th: "การแข่งขัน ICPC ระดับชาติ ปี 2024 และ 2025 ปี 2024 ทีมเราเป็นทีมแรกที่ทำโจทย์ G ได้"
+fact: { en: First to solve problem G · 2024, th: ทำโจทย์ G ได้เป็นทีมแรก · 2024, ja: "問題Gを最初に解く · 2024年" }
+meta:
+  - { k: team, v: { en: "2024: Eeg E Eeg Eeg · 2025: Egg E Egg Egg" } }
+  - { k: result, v: { en: "2024: 19th of 56 · solved B, G, K", th: "2024: อันดับ 19 จาก 56 · ทำได้ B, G, K", ja: "2024年：56チーム中19位 · B、G、K を解答" } }
+links:
+  - { kind: other, url: "https://icpc-chula.github.io/scoreboard-archive/2024/", label: Scoreboard 2024 }
+tags: [team]
+sources: [portfolio-facts §6.3, §6.4, "https://icpc-chula.github.io/scoreboard-archive/2024/", "media-candidates/icpc: 2024 poster (7–8 September 2024, Chulalongkorn University), First to Solve photo, 2025 badge"]

@@ -1,0 +1,10 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §4.3.
+title: "WhipForAWeeb-skills"
+cat: tool
+year: 2026
+type: SKILL ROUTER
+line:
+  en: "A personal skill pack; v0.7.0 added a hybrid skill router. 9 releases."
+  th: "skill pack ส่วนตัว · v0.7.0 เพิ่ม hybrid skill router · 9 release"
+  ja: "個人のスキルパック。v0.7.0でハイブリッドのスキルルーターを追加。9リリース。"
+sources: [portfolio-facts §4.3]

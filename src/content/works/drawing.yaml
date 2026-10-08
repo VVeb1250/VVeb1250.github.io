@@ -1,0 +1,19 @@
+# The owner's drawing (kind: art) — a sketchbook, not a professional art portfolio (Facts §7.5). Facts: §7.1–7.5.
+# Pictures: the owner's supplied set in _note/media-candidates/drawing, via scripts/media-map.json.
+title: Drawing
+kind: art
+cat: self
+theme: drawing
+year: 2023
+type: SKETCHBOOK · HOBBY
+page: true
+line:
+  en: A hobby since primary school, practised much more seriously from Grade 12. I still draw, less often now.
+  ja: "小学生の頃から続けている趣味で、高校3年生の頃からより本格的に取り組みました。今も描いていますが、以前より頻度は減っています。"
+  th: "งานอดิเรกตั้งแต่ประถม จริงจังขึ้นตั้งแต่ ม.6 ตอนนี้ยังวาดอยู่ แต่น้อยลง"
+meta:
+  - { k: where, v: Pixiv · WhipForAWeeb }
+links:
+  - { kind: pixiv, url: "https://www.pixiv.net/en/users/116719673", label: Pixiv }
+tags: [solo]
+sources: [portfolio-facts §7.1–7.5, _note/media-candidates/drawing (owner-supplied artwork and practice pages)]

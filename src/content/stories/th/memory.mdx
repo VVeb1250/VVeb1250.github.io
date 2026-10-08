@@ -1,0 +1,44 @@
+---
+work: memory
+recipe: assumption-broke
+summary: Memory Base — เลเยอร์ความจำสำหรับ AI coding assistant ที่เก็บสิ่งที่ควรเชื่อ อัปเดตเมื่อเปลี่ยน และดึงกลับมาใช้ได้ ยังเป็นการทดลองอยู่
+---
+
+import { MEMORY_SKETCH } from '../../../lib/facts';
+
+{/* Facts §4.1. A research notebook, not a success case: what exists, what is still being tested, what turned out wrong. Moved from the old Notes page (/lab). */}
+
+<ProjectHeader work="memory" layout="text" />
+
+<ProjectContext lead={{ en: 'Existing memory systems may already be enough for many people.', th: 'ระบบความจำที่มีอยู่อาจพอสำหรับคนส่วนใหญ่แล้ว' }}>
+  <p>ผมต้องการเลเยอร์ที่ควบคุมการเก็บ การอัปเดตความเชื่อ และการเรียกใช้ซ้ำได้เอง ไม่ว่าจะใช้กับ agent ติวเตอร์ หรือแอป มี Claude Code เป็น host แรก และ Codex อ่านข้อมูลจากระบบนี้</p>
+</ProjectContext>
+
+<FlowDiagram n="01" caption={MEMORY_SKETCH.caption} note={MEMORY_SKETCH.note} nodes={MEMORY_SKETCH.nodes} edges={MEMORY_SKETCH.edges} />
+
+<ClaimLedger
+  exists={[
+    { en: 'Personal and project information persists across sessions and is recalled later.', th: 'ข้อมูลส่วนตัวและของโปรเจกต์ คงอยู่ข้าม session และดึงมาใช้ทีหลังได้' },
+    { en: 'current_memory updates when understanding changes; append-only events keep the trace behind it.', th: 'current_memory อัปเดตเมื่อความเข้าใจเปลี่ยน ส่วน event ที่เพิ่มอย่างเดียวเก็บร่องรอยที่อยู่เบื้องหลัง' },
+    { en: 'M1 (core mechanics) and M2A (safe control plane) are closed.', th: 'ปิด M1 (core mechanics) และ M2A (safe control plane) แล้ว', ja: 'M1(コア機構)とM2A(安全な制御プレーン)は完了。' }
+  ]}
+  unproven={[
+    { en: 'Whether compact understanding adds value beyond episodic recall.', th: 'ความเข้าใจแบบกระชับให้ค่ามากกว่าการ recall จากเหตุการณ์ (episodic) หรือไม่' },
+    { en: 'Fewer repeated mistakes, or any advantage over Claude Memory, claude-mem or project memory.', th: 'ทำให้ความผิดพลาดซ้ำๆ น้อยลง หรือได้เปรียบ Claude Memory, claude-mem หรือ project memory' },
+    { en: 'Procedural memory — remembering ways of working. Still an idea.', th: 'Procedural memory การจำวิธีทำงาน ยังเป็นแค่ไอเดีย' }
+  ]} />
+
+## เหตุการณ์ที่ต้องแก้
+
+คุณภาพของการ recall ลดลงอย่างมาก ตอนแรกสงสัยว่า cap 25 แถวเป็นสาเหตุ แต่ผลการตรวจสอบพบว่าไม่ใช่ ค่าที่ producer เขียนยาวราว 221 ตัวอักษร ส่วนที่คนเขียนยาวราว 106 ตัวอักษร ทำให้ใส่ได้แค่ราว 5 แถวใน budget ของการ recall
+
+หลังจากนั้น ผมกำหนดให้กฎที่สำคัญมี hook หรือ gate กำกับ ไม่ได้พึ่งเพียงข้อความใน prompt
+
+## สิ่งที่ผิด
+
+- ข้อได้เปรียบด้าน token และการบีบอัด ตามที่คาดไว้ตอนแรก
+- การใช้ความใกล้กันของ path หรือ symbol เป็นตัววัดความเกี่ยวข้อง
+- ระบบที่มีอยู่ในปัจจุบันยังส่งต่อบริบทข้าม session ไม่ได้
+
+<OutcomeBlock outcome={{ en: 'Persistence, updating and recall work in daily use with Claude Code.', th: 'การเก็บ อัปเดต และเรียกใช้ความจำ ใช้งานได้จริงในการทำงานประจำวันกับ Claude Code' }}
+  current={{ en: 'Experiment phase: M1 and M2A closed; the comparison against existing memory tools is still being tested.', th: 'เฟสทดลอง ปิด M1 และ M2A แล้ว การเทียบกับเครื่องมือความจำที่มีอยู่ยังทดสอบอยู่' }} />

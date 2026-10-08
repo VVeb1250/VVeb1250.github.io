@@ -1,0 +1,58 @@
+---
+/**
+ * @component RefBoard
+ * @group project
+ * @summary The opening of a contribution story: the references themselves, very large (#102, #28, #878), each with its repo, its real state and one plain line. Merged ones stand in ink; the rest stay grey, so "merged" and "reported" never read the same.
+ * @use Right after ProjectHeader on a page about work in other people's repos (OSS). Each item jumps to its part of the page (`to`, an #id on the same page); the GitHub links live there, in the PR cards and evidence links.
+ * @avoid Star counts, a heatmap or a trophy wall; calling a report a fix; more than four items (the rest belong lower on the page).
+ * @behavior Aimed at, the number takes the signal color and the line under the item runs out (GoLink). Reduced motion: the same states, no movement.
+ * @example
+ * <RefBoard items={[
+ *   { ref: '#102', repo: 'AgentsMesh', state: { en: 'merged · 21 Jul 2026' }, merged: true, text: { en: 'A read-only check for stale generated files.' }, to: '#agentsmesh' },
+ *   { ref: '#878', repo: 'context-mode', state: { en: 'open · root cause found' }, text: { en: 'Oversized paragraphs slipped past the chunk cap.' }, to: '#context-mode' }
+ * ]} />
+ */
+import GoLink from '../primitives/GoLink.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  items: { ref: string; repo: string; state: L; merged?: boolean; text: L; to: string }[];
+  /** Accessible name of the list. */
+  label?: L;
+}
+const { items, label = { en: 'The contributions on this page', th: 'งานที่อยู่ในหน้านี้', ja: 'このページの貢献' } } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<div class="rb" style={`--n:${items.length}`}>
+<ol aria-label={tx(label, lang)}>
+  {items.map((it) => (
+    <li class:list={{ merged: it.merged }}>
+      <a href={it.to}>
+        <span class="rb-ref disp num">{it.ref}</span>
+        <span class="rb-repo">{it.repo}</span>
+        <span class="rb-state eyebrow">{tx(it.state, lang)}</span>
+        <span class="rb-text">{tx(it.text, lang)}</span>
+        <GoLink lineOnly />
+      </a>
+    </li>
+  ))}
+</ol>
+</div>
+
+<style>
+  .rb ol { list-style: none; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); border-top: 1px solid var(--ink); }
+  .rb li + li { border-left: 1px solid var(--rule); }
+  .rb a { display: grid; gap: 8px; align-content: start; justify-items: start; height: 100%; padding: clamp(16px, 2vw, 24px) clamp(16px, 2vw, 28px) 24px; color: inherit; text-decoration: none; }
+  .rb li:first-child a { padding-left: 0; }
+  .rb-ref { font-size: clamp(72px, 9vw, 148px); line-height: 0.86; letter-spacing: -0.02em; color: var(--ink3); margin-bottom: 8px; transition: color var(--t-line) var(--e-enter); }
+  .merged .rb-ref { color: var(--ink); }
+  .rb-repo { font-weight: 600; font-size: 17px; }
+  .rb-state { color: var(--ink2); }
+  .merged .rb-state { color: var(--ctxs); }
+  .rb-text { color: var(--ink2); font-size: 15px; max-width: 36ch; text-wrap: pretty; margin-bottom: 6px; }
+  .rb a:is(:hover, :focus-visible) .rb-ref { color: var(--ctxs); }
+  @media (max-width: 820px) {
+    .rb ol { grid-template-columns: minmax(0, 1fr); }
+    .rb li + li { border-left: 0; border-top: 1px solid var(--rule); }
+    .rb a { padding-inline: 0; }
+  }
+</style>

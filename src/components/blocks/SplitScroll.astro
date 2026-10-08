@@ -1,0 +1,154 @@
+---
+/**
+ * @component SplitScroll
+ * @group blocks
+ * @summary Scroll-driven walkthrough: short steps on the left, a sticky screen on the right that switches to the matching capture as each step reaches the middle of the viewport — a block in the work's signal color sweeps over the old capture (its own box), reshapes to the new capture's box, the new one sweeps in as it leaves, the index chip rolls, the corner brackets glide to the new capture and lock on. Each capture shows at its own size — no letterbox panel. Stacks (image above each step) on phones.
+ * @use Interface-led work: walking through a real tool screen by screen (a workspace, an extension's features). 3–5 steps, each with its own real capture.
+ * @avoid Steps that share one image (use MediaFrame with marks); invented UI states; more than 5 steps.
+ * @behavior The step whose top has passed 55% of the viewport is active. Switch (src/scripts/wipe.ts, ~0.4s): block covers the old capture (140ms) → reshapes if the sizes differ (120ms) → the new capture sweeps in as the block leaves (240ms), left → right going down, right → left going up → the brackets lock on (accent last). The active step's number inverts with a signal bar. No scroll-jacking. Reduced motion: instant switch.
+ * @example
+ * <SplitScroll steps={[
+ *   { title: { en: 'Autocomplete' }, text: { en: 'Inside a memory bracket it offers symbols that fit there.' }, src: 'yasm/autocomplete.webp', alt: { en: 'Autocomplete list inside a memory bracket' } },
+ *   { title: { en: 'Hover' }, text: { en: 'Hover shows a label’s doc comment.' }, src: 'yasm/hover.webp', alt: { en: 'Hover card' } }
+ * ]} />
+ */
+import { Image } from 'astro:assets';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { img, lqStyle } from '../../lib/media';
+export interface Props {
+  steps: { title: L; text: L; src: string; alt: L; source?: L }[];
+}
+const { steps } = Astro.props;
+const lang = langOf(Astro.url);
+const imgs = steps.map((s) => img(s.src));
+const lqs = await Promise.all(imgs.map((m) => lqStyle(m)));
+const w = (m: { width: number }) => [480, 800, 1200].filter((x) => x <= m.width).concat(m.width < 480 ? [m.width] : []);
+---
+<div class="ss" data-n={steps.length}>
+  <ol class="ss-steps">
+    {steps.map((s, i) => (
+      <li class="ss-step" data-i={i} data-on={i === 0 ? '' : undefined}>
+        <span class="eyebrow num ss-n">{String(i + 1).padStart(2, '0')}</span>
+        <h3 class="disp">{tx(s.title, lang)}</h3>
+        <p>{tx(s.text, lang)}</p>
+        {s.source && <small class="eyebrow l10n">{tx(s.source, lang)}</small>}
+        <div class="ss-inline"><Image style={lqs[i]} data-lq src={imgs[i]} alt={tx(s.alt, lang)} sizes="92vw" widths={w(imgs[i])} /></div>
+      </li>
+    ))}
+  </ol>
+  <div class="ss-stage" aria-hidden="true">
+    <div class="ss-frame">
+      {steps.map((_, i) => <Image style={lqs[i]} data-lq src={imgs[i]} alt="" sizes="(max-width: 1280px) 55vw, 700px" widths={w(imgs[i])} data-i={i} class:list={['ss-img', { on: i === 0 }]} />)}
+      <span class="ss-hud"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="ss-chip num"><span class="ss-roll"><b>01</b></span> / {String(steps.length).padStart(2, '0')}</span></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ss { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(24px, 4vw, 64px); }
+  .ss-steps { list-style: none; margin: 0; padding: 12vh 0 30vh; display: grid; gap: 40vh; }
+  .ss-step { display: grid; gap: 10px; align-content: start; justify-items: start; color: var(--ink2); transition: color var(--t-cursor); }
+  .ss-step[data-on] { color: var(--ink); }
+  .ss-n { padding: 3px 7px; border: 1px solid var(--rule); color: var(--ink2); transition: background-color var(--t-cursor) var(--e-enter), color var(--t-cursor), border-color var(--t-cursor), box-shadow var(--t-cursor) var(--e-enter); }
+  .ss-step[data-on] .ss-n { background: var(--ink); color: var(--bg); border-color: var(--ink); box-shadow: -4px 0 0 var(--ctxs); }
+  .ss-step h3 { font-size: clamp(24px, 2.6vw, 32px); line-height: 1.1; color: inherit; }
+  .ss-step p { font-size: 17px; max-width: 36ch; }
+  .ss-inline { display: none; }
+  .ss-stage { position: relative; }
+  /* the frame is only a slot: the box you see is each capture's own size (no letterbox, no stretched panel) */
+  .ss-frame { position: sticky; top: calc(var(--hdr-h) + 10vh); aspect-ratio: 4 / 3; max-height: 72vh; width: 100%; --hx: 0px; --hy: 0px; --hw: 100%; --hh: 100%; }
+  .ss-frame :global(.ss-img) { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; width: auto; height: auto; border: 1px solid var(--rule); background: var(--sunk); box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--shade) 60%, transparent); opacity: 0; }
+  .ss-frame :global(.ss-img.on) { opacity: 1; }
+  /* HUD: index chip + corner brackets */
+  .ss-chip { position: absolute; left: 8px; top: 8px; z-index: 1; display: inline-flex; gap: 4px; align-items: baseline; padding: 4px 8px; background: var(--ink); color: var(--bg); font: 500 11px/1 var(--f-mono); letter-spacing: 0.06em; }
+  .ss-roll { display: inline-block; overflow: hidden; height: 1em; line-height: 1; }
+  .ss-roll b { display: block; font-weight: 700; }
+  /* HUD sits on the capture showing now and glides to the next one's box */
+  .ss-hud { position: absolute; left: var(--hx); top: var(--hy); width: var(--hw); height: var(--hh); z-index: 5; pointer-events: none; transition: left var(--t-cursor) var(--e-enter), top var(--t-cursor) var(--e-enter), width var(--t-cursor) var(--e-enter), height var(--t-cursor) var(--e-enter); }
+  .ss-hud i { position: absolute; width: 14px; height: 14px; border: 0 solid var(--ink3); margin: -7px; }
+  .ss-hud .c1 { left: 0; top: 0; border-width: 2px 0 0 2px; }
+  .ss-hud .c2 { right: 0; top: 0; border-width: 2px 2px 0 0; }
+  .ss-hud .c3 { right: 0; bottom: 0; border-width: 0 2px 2px 0; }
+  .ss-hud .c4 { left: 0; bottom: 0; border-width: 0 0 2px 2px; }
+  @media (max-width: 860px) {
+    .ss { grid-template-columns: minmax(0, 1fr); }
+    .ss-stage { display: none; }
+    .ss-steps { padding: 0; gap: 56px; }
+    .ss-step { color: var(--ink); }
+    .ss-step .ss-n { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .ss-inline { display: block; border: 1px solid var(--rule); background: var(--sunk); margin-top: 6px; justify-self: stretch; }
+    .ss-inline :global(img) { width: 100%; height: auto; }
+  }
+</style>
+
+<script>
+  import { onPage, cssMs as ms } from '../../scripts/lifecycle';
+  import { onScroll } from '../../scripts/scroll';
+  import { blockSwap } from '../../scripts/wipe';
+  onPage(() => {
+    const roots = [...document.querySelectorAll<HTMLElement>('.ss')];
+    if (!roots.length) return;
+    const cur = new Map<HTMLElement, number>();
+    const ENTER = 'cubic-bezier(0.22, 1, 0.36, 1)';
+    const swap = async (root: HTMLElement, i: number, was: number) => {
+      const imgs = [...root.querySelectorAll<HTMLElement>('.ss-img')];
+      const next = imgs[i], up = i < was;
+      const tEnter = ms('--t-enter'), tCursor = ms('--t-cursor');
+      // index chip rolls right away (the reader's step changed already), in the direction of travel
+      const b = root.querySelector<HTMLElement>('.ss-roll b')!;
+      b.textContent = String(i + 1).padStart(2, '0');
+      b.animate([{ transform: `translateY(${up ? -100 : 100}%)` }, { transform: 'none' }], { duration: tEnter, easing: ENTER });
+      const frame = root.querySelector<HTMLElement>('.ss-frame')!;
+      const done = await blockSwap(frame, up ? -1 : 1, () => {
+        imgs.forEach((m) => m.classList.toggle('on', m === next));
+        return next;
+      }, { from: imgs[was], ready: (next as HTMLImageElement).decode?.() });
+      if (!done) return;
+      hud(root);
+      // accent last: the brackets reacquire in the signal color, then settle
+      const cs = getComputedStyle(root), sig = cs.getPropertyValue('--ctxs').trim(), rest = cs.getPropertyValue('--ink3').trim();
+      root.querySelectorAll<HTMLElement>('.ss-hud i').forEach((c, k) => {
+        const dx = k === 0 || k === 3 ? -8 : 8, dy = k < 2 ? -8 : 8;
+        c.animate([
+          { transform: `translate(${dx}px, ${dy}px)`, borderColor: sig, opacity: 0 },
+          { transform: 'none', borderColor: sig, opacity: 1, offset: 0.5 },
+          { transform: 'none', borderColor: rest, opacity: 1 }
+        ], { duration: tCursor * 2, easing: ENTER });
+      });
+    };
+    // HUD box = the capture on show (brackets + chip hug the real image, not the slot)
+    const hud = (root: HTMLElement) => {
+      const frame = root.querySelector<HTMLElement>('.ss-frame')!, on = root.querySelector<HTMLElement>('.ss-img.on');
+      if (!on || !on.offsetWidth) return;
+      frame.style.setProperty('--hx', `${on.offsetLeft}px`); frame.style.setProperty('--hy', `${on.offsetTop}px`);
+      frame.style.setProperty('--hw', `${on.offsetWidth}px`); frame.style.setProperty('--hh', `${on.offsetHeight}px`);
+    };
+    const ro = new ResizeObserver(() => roots.forEach(hud));
+    roots.forEach((root) => {
+      ro.observe(root.querySelector('.ss-frame')!);
+      root.querySelectorAll<HTMLImageElement>('.ss-img').forEach((m) => { if (!m.complete) m.addEventListener('load', () => hud(root), { once: true }); });
+      hud(root);
+    });
+    const off = onScroll((_, vh) => {
+      for (const root of roots) {
+        const r = root.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) continue;
+        let i = 0;
+        root.querySelectorAll<HTMLElement>('.ss-step').forEach((s) => { if (s.getBoundingClientRect().top < vh * 0.55) i = +(s.dataset.i || 0); });
+        const was = cur.get(root);
+        if (was === i) continue;
+        cur.set(root, i);
+        root.querySelectorAll<HTMLElement>('.ss-step').forEach((s) => s.toggleAttribute('data-on', +(s.dataset.i || 0) === i));
+        if (was === undefined) {
+          // first read (e.g. reload mid-way): show the right capture without a sweep
+          root.querySelectorAll<HTMLElement>('.ss-img').forEach((m) => m.classList.toggle('on', +(m.dataset.i || 0) === i));
+          root.querySelector<HTMLElement>('.ss-roll b')!.textContent = String(i + 1).padStart(2, '0');
+          hud(root);
+          continue;
+        }
+        swap(root, i, was);
+      }
+    });
+    return () => { off(); ro.disconnect(); };
+  });
+</script>

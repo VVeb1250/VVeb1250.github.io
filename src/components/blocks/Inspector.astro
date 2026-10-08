@@ -1,0 +1,192 @@
+---
+/**
+ * @component Inspector
+ * @group blocks
+ * @summary Endfield's list | subject | detail: a rail of parts on the left, the real artifact in the middle, what the selected part is (and the proof) on the right. Two modes — `swap` (each part has its own media) and `focus` (one shared screenshot that zooms to each part).
+ * @use When a work is made of named parts worth inspecting one by one: the tools a workspace integrates, a game's characters and their clips, the modules of a system, the features of an extension. 3–6 parts.
+ * @avoid Parts without their own real visual or fact; using it as a generic tab box for prose; more than one per page section.
+ * @behavior Selection uses the shared `.sel` grammar (base.css): the charcoal block fills the number cell, then the row (~140ms), with the signal bar on its left; the old row retracts at the same time. The detail swaps fast: old out at once, new fades in ~200ms. Swap mode changes media with the block → image sweep sized to each picture (src/scripts/wipe.ts, ~0.4s; down the list sweeps left → right, up sweeps right → left); focus mode zooms with a 500ms enter curve and pins a mark on the part. Keyboard: ↑ ↓ (← → on phones) move, Home / End jump. On phones the rail becomes a swipe row above the subject.
+ * @example
+ * <Inspector image="z80/workspace.webp" imageAlt={{ en: 'Z80 Workspace' }} frame="screen" items={[
+ *   { name: 'Explorer', text: { en: 'Files and folders of the lab.' }, focus: { x: 4, y: 9.4, zoom: 2.4 } },
+ *   { name: 'Console', meta: 'C16.EXE', text: { en: 'Runs the real assembler inside DOSBox compiled to WebAssembly.' }, focus: { x: 16.8, y: 88.6, zoom: 2.2 } }
+ * ]} />
+ */
+import { Image, getImage } from 'astro:assets';
+import MetaList from '../primitives/MetaList.astro';
+import EvidenceLink from '../primitives/EvidenceLink.astro';
+import Plate from '../media/Plate.astro';
+import VideoEmbed from '../media/VideoEmbed.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { img, lqStyle } from '../../lib/media';
+import type { Plate as Shape } from '../../lib/vocab';
+
+interface Item {
+  name: L;
+  /** Small mono line under the name in the rail. */
+  meta?: L;
+  /** Heading in the detail panel (defaults to name). */
+  title?: L;
+  text: L;
+  facts?: { k: L; v: L }[];
+  evidence?: { label: string; href?: string; shows?: L; kind?: 'pr' | 'release' | 'commit' | 'page' | 'video' | 'file' | 'private' }[];
+  /** swap mode: this part's own media. */
+  src?: string; video?: string; poster?: string; strip?: { src: string; frames: number; fps?: number }; alt?: L;
+  /** focus mode: where the part is on the shared image (% of the image) and how far to zoom (1–4). */
+  focus?: { x: number; y: number; zoom?: number };
+}
+export interface Props {
+  items: Item[];
+  /** Shared image → focus mode. */
+  image?: string;
+  imageAlt?: L;
+  frame?: 'plain' | 'screen';
+  /** Opt-in plate behind the subject (swap mode, for cutouts). */
+  plate?: Shape;
+  /** Accessible name of the whole inspector. */
+  label?: L;
+}
+const { items, image, imageAlt, frame = 'plain', plate, label } = Astro.props;
+const lang = langOf(Astro.url);
+const mode = image ? 'focus' : 'swap';
+const uid = `in-${tx(items[0].name, 'en').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${items.length}`;
+const p = (n: number) => String(n).padStart(2, '0');
+const shared = image ? img(image) : null;
+const lqShared = shared ? await lqStyle(shared) : '';
+const lqItems = await Promise.all(items.map((it) => (it.src ? lqStyle(img(it.src), 'contain') : Promise.resolve(''))));
+const clampT = (c: number, z: number) => { const lim = 50 - 50 / z; return Math.max(-lim, Math.min(lim, 50 - c)); };
+const focusVars = items.map((it) => { const z = Math.max(1, it.focus?.zoom ?? 1); const x = it.focus?.x ?? 50, y = it.focus?.y ?? 50; return `--z:${z};--tx:${clampT(x, z).toFixed(2)}%;--ty:${clampT(y, z).toFixed(2)}%;--mx:${x}%;--my:${y}%`; });
+const stripData = await Promise.all(items.map(async (it) => {
+  if (!it.strip) return null;
+  const m = img(it.strip.src);
+  return { url: (await getImage({ src: m, format: 'webp', width: Math.min(m.width, 4800) })).src, n: it.strip.frames, fps: it.strip.fps ?? 12, ar: `${m.width / it.strip.frames}/${m.height}` };
+}));
+---
+<div class="insp" data-mode={mode} id={uid} role="group" aria-label={label ? tx(label, lang) : undefined}>
+  <div class="insp-list" role="tablist" aria-orientation="vertical">
+    {items.map((it, i) => (
+      <button type="button" class="sel" role="tab" id={`${uid}-t${i}`} aria-controls={`${uid}-p${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-i={i} data-focus={focusVars[i]}>
+        <span class="num">{p(i + 1)}</span><span class="nm">{tx(it.name, lang)}</span>{it.meta && <span class="mt">{tx(it.meta, lang)}</span>}
+      </button>
+    ))}
+  </div>
+  <div class:list={['insp-subj', { screen: frame === 'screen' }]}>
+    {plate && mode === 'swap' && <Plate shape={plate} />}
+    {shared && (
+      <div class="insp-view">
+        <div class="insp-zoom" style={focusVars[0]}>
+          <Image style={lqShared} data-lq src={shared} alt={tx(imageAlt, lang)} sizes="(max-width: 900px) 92vw, 60vw" widths={[800, 1200, 1600, 2000].filter((w) => w <= shared.width)} />
+          <span class="insp-mk" aria-hidden="true"></span>
+        </div>
+      </div>
+    )}
+    {mode === 'swap' && items.map((it, i) => (
+      <div class="insp-pane" data-i={i} data-on={i === 0 ? '' : undefined}>
+        {it.src && <Image style={lqItems[i]} data-lq src={img(it.src)} alt={tx(it.alt ?? it.name, lang)} sizes="(max-width: 900px) 92vw, 50vw" widths={[480, 800, 1200].filter((w) => w <= img(it.src!).width).concat(img(it.src).width < 480 ? [img(it.src).width] : [])} />}
+        {it.video && it.poster && <VideoEmbed src={it.video} poster={it.poster} label={it.alt ?? it.name} loop />}
+        {stripData[i] && <div class="insp-strip" role="img" aria-label={tx(it.alt ?? it.name, lang)} data-n={stripData[i]!.n} data-fps={stripData[i]!.fps} style={`background-image:url(${stripData[i]!.url});aspect-ratio:${stripData[i]!.ar};--n:${stripData[i]!.n};--f:0`}></div>}
+      </div>
+    ))}
+  </div>
+  <div class="insp-detail">
+    {items.map((it, i) => (
+      <div role="tabpanel" id={`${uid}-p${i}`} aria-labelledby={`${uid}-t${i}`} class="insp-panel" data-on={i === 0 ? '' : undefined}>
+        <span class="eyebrow num">{p(i + 1)} / {p(items.length)}</span>
+        <h3 class="disp">{tx(it.title ?? it.name, lang)}</h3>
+        <p>{tx(it.text, lang)}</p>
+        {it.facts?.length ? <MetaList items={it.facts} layout="table" /> : null}
+        {it.evidence?.length ? <div class="insp-ev">{it.evidence.map((e) => <EvidenceLink {...e} />)}</div> : null}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .insp { display: grid; grid-template-columns: 200px minmax(0, 1.7fr) minmax(0, 1fr); gap: clamp(16px, 2.6vw, 36px); align-items: start; }
+  /* rail */
+  .insp-list { display: grid; gap: 2px; border-left: 1px solid var(--rule); }
+  /* selection look + motion come from .sel (base.css): the block fills the number cell first, then the row */
+  .insp-list button { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 2px 8px; text-align: left; background: none; border: 0; border-left: 3px solid transparent; margin-left: -2px; padding: 10px 10px 10px 12px; cursor: pointer; color: var(--ink2);
+    --sel-inset: 0 0 0 -3px; --sel-ease: linear(0, 0.19 35%, 0.21 55%, 1); }
+  .insp-list button:hover { color: var(--ink); }
+  .insp-list button[aria-selected='true'] { color: var(--bg); }
+  .insp-list .num { font: 500 11px/1.5 var(--f-mono); grid-row: span 2; }
+  .insp-list .nm { font-weight: 600; font-size: 15px; line-height: 1.3; }
+  .insp-list .mt { font: 500 11px/1.4 var(--f-mono); letter-spacing: 0.04em; opacity: 0.75; grid-column: 2; }
+  /* subject */
+  .insp-subj { position: relative; display: grid; min-height: 240px; overflow: clip; overflow-clip-margin: 24px; }
+  /* screen frame goes on the view (focus) or on each image itself (swap), never on the pane — panes are as tall as the tallest part */
+  .insp-subj.screen .insp-view, .insp-subj.screen .insp-pane :global(img) { border: 1px solid var(--rule); background: var(--sunk); box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--shade) 60%, transparent); filter: none; }
+  .insp-view { overflow: hidden; position: relative; z-index: 1; }
+  .insp-zoom { position: relative; transform: scale(var(--z)) translate(var(--tx), var(--ty)); transform-origin: 50% 50%; transition: transform var(--t-enter) var(--e-enter); }
+  .insp-zoom :global(img) { display: block; width: 100%; height: auto; }
+  .insp-mk { position: absolute; left: var(--mx); top: var(--my); width: calc(22px / var(--z)); height: calc(22px / var(--z)); transform: translate(-50%, -50%); border: calc(2px / var(--z)) solid var(--ctxs); box-shadow: 0 0 0 calc(2px / var(--z)) var(--bg); transition: left var(--t-enter) var(--e-enter), top var(--t-enter) var(--e-enter); }
+  /* a pane is exactly as big as its media, so the swap block covers the picture, not the whole subject column */
+  .insp-pane { grid-area: 1 / 1; justify-self: center; align-self: start; max-width: 100%; position: relative; z-index: 1; opacity: 0; pointer-events: none; }
+  .insp-pane[data-on] { opacity: 1; pointer-events: auto; }
+  .insp-pane:has(video) { justify-self: stretch; }
+  .insp-pane :global(img) { display: block; max-width: 100%; height: auto; max-height: 60vh; width: auto; filter: drop-shadow(0 16px 14px color-mix(in srgb, var(--shade) calc(var(--sh-o) * 100%), transparent)); }
+  .insp-strip { width: 440px; max-width: 100%; background-repeat: no-repeat; background-size: calc(var(--n) * 100%) 100%; background-position-x: calc(var(--f) / (var(--n) - 1) * 100%); }
+  /* detail */
+  .insp-detail { display: grid; }
+  .insp-panel { grid-area: 1 / 1; display: grid; gap: 12px; align-content: start; opacity: 0; visibility: hidden; transition: opacity var(--t-exit) var(--e-exit), visibility 0s var(--t-exit); }
+  /* the old detail goes at once, the new one fades in ~200ms — a tab switch answers fast (Endfield's tabs) */
+  .insp-panel[data-on] { opacity: 1; visibility: visible; transition: opacity calc(var(--t-enter) * 0.4) var(--e-enter) var(--t-exit), visibility 0s; }
+  .insp-panel h3 { font-size: clamp(24px, 2.6vw, 32px); line-height: 1.1; }
+  .insp-panel p { font-size: 16px; color: var(--ink); max-width: 44ch; }
+  .insp-ev { display: grid; gap: 6px; }
+  @media (max-width: 900px) {
+    .insp { grid-template-columns: minmax(0, 1fr); }
+    .insp-list { display: flex; overflow-x: auto; border-left: 0; border-bottom: 1px solid var(--rule); scrollbar-width: none; }
+    .insp-list::-webkit-scrollbar { display: none; }
+    .insp-list button { flex: 0 0 auto; border-left: 0; border-bottom: 3px solid transparent; margin: 0 0 -1px; --sel-inset: 0 0 -3px 0; --sel-shadow: inset 0 -3px 0 var(--ctx); --sel-ease: var(--e-enter); }
+  }
+  @media (prefers-reduced-motion: reduce) { .insp-zoom, .insp-pane, .insp-panel, .insp-mk { transition: none !important; } }
+</style>
+
+<script>
+  import { onPage, reducedMotion } from '../../scripts/lifecycle';
+  import { blockSwap } from '../../scripts/wipe';
+  onPage(() => {
+    const offs = [...document.querySelectorAll<HTMLElement>('.insp')].map((root) => {
+      const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+      const zoom = root.querySelector<HTMLElement>('.insp-zoom');
+      let timer = 0;
+      const strip = (i: number) => {
+        clearInterval(timer);
+        const el = root.querySelector<HTMLElement>(`.insp-pane[data-i="${i}"] .insp-strip`);
+        if (!el || reducedMotion()) return;
+        let k = 0; const n = +el.dataset.n!;
+        timer = window.setInterval(() => { k = (k + 1) % n; el.style.setProperty('--f', String(k)); }, 1000 / +(el.dataset.fps || 12));
+      };
+      const subj = root.querySelector<HTMLElement>('.insp-subj')!;
+      const panes = [...root.querySelectorAll<HTMLElement>('.insp-pane')];
+      const select = (i: number, focus = false) => {
+        const was = tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true');
+        tabs.forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); t.tabIndex = k === i ? 0 : -1; });
+        if (panes.length && i !== was) {
+          // swap mode: block → image sweep (src/scripts/wipe.ts), downward in the list sweeps left → right
+          const next = panes[i], im = next.querySelector('img');
+          blockSwap(subj, i > was ? 1 : -1, () => { panes.forEach((p) => p.toggleAttribute('data-on', p === next)); return next; }, { from: panes[was] ?? null, ready: im?.decode?.() });
+        }
+        root.querySelectorAll<HTMLElement>('.insp-panel').forEach((p, k) => p.toggleAttribute('data-on', k === i));
+        if (zoom) zoom.setAttribute('style', tabs[i].dataset.focus || '');
+        if (focus) tabs[i].focus();
+        strip(i);
+      };
+      const click = (e: Event) => { const t = (e.target as Element).closest<HTMLButtonElement>('[role="tab"]'); if (t && root.contains(t)) select(+t.dataset.i!); };
+      const key = (e: KeyboardEvent) => {
+        const cur = tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true');
+        const k = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key as string];
+        if (k) { e.preventDefault(); select((cur + k + tabs.length) % tabs.length, true); }
+        if (e.key === 'Home') { e.preventDefault(); select(0, true); }
+        if (e.key === 'End') { e.preventDefault(); select(tabs.length - 1, true); }
+      };
+      root.addEventListener('click', click);
+      root.querySelector('[role="tablist"]')!.addEventListener('keydown', key as EventListener);
+      strip(0);
+      return () => { clearInterval(timer); root.removeEventListener('click', click); };
+    });
+    return () => offs.forEach((f) => f());
+  });
+</script>

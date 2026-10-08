@@ -1,0 +1,77 @@
+---
+/**
+ * @component ArchiveList
+ * @group lists
+ * @summary Every work worth keeping, as rows, with optional filter chips (All · Game · AI · Tools · Systems · Embedded · Coursework · Archived/failed). Includes ArchiveFilter.
+ * @use The /archive page (all works). Filter groups live in src/lib/vocab.ts FILTERS.
+ * @avoid A grid of project cards; auto-playing thumbnails; hiding the row's facts behind its object.
+ * @behavior Chips use the shared `.sel` grammar. Filtering is instant; visible rows re-enter with a 35ms stagger. Filter state is kept in the URL hash (#f=tools). Optional static glyphs belong to each row; hover highlights the row without opening a preview.
+ * @example
+ * <ArchiveList filter />
+ */
+import ArchiveRow from './ArchiveRow.astro';
+import { langOf, tx, t } from '../../lib/i18n';
+import { allWorks } from '../../lib/works';
+import { FILTERS } from '../../lib/vocab';
+export interface Props {
+  /** Work ids in display order. Default: every work, newest first. */
+  works?: string[];
+  filter?: boolean;
+  /** Opt in to each row's left-hand static glyph column. */
+  objects?: boolean;
+  base?: string;
+}
+const { works, filter = false, objects = false, base } = Astro.props;
+const lang = langOf(Astro.url);
+const ids = works ?? (await allWorks()).map((w) => w.id);
+const rules = JSON.stringify(Object.fromEntries(FILTERS.map((f) => [f.key, { c: f.cats ?? [], t: f.tags ?? [], s: f.statuses ?? [] }])));
+---
+<div class="alist" data-rules={rules}>
+  {filter && (
+    <div class="chips" role="group" aria-label={t('filter', lang)}>
+      {FILTERS.map((f, i) => <button type="button" class="chip sel" data-f={f.key} aria-pressed={i === 0 ? 'true' : 'false'}>{tx(f.label, lang)}</button>)}
+    </div>
+  )}
+  <ul class="rows">{ids.map((id) => <ArchiveRow work={id} base={base} object={objects} />)}</ul>
+</div>
+
+<style>
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .chip { --sel-inset: -1px; background: color-mix(in srgb, var(--surface) 70%, transparent); border: 1px solid var(--rule); padding: 8px 12px; cursor: pointer; font: 500 12px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); border-radius: 2px; }
+  :global(:root[lang='th']) .chip, :global(:root[lang='ja']) .chip { font: 500 13px/1 var(--f-body); letter-spacing: 0; }
+  .chip:hover { border-color: var(--ink2); color: var(--ink); }
+  .chip[aria-pressed='true'] { color: var(--bg); border-color: transparent; } /* the block itself comes from .sel */
+</style>
+
+<script>
+  import { onPage, reducedMotion } from '../../scripts/lifecycle';
+  onPage(() => {
+    const lists = [...document.querySelectorAll<HTMLElement>('.alist')].filter((l) => l.querySelector('.chips'));
+    const offs = lists.map((list) => {
+      const rules = JSON.parse(list.dataset.rules || '{}') as Record<string, { c: string[]; t: string[]; s: string[] }>;
+      const rows = [...list.querySelectorAll<HTMLElement>('.ar')];
+      const apply = (key: string, animate: boolean) => {
+        const r = rules[key] ?? rules.all;
+        list.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String((c as HTMLElement).dataset.f === key)));
+        let i = 0;
+        for (const row of rows) {
+          const tags = (row.dataset.tags || '').split(' ');
+          const ok = key === 'all' || r.c.includes(row.dataset.cat || '') || r.t.some((t) => tags.includes(t)) || r.s.includes(row.dataset.status || '');
+          row.hidden = !ok;
+          if (ok && animate && !reducedMotion()) row.animate([{ opacity: 0, transform: 'translateX(-12px)' }, { opacity: 1, transform: 'none' }], { duration: 500, delay: Math.min(i++, 12) * 35, easing: 'cubic-bezier(0.22,1,0.36,1)', fill: 'backwards' });
+        }
+      };
+      const fromHash = () => (location.hash.match(/f=([\w-]+)/)?.[1] ?? 'all');
+      apply(fromHash(), false);
+      const click = (e: Event) => {
+        const c = (e.target as Element).closest<HTMLElement>('.chip'); if (!c) return;
+        const k = c.dataset.f || 'all';
+        history.replaceState(history.state, '', k === 'all' ? location.pathname : `#f=${k}`);
+        apply(k, true);
+      };
+      list.addEventListener('click', click);
+      return () => list.removeEventListener('click', click);
+    });
+    return () => offs.forEach((f) => f());
+  });
+</script>

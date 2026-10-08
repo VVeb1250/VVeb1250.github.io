@@ -1,0 +1,12 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §3.3.
+title: "ROP route optimizer"
+cat: sys
+year: 2026
+type: ALGORITHM
+status: ARCHIVED
+line:
+  en: "Route-optimization prototype for fleets with time windows, backhauls and multi-trip. I worked on the Go ↔ C++ solver integration and the routing infrastructure. The startup did not sell. Private repo."
+  ja: "車両の時間枠、帰路の積載、複数回の配送に対応する配送ルート最適化のプロトタイプ。Go ↔ C++ のソルバー連携とルーティング基盤を担当しました。スタートアップは販売に至らず、リポジトリは非公開です。"
+  th: "ต้นแบบ route optimization สำหรับกองรถที่มี time window การรับของกลับ และหลายเที่ยว ผมรับผิดชอบการเชื่อมต่อ solver Go ↔ C++ และโครงสร้าง routing สตาร์ทอัพยังขายไม่ได้ repo เป็น private"
+tags: [startup, team]
+sources: [portfolio-facts §3.3]

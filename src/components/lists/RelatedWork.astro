@@ -1,0 +1,32 @@
+---
+/**
+ * @component RelatedWork
+ * @group lists
+ * @summary A few rows linking to works that share a thread with this one (same tool, same question, a follow-up).
+ * @use Near the end of a work page. Defaults to the work's `related` list in its YAML.
+ * @avoid Filling it to look busy; more than 4.
+ * @example
+ * <RelatedWork work="z80" />
+ */
+import ArchiveRow from './ArchiveRow.astro';
+import { langOf, t } from '../../lib/i18n';
+import { work } from '../../lib/works';
+export interface Props {
+  /** The current work; its `related` ids are used unless `works` is given. */
+  work?: string;
+  works?: string[];
+  base?: string;
+}
+const { work: id, works, base } = Astro.props;
+const lang = langOf(Astro.url);
+const ids = works ?? (id ? (await work(id)).data.related : []);
+---
+{ids.length > 0 && (
+  <section class="rel">
+    <h3 class="eyebrow l10n">{t('related', lang)}</h3>
+    <ul class="rows">{ids.map((r) => <ArchiveRow work={r} base={base} />)}</ul>
+  </section>
+)}
+<style>
+  .rel { display: grid; gap: 14px; }
+</style>

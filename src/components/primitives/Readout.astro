@@ -1,0 +1,47 @@
+---
+/**
+ * @component Readout
+ * @group primitives
+ * @summary A real number read like a game UI value: current large, total small (`59 / 64`), what it counts, a thin share bar when there is a total, and where the number comes from.
+ * @use Contribution share (commits you wrote of the team's), installs, visits, releases — numbers a recruiter would ask about. In a row of 2–4, or inline in an EvidenceRow.
+ * @avoid Decorative stats, rounded-up numbers, percentages without the raw count, any number without `source`.
+ * @example
+ * <Readout value={59} total={64} unit={{ en: 'commits', th: 'commit' }} label={{ en: 'of the repo' }} source="GitHub · 2026-07-30" />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  value: number;
+  total?: number;
+  unit?: L;
+  /** What the number is about (e.g. "in the final", "on the Marketplace"). */
+  label?: L;
+  /** Where the number comes from, with a date. Required. */
+  source: L;
+  size?: 'sm' | 'md' | 'lg';
+}
+const { value, total, unit, label, source, size = 'md' } = Astro.props;
+const lang = langOf(Astro.url);
+const pct = total ? Math.max(0, Math.min(100, (value / total) * 100)) : null;
+const fmt = (n: number) => n.toLocaleString(lang === 'th' ? 'th-TH' : lang === 'ja' ? 'ja-JP' : 'en-US');
+---
+<div class:list={['ro', size]}>
+  <p class="ro-n num"><b class="disp">{fmt(value)}</b>{total != null && <span class="ro-t">/ {fmt(total)}</span>}{unit && <span class="ro-u">{tx(unit, lang)}</span>}</p>
+  {pct != null && <span class="ro-bar" role="img" aria-label={`${Math.round(pct)}%`}><i style={`width:${pct.toFixed(1)}%`}></i></span>}
+  {label && <p class="ro-l">{tx(label, lang)}</p>}
+  <p class="ro-s eyebrow l10n">{tx(source, lang)}</p>
+</div>
+
+<style>
+  .ro { display: grid; gap: 6px; align-content: start; min-width: 0; }
+  .ro-n { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+  .ro-n b { font-size: 40px; line-height: 0.95; color: var(--ink); }
+  .sm .ro-n b { font-size: 26px; }
+  .lg .ro-n b { font-size: clamp(56px, 7vw, 88px); }
+  .ro-t { font: 500 14px/1 var(--f-mono); color: var(--ink2); }
+  .ro-u { font: 500 12px/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink2); text-transform: uppercase; }
+  :global(:root[lang='th']) .ro-u, :global(:root[lang='ja']) .ro-u { font: 500 13px/1 var(--f-body); text-transform: none; letter-spacing: 0; }
+  .ro-bar { position: relative; height: 3px; background: repeating-linear-gradient(90deg, var(--ink3) 0 2px, transparent 2px 5px); max-width: 220px; }
+  .ro-bar i { position: absolute; inset: 0 auto 0 0; background: var(--ctxs); }
+  .ro-l { font-size: 14px; color: var(--ink2); }
+  .ro-s { color: var(--ink3); font-size: 10px; }
+</style>

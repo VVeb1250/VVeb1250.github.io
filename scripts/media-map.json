@@ -1,0 +1,180 @@
+{
+  "_about": "Site pictures made from the owner's originals in _note/media-candidates (private). Edit an original (blur a face, crop), then run `npm run media` to rebuild the site picture from it. `crop` is [left, top, width, height] in the original's pixels; `width` is the largest width kept.",
+  "items": [
+    {
+      "out": "portrait/instagram-avatar.webp",
+      "from": "_note/media-candidates/portrait/crying-avatar.jpg",
+      "width": 640,
+      "note": "About: the Instagram picture (a post in the owner's Instagram export)"
+    },
+    {
+      "out": "portrait/photo-2025.webp",
+      "from": "_note/media-candidates/portrait/2025-instagram-profile.jpg",
+      "width": 720,
+      "note": "About: the real photo (2025, from profile_photos.json in the Instagram export)"
+    },
+    {
+      "out": "cesca/n20-candles.webp",
+      "from": "_note/media-candidates/cesca/2024/ENP03004-Pano.jpg",
+      "note": "CESCa #20 (folder 2024 = the #20 camp, April 2025, by its logo)"
+    },
+    {
+      "out": "cesca/n20-lab-a.webp",
+      "from": "_note/media-candidates/cesca/2024/SNZ-372.jpg"
+    },
+    {
+      "out": "cesca/n20-lab-b.webp",
+      "from": "_note/media-candidates/cesca/2024/ENP03409.jpg"
+    },
+    {
+      "out": "cesca/n20-lab-c.webp",
+      "from": "_note/media-candidates/cesca/2024/ENP02593.jpg"
+    },
+    {
+      "out": "cesca/n21-lab-a.webp",
+      "from": "_note/media-candidates/cesca/2025/A7406586.jpg",
+      "note": "CESCa #21 (folder 2025 = the #21 camp, April 2026, by its logo)"
+    },
+    {
+      "out": "cesca/n21-lab-b.webp",
+      "from": "_note/media-candidates/cesca/2025/A7406696.jpg"
+    },
+    {
+      "out": "aise/group-2024.webp",
+      "from": "_note/media-candidates/aise/image.png"
+    },
+    {
+      "out": "icpc/first-to-solve-2024.webp",
+      "from": "_note/media-candidates/icpc/Screenshot 2026-09-28 023203.png"
+    },
+    {
+      "out": "icpc/team-banner-2024.webp",
+      "from": "_note/media-candidates/icpc/Screenshot 2026-09-28 023237.png"
+    },
+    {
+      "out": "msu/award-team.webp",
+      "from": "_note/media-candidates/msu/image1.png"
+    },
+    {
+      "out": "msu/award-stage.webp",
+      "from": "_note/media-candidates/msu/image.png",
+      "width": 1200
+    },
+    {
+      "out": "drawing/standing.webp",
+      "from": "_note/media-candidates/drawing/139164594_p0_master1200.jpg"
+    },
+    {
+      "out": "drawing/flashlight.webp",
+      "from": "_note/media-candidates/drawing/132892772_p0_master1200.jpg"
+    },
+    {
+      "out": "drawing/fence.webp",
+      "from": "_note/media-candidates/drawing/131425502_p0_master1200 (1).jpg"
+    },
+    {
+      "out": "drawing/pink.webp",
+      "from": "_note/media-candidates/drawing/130961322_p0_master1200.jpg"
+    },
+    {
+      "out": "drawing/03_dec_23.webp",
+      "from": "_note/media-candidates/drawing/03_dec_23.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/10_feb_25.webp",
+      "from": "_note/media-candidates/drawing/10_feb_25.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/11_aug_25.webp",
+      "from": "_note/media-candidates/drawing/11_aug_25.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/11_may_68.webp",
+      "from": "_note/media-candidates/drawing/11_may_68.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/13_aug_67.webp",
+      "from": "_note/media-candidates/drawing/13_aug_67.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/13_nov_24.webp",
+      "from": "_note/media-candidates/drawing/13_nov_24.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/18_apr_25.webp",
+      "from": "_note/media-candidates/drawing/18_apr_25.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/18_feb_68.webp",
+      "from": "_note/media-candidates/drawing/18_feb_68.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/21_jan_26.webp",
+      "from": "_note/media-candidates/drawing/21_jan_26.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/21_mar_67.webp",
+      "from": "_note/media-candidates/drawing/21_mar_67.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/24_sep_67.webp",
+      "from": "_note/media-candidates/drawing/24_sep_67.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/26_apr_68.webp",
+      "from": "_note/media-candidates/drawing/26_apr_68.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/29_may_68.webp",
+      "from": "_note/media-candidates/drawing/29_may_68.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/31_oct_25.webp",
+      "from": "_note/media-candidates/drawing/31_oct_25.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/5_jan_68.webp",
+      "from": "_note/media-candidates/drawing/5_jan_68.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/5_mar_26.webp",
+      "from": "_note/media-candidates/drawing/5_mar_26.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/6_jan_68.webp",
+      "from": "_note/media-candidates/drawing/6_jan_68.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/6_jun_67.webp",
+      "from": "_note/media-candidates/drawing/6_jun_67.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/8_aug_25.webp",
+      "from": "_note/media-candidates/drawing/8_aug_25.PNG",
+      "width": 2000
+    },
+    {
+      "out": "drawing/8_may_67.webp",
+      "from": "_note/media-candidates/drawing/8_may_67.PNG",
+      "width": 2000
+    }
+  ]
+}

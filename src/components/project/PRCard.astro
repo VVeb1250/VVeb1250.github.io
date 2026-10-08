@@ -1,0 +1,104 @@
+---
+/**
+ * @component PRCard
+ * @group project
+ * @summary One contribution to someone else's project as a single card: repo and PR number, state, the size of the change as a +/− bar, what was broken, what the change did, and what the maintainer said — with the link to the real PR.
+ * @use Process-led OSS pages (one card per PR, in order), EvidenceRow-like proof on About. Every field comes from the PR itself.
+ * @avoid Paraphrasing the maintainer into praise (quote them or leave `maintainer` out); star counts, contribution graphs; PRs that were not merged shown as MERGED.
+ * @props-note `add` / `del` are the line counts GitHub shows on the PR; leave them out if unknown — the bar is hidden then. `maintainer.quote` must be their words (trim, don't rewrite).
+ * @example
+ * <PRCard repo="slash9494/ai-config-sync-manager" number={28} state="merged" date="2026-07-09"
+ *   href="https://github.com/slash9494/ai-config-sync-manager/pull/28" title="fix: sanitize Windows backup paths"
+ *   problem={{ en: 'Backups silently broke on Windows drive-letter paths.' }}
+ *   change={{ en: 'Backup paths are derived with parse() + relative() and a sanitized root label; POSIX layouts unchanged.' }}
+ *   maintainer={{ who: 'slash9494', quote: 'The bug is real … the correct cross-platform fix.' }} />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  /** owner/name */
+  repo: string;
+  number: number;
+  href: string;
+  /** The PR title as written on GitHub. */
+  title: string;
+  state: 'merged' | 'open' | 'closed';
+  /** YYYY-MM-DD (merge date when merged). */
+  date?: string;
+  add?: number;
+  del?: number;
+  /** Issues it closes / refers to, e.g. ['#98', '#99']. */
+  issues?: string[];
+  /** What was broken, in real use. */
+  problem: L;
+  /** What the change did. */
+  change: L;
+  /** The maintainer's own words. */
+  maintainer?: { who: string; quote: L };
+}
+const { repo, number, href, title, state, date, add, del, issues = [], problem, change, maintainer } = Astro.props;
+const lang = langOf(Astro.url);
+const T = {
+  problem: { en: 'Problem', th: 'ปัญหา', ja: '問題' },
+  change: { en: 'Change', th: 'สิ่งที่แก้', ja: '変更' },
+  said: { en: 'Maintainer', th: 'Maintainer', ja: 'メンテナ' },
+  open: { en: 'Open the PR', th: 'เปิด PR', ja: 'PRを開く' },
+  lines: { en: 'lines', th: 'บรรทัด', ja: '行' }
+};
+const total = (add ?? 0) + (del ?? 0);
+const STATE = { merged: 'MERGED', open: 'OPEN', closed: 'CLOSED' }[state];
+---
+<article class="prc" data-state={state}>
+  <header class="prc-h">
+    <span class="prc-repo num">{repo} <b>#{number}</b></span>
+    <span class="prc-state num">{STATE}{date && <span class="prc-date"> · {date}</span>}</span>
+  </header>
+  <h3 class="prc-t"><a href={href} rel="noopener">{title}</a></h3>
+  {total > 0 && (
+    <div class="prc-diff" aria-label={`+${add ?? 0} / −${del ?? 0} ${tx(T.lines, lang)}`}>
+      <span class="prc-bar" aria-hidden="true"><i class="a" style={`flex:${add ?? 0}`}></i><i class="d" style={`flex:${del ?? 0}`}></i></span>
+      <span class="num prc-n"><b>+{add ?? 0}</b> / −{del ?? 0}</span>
+    </div>
+  )}
+  <dl class="prc-body">
+    <div><dt class="eyebrow l10n">{tx(T.problem, lang)}</dt><dd>{tx(problem, lang)}</dd></div>
+    <div><dt class="eyebrow l10n">{tx(T.change, lang)}</dt><dd>{tx(change, lang)}</dd></div>
+  </dl>
+  {maintainer && (
+    <blockquote class="prc-q">
+      <p>“{tx(maintainer.quote, lang)}”</p>
+      <footer class="num">— @{maintainer.who} · {tx(T.said, lang)}</footer>
+    </blockquote>
+  )}
+  <footer class="prc-f">
+    {issues.length > 0 && <span class="num prc-issues">{issues.join(' · ')}</span>}
+    <a class="prc-go num" href={href} rel="noopener">{tx(T.open, lang)} ↗</a>
+  </footer>
+</article>
+
+<style>
+  .prc { display: grid; gap: 14px; padding: 18px 20px 16px; border: 1px solid var(--rule); border-left: 3px solid var(--ctxs); background: color-mix(in srgb, var(--surface) 70%, transparent); max-width: 760px; }
+  .prc-h { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; font: 500 12px/1.3 var(--f-mono); letter-spacing: 0.04em; color: var(--ink2); }
+  .prc-repo b { color: var(--ink); }
+  .prc-state { padding: 3px 7px; background: var(--ink); color: var(--bg); font-size: 10px; letter-spacing: 0.1em; }
+  .prc[data-state='open'] .prc-state { background: none; color: var(--ink); border: 1px solid var(--ink); }
+  .prc[data-state='closed'] .prc-state { background: none; color: var(--ink3); border: 1px dashed var(--ink3); }
+  .prc-date { opacity: 0.75; }
+  .prc-t { font: 600 clamp(19px, 2vw, 23px)/1.25 var(--f-mono); letter-spacing: -0.01em; }
+  .prc-t a { color: var(--ink); text-decoration: none; }
+  .prc-t a:hover { text-decoration: underline; text-decoration-color: var(--ctxs); text-underline-offset: 4px; }
+  .prc-diff { display: flex; gap: 12px; align-items: center; }
+  .prc-bar { display: flex; flex: 0 1 220px; height: 8px; gap: 2px; }
+  .prc-bar .a { background: var(--ctxs); }
+  .prc-bar .d { background: repeating-linear-gradient(135deg, var(--ink3) 0 2px, transparent 2px 5px); }
+  .prc-n { font: 500 12px/1 var(--f-mono); color: var(--ink2); }
+  .prc-n b { color: var(--ink); }
+  .prc-body { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; }
+  .prc-body dd { margin: 4px 0 0; font-size: 15px; }
+  .prc-q { margin: 0; padding: 10px 14px; border-left: 2px solid var(--rule); color: var(--ink2); }
+  .prc-q p { font-size: 15px; }
+  .prc-q footer { margin-top: 6px; font: 500 11px/1.3 var(--f-mono); color: var(--ink3); }
+  .prc-f { display: flex; justify-content: space-between; gap: 12px; align-items: center; border-top: 1px solid var(--rule); padding-top: 10px; font: 500 11px/1.3 var(--f-mono); color: var(--ink3); }
+  .prc-go { margin-left: auto; color: var(--ink); text-decoration: none; letter-spacing: 0.06em; }
+  .prc-go:hover { color: var(--ctxs); }
+  @media (max-width: 640px) { .prc-body { grid-template-columns: minmax(0, 1fr); } }
+</style>

@@ -1,0 +1,32 @@
+title: Z80 Workspace
+cat: dev
+theme: z80
+year: 2026
+date: "2026-07"
+type: DEV TOOL · BROWSER IDE
+status: COMPLETED
+idx: "02"
+page: true
+line:
+  en: A browser IDE for Z80 assembly that runs the course’s real assembler and board simulator through DOSBox compiled to WebAssembly.
+  th: "IDE บนเบราว์เซอร์สำหรับเขียน Z80 assembly รันตัว assembler กับ board simulator ของวิชาตัวจริง ผ่าน DOSBox ที่คอมไพล์เป็น WebAssembly"
+  ja: 授業で使う本物のアセンブラとボードシミュレータを、WebAssembly化したDOSBoxで動かすZ80アセンブリ用ブラウザIDE。
+fact: { en: Built in 9 days · complete · web + Electron, th: ทำใน 9 วัน · เสร็จแล้ว · web + Electron, ja: "9日で制作 · 完成 · web + Electron" }
+meta:
+  - { k: built, v: { en: 9 days · 2026-07-22 → 07-30, th: 9 วัน · 2026-07-22 → 07-30, ja: 9日間 · 2026-07-22 → 07-30 } }
+  - { k: commits, v: { en: 59 of 64 · 5 releases, th: 59 จาก 64 · 5 release, ja: 64中59 · 5リリース } }
+  - { k: stack, v: Monaco · DOSBox → WASM · C16.EXE }
+cover:
+  src: ../../assets/works/z80/workspace.webp
+  alt: { en: Z80 Workspace welcome screen with explorer, toolbar and console, th: หน้า Welcome ของ Z80 Workspace มี explorer, toolbar และ console, ja: エクスプローラー、ツールバー、コンソールのあるZ80 Workspaceのウェルカム画面 }
+  plate: wide
+  frame: screen
+  callouts:
+    - { x: 4, y: 9.4, label: Explorer, side: right, key: true }
+    - { x: 16.8, y: 88.6, label: { en: Console, th: Console, ja: コンソール }, sub: C16.EXE IN DOSBOX, side: right }
+related: [z80prep, yasm]
+tags: [solo]
+links:
+  - { kind: live, url: "https://vveb1250.github.io/z80-workspace/", label: Live }
+  - { kind: github, url: "https://github.com/VVeb1250/z80-workspace", label: GitHub }
+sources: [portfolio-facts §2.2, GoatCounter 2026-07-20 → 09-26, GitHub repo checked 2026-09-30, "https://github.com/VVeb1250/z80-workspace/releases/tag/v0.1.4"]

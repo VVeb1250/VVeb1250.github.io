@@ -1,0 +1,74 @@
+---
+/**
+ * @component MediaFrame
+ * @group media
+ * @summary The standard way to show one real artifact — an image or a video — with optional numbered marks pinned on it and a caption. Frames: `plain` (art, photos, video), `screen` (UI screenshots: thin border, lifted). Widths: `text`, `wide`, `full` (edge to edge inside a story — for art that should dominate).
+ * @use Every screenshot, capture, drawing, photo. Marks point at the exact spot the caption talks about.
+ * @avoid Decorative images, stock photos, "device mockups", more than 4 marks, screenshots too small to read (use width="wide").
+ * @behavior Images are resized and lazy-loaded by astro:assets. Marks stay pinned at the same % position at every width.
+ * @example
+ * <MediaFrame src="z80/workspace.webp" alt={{ en: 'Z80 Workspace welcome screen' }} frame="screen" width="wide"
+ *   marks={[{ n: 1, x: 4, y: 9.4 }, { n: 2, x: 16.8, y: 88.6 }]}
+ *   title={{ en: 'Workspace' }} caption={{ en: '① explorer · ② the console runs the real C16.EXE in DOSBox' }} />
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Mark from '../primitives/Mark.astro';
+import ImageCaption from './ImageCaption.astro';
+import VideoEmbed from './VideoEmbed.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { toImage, lqStyle } from '../../lib/media';
+
+export interface Props {
+  /** Image key ("z80/workspace.webp") or imported image. Omit when using `video`. */
+  src?: string | ImageMetadata;
+  /** Video key ("vaja/highlight-720.mp4"); needs `poster`. */
+  video?: string;
+  poster?: string;
+  /** Short silent clip that loops while visible. */
+  loop?: boolean;
+  /** Required for images: what is in it. */
+  alt?: L;
+  frame?: 'plain' | 'screen';
+  /** How much room it takes inside a story/page column. */
+  width?: 'text' | 'wide' | 'full';
+  /** Crop to a ratio (e.g. "16/9"). Default: the file's own ratio, never cropped. */
+  ratio?: string;
+  /** Crop focus when `ratio` crops, CSS object-position (e.g. "30% 60%"). */
+  focus?: string;
+  marks?: { n: number; x: number; y: number }[];
+  /** Caption number (matches a mark on another figure, or orders a sequence). */
+  n?: number;
+  title?: L;
+  caption?: L;
+  source?: L;
+  eager?: boolean;
+}
+const { src, video, poster, loop = false, alt, frame = 'plain', width = 'wide', ratio, focus, marks = [], n, title, caption, source, eager = false } = Astro.props;
+const lang = langOf(Astro.url);
+const image = src ? toImage(src) : null;
+const lq = image ? await lqStyle(image) : '';
+const sizes = { text: '(max-width: 760px) 92vw, 680px', wide: '(max-width: 1280px) 92vw, 1180px', full: '100vw' }[width];
+const hasCap = !!(title || caption || source || n != null);
+---
+<figure class="mf" data-frame={frame} data-width={width}>
+  <div class="mf-f" style={ratio ? `aspect-ratio:${ratio}` : undefined}>
+    {image && <Image data-lq src={image} alt={tx(alt, lang)} sizes={sizes} widths={[480, 800, 1200, 1600, 2000].filter((w) => w <= image.width * 1.01).concat(image.width < 480 ? [image.width] : [])} loading={eager ? 'eager' : 'lazy'} style={[lq, focus ? `object-position:${focus}` : ''].filter(Boolean).join(';') || undefined} class:list={{ crop: !!ratio }} />}
+    {video && poster && <VideoEmbed src={video} poster={poster} label={alt ?? title ?? ''} loop={loop} ratio={ratio} />}
+    {marks.map((m) => <span class="mf-mk" style={`left:${m.x}%;top:${m.y}%`}><Mark n={m.n} /></span>)}
+  </div>
+  {hasCap && <ImageCaption n={n} title={title} text={caption} source={source} />}
+</figure>
+
+<style>
+  .mf { display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .mf-f { position: relative; }
+  .mf[data-width='text'] { max-width: 720px; }
+  .mf[data-width='full'] { width: 100vw; margin-left: calc(50% - 50vw); }
+  .mf[data-width='full'] :global(figcaption) { padding-inline: var(--gut); }
+  .mf-f :global(img) { display: block; width: 100%; height: auto; }
+  .mf-f :global(img.crop) { height: 100%; object-fit: cover; }
+  .mf[data-frame='screen'] .mf-f { border: 1px solid var(--rule); background: var(--sunk); box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--shade) 60%, transparent); }
+  .mf-mk { position: absolute; transform: translate(-50%, -50%); z-index: 1; }
+  .mf-mk :global(.mk) { outline: 2px solid var(--bg); }
+</style>

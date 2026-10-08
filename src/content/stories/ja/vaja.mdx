@@ -1,0 +1,57 @@
+---
+work: vaja
+recipe: art-led
+summary: チーム3人で作った2Dアクション RPG。プロジェクトリーダーとして、ビジュアル制作とコードをつなぎました。メインのアートの大半、シーン、リギングとアニメーション、プレイヤー操作を担当しました。
+---
+
+import '../../../styles/stories/vaja.css';
+
+{/* Art and playable build lead. Facts §2.1; all media come from the real game. */}
+<ProjectHeader work="vaja" layout="stack">
+  <MediaFrame slot="media" src="vaja/scene-celestia-grounded.webp" alt={{ en: 'Gameplay frame: Vaja standing on the ground in a crystal cavern', ja: 'ゲーム画面：水晶の洞窟の地面に立つVaja' }} width="full" eager
+    caption={{ en: 'Celestia Crystal Cavern · frame from the recorded build', ja: 'Celestia Crystal Cavern · 録画したビルドのフレーム' }} />
+</ProjectHeader>
+
+<div class="vaja-build">
+  <div>
+    <h2>プレイ可能なビルド（授業でデモ）</h2>
+    <p>プレイヤー操作、スクロール、UI のロジック、シーン管理、セーブ機能。</p>
+    <EvidenceLink label="PlayerController.cs" shows={{ en: '370 lines', ja: '370行' }} kind="file" />
+  </div>
+  <figure>
+    <VideoEmbed src="vaja/highlight-720.mp4" poster="vaja/highlight-poster.webp" label={{ en: 'Gameplay, 51 seconds, no sound', ja: 'ゲームプレイ、51秒、音声なし' }} />
+    <figcaption>ゲームプレイ · 51秒 · 音声なし · 録画したビルドから切り出し</figcaption>
+  </figure>
+</div>
+
+## シートからシーンへ
+
+マップのアートは、個別のピースのシートとして描かれ、Unity でシーンに組み立てられました。
+
+<div class="vaja-art">
+  <MediaFrame src="vaja/sheet-forest.webp" alt={{ en: 'Forest map-art sheet: ground strips, grass, rocks, stone slabs, plants, branches, two trunks, two trees and a small Vaja sprite, each on its own', ja: '森のマップアートのシート：地面の帯、草、岩、石板、植物、枝、2本の幹、2本の木、小さなVajaのスプライトが、それぞれ単独で並ぶ' }} frame="plain" width="wide"
+    marks={[{ n: 1, x: 58, y: 78 }, { n: 2, x: 44, y: 27 }, { n: 3, x: 15, y: 18 }]}
+    title={{ en: 'Forest map-art sheet', ja: '森のマップアートシート' }}
+    caption={{ en: 'Pieces like ① the trunks, ② the stone slab and ③ the grass strip are what the Westbrook scene is built from.', ja: '①の幹、②の石板、③の草の帯のようなピースから、Westbrook のシーンが組み立てられています。' }}
+    source={{ en: 'Game source art · 4000 × 4000, shown reduced', ja: 'ゲームの原画 · 4000 × 4000、縮小表示' }} />
+  <div>
+    <MediaFrame src="vaja/scene-westbrook.webp" alt={{ en: 'Westbrook Stonescape scene', ja: 'Westbrook Stonescape のシーン' }} width="wide" caption={{ en: 'Westbrook Stonescape · scene composed from the map art', ja: 'Westbrook Stonescape · マップアートから組み立てたシーン' }} />
+    <MediaFrame src="vaja/object.webp" alt={{ en: 'Vaja holding the crystal staff', ja: '水晶の杖を持つVaja' }} frame="plain" width="text" caption={{ en: 'Vaja and the crystal staff', ja: 'Vajaと水晶の杖' }} />
+  </div>
+</div>
+
+## 攻撃をコマ送りで
+
+Unity の 2D スケルタルアニメーションと IK でリギングしています。Vaja の最初の攻撃を、ビルドから書き出した10コマでご覧いただけます。
+
+<ScrubFrames src="vaja/strip-attack1-padded.webp" frames={10} name="Vaja · attack1" fps={12} />
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Project head. Most of the main art (map art, UI art, the crystal staff), scene composition, skeletal rigging, IK and animation; player control, scene scrolling, UI logic, scene management and the save system.', ja: 'プロジェクトリーダーとして、メインのアートの大半（マップアート、UI アート、水晶の杖）、シーン構成、スケルタルリギング、IK、アニメーションを担当しました。プレイヤー操作、スクロール、UI のロジック、シーン管理、セーブ機能も担当しました。' } },
+  { who: 'team', did: { en: 'The main concept, game design and story came mainly from a teammate. Teammates also made the effects and some of the skill art.', ja: '主なコンセプト、ゲームデザイン、ストーリーは、主にチームメイトが担当しました。エフェクトや一部のスキルのアートもチームメイトが制作しました。' } },
+  { who: { en: 'External assets', ja: '外部のアセット' }, did: { en: 'Some assets came from outside the team.', ja: '一部のアセットはチーム外から提供されました。' } }
+]} />
+
+<OutcomeBlock
+  outcome={{ en: 'A playable build, demoed for the course.', ja: '授業で使うため、プレイ可能なビルドをデモしました。' }}
+  current={{ en: 'Finished as a course project in March 2025.', ja: '2025年3月、授業の課題として完成しました。' }} />

@@ -1,0 +1,19 @@
+# Teaching with its own page (/timeline/cesca/): #20 and #21 on one page; the #21 row opens its part.
+# Facts: _note/portfolio-facts.md §6.5, §6.6. Month: CESCa #20 posts in the owner's Instagram export, April 2025.
+# Photos: the owner is choosing them (2026-10-02).
+title: CESCa
+kind: teaching
+cat: self
+theme: cesca20
+year: 2025
+date: "2025-04"
+type: CAMP · ACADEMIC STAFF / TA
+page: true
+line:
+  en: "A camp where high-school students learn university topics and build projects. I was academic staff / TA twice — Game Design at #20, Networking at #21."
+  ja: "高校生が大学の内容を学び、プロジェクトを作る合宿。私は学術スタッフ / TA として2回参加しました。#20 は Game Design、#21 は Networking を担当しました。"
+  th: "ค่ายที่นักเรียนมัธยมปลายมาเรียนหัวข้อระดับมหาวิทยาลัยและทำโปรเจกต์ ผมเป็นทีมงานฝ่ายวิชาการ (academic staff / TA) ในค่ายสองครั้ง คือ Game Design ที่ #20 และ Networking ที่ #21"
+meta:
+  - { k: topic, v: { en: "#20 Game Design · #21 Networking", th: "#20 Game Design · #21 Networking", ja: "#20 Game Design · #21 Networking" } }
+tags: []
+sources: [portfolio-facts §6.5, §6.6, "Instagram export: CESCa20 post 2025-04-05"]

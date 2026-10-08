@@ -1,0 +1,53 @@
+---
+/**
+ * @component ReelZ80
+ * @group showcase
+ * @summary Z80 Workspace on the Work reel: the three states it was built to reach — Assemble, Load, Run — as live captures stacked like windows, each labelled with what it shows.
+ * @use Inside WorkReel, once.
+ * @avoid Claiming more than the captures show (the run is the built-in lab1.asm sample).
+ * @behavior Pointing at a window lifts it to the front. Under 600px the windows stack in order.
+ * @example
+ * <ReelZ80 />
+ */
+import { Image } from 'astro:assets';
+import ReelPanel from './ReelPanel.astro';
+import { langOf, tx } from '../../lib/i18n';
+import { img, lqStyle } from '../../lib/media';
+const lang = langOf(Astro.url);
+const shots = await Promise.all([
+  { key: 'z80/live-assemble-success.webp', n: '01', what: { en: 'Assemble', th: 'ประกอบ', ja: 'アセンブル' }, shows: 'End of Assembly -- No Errors', alt: { en: 'Z80 Workspace console: C16 finishes with End of Assembly -- No Errors', th: 'Console ของ Z80 Workspace: C16 จบด้วย End of Assembly -- No Errors', ja: 'Z80 Workspace のコンソール：C16 が End of Assembly -- No Errors で完了' } },
+  { key: 'z80/live-simulator-loaded.webp', n: '02', what: { en: 'Load', th: 'โหลด', ja: '読み込み' }, shows: 'File load success at 2000h', alt: { en: 'Z80sim in Z80 Workspace: File load success at 2000h', th: 'Z80sim ใน Z80 Workspace: File load success at 2000h', ja: 'Z80 Workspace の Z80sim：File load success at 2000h' } },
+  { key: 'z80/live-program-halted.webp', n: '03', what: { en: 'Run', th: 'รัน', ja: '実行' }, shows: 'Program halted', alt: { en: 'The built-in lab1.asm sample after running from 8000h: Z80sim reports Program halted', th: 'โปรแกรมตัวอย่าง lab1.asm หลังรันจาก 8000h: Z80sim รายงาน Program halted', ja: '付属の lab1.asm サンプルを 8000h から実行後：Z80sim が Program halted を表示' } }
+].map(async (s) => { const m = img(s.key); return { ...s, m, lq: await lqStyle(m) }; }));
+const widths = (m: ImageMetadata) => [640, 960, 1280].filter((x) => x <= m.width);
+---
+<ReelPanel work="z80" aim>
+  <div class="v-z80">
+    {shots.map((s) => (
+      <figure class="win">
+        <figcaption><span class="num">{s.n}</span> {tx(s.what, lang)} <span class="shows">{s.shows}</span></figcaption>
+        <Image src={s.m} alt={tx(s.alt, lang)} style={s.lq} data-lq widths={widths(s.m)} sizes="(max-width: 1023px) 80vw, 560px" loading="lazy" />
+      </figure>
+    ))}
+    <p class="note">{tx({ en: 'Captured on the live site · the built-in lab1.asm sample', th: 'แคปจากเว็บจริง · โปรแกรมตัวอย่าง lab1.asm ที่มีมาให้', ja: '公開サイトでキャプチャ · 付属の lab1.asm サンプル' }, lang)}</p>
+  </div>
+</ReelPanel>
+
+<style>
+  .v-z80 { position: relative; aspect-ratio: 16 / 11.2; width: min(100%, calc(var(--rp-vh, 9999px) * 1.43)); margin-left: auto; }
+  .win { position: absolute; width: 66%; margin: 0; background: var(--chip); border: 1px solid var(--rule); transition: transform var(--t-enter) var(--e-enter); }
+  .win:nth-of-type(1) { left: 0; top: 0; }
+  .win:nth-of-type(2) { left: 17%; top: 19%; }
+  .win:nth-of-type(3) { left: 34%; top: 38%; }
+  figcaption { display: flex; gap: 8px; align-items: baseline; padding: 7px 10px; background: var(--surface); border-bottom: 1px solid var(--rule); font: 500 11px/1.2 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+  figcaption .num { color: var(--ctxs); }
+  .shows { margin-left: auto; text-transform: none; letter-spacing: 0; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .win :global(img) { display: block; width: 100%; height: auto; }
+  @media (hover: hover) { .win:hover { z-index: 4; transform: translate3d(0, -8px, 0); } }
+  .note { position: absolute; right: 0; bottom: -22px; margin: 0; font: 500 11px/1.45 var(--f-mono); color: var(--ink3); }
+  @media (max-width: 600px) {
+    .v-z80 { aspect-ratio: auto; display: grid; gap: 12px; }
+    .win { position: relative; left: 0 !important; top: 0 !important; width: 100%; }
+    .note { position: static; }
+  }
+</style>

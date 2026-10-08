@@ -1,0 +1,45 @@
+---
+/**
+ * @component Section
+ * @group shell
+ * @summary A top-level page section: spacing, anchor, SectionHeader, SectionMarker registration. Context color and fog tint are opt-in.
+ * @use Wrap each top-level block of a page (Selected work, the path so far, Outside software…). Put compositions or lists inside.
+ * @avoid Nesting Sections; wrapping every small block (use SectionHeader alone for sub-parts).
+ * @example
+ * <Section id="path" index="02" title={{ en: 'The path so far', th: 'เส้นทางที่ผ่านมา' }} mark={{ en: 'Path', th: 'เส้นทาง' }}>
+ *   <EvidenceRow … />
+ * </Section>
+ */
+import SectionHeader from './SectionHeader.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import type { CatOrSelf } from '../../lib/vocab';
+
+export interface Props {
+  /** Anchor id (e.g. used by /#work). */
+  id?: string;
+  title: L;
+  index?: string;
+  description?: L;
+  /** Vertical SectionMarker label; defaults to `title`. One or two words. */
+  mark?: L;
+  count?: number;
+  /** Context color for everything inside. Omit to inherit (identity blue on most pages). */
+  cat?: CatOrSelf;
+  /** Opt in: let this section tint the background fog with its context color while in view. */
+  fog?: boolean;
+  /** Remove the large top spacing (first section after the intro). */
+  tight?: boolean;
+  class?: string;
+}
+const { id, title, index, description, mark, count, cat, fog = false, tight = false, class: cls } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<section id={id} class:list={['sec', { tight }, cls]} data-cat={cat} data-mark={tx(mark ?? title, lang)} data-fog={fog ? '' : undefined}>
+  <SectionHeader title={title} index={index} description={description} count={count} />
+  <slot />
+</section>
+
+<style>
+  .sec { margin-top: var(--space-section); position: relative; }
+  .sec.tight { margin-top: 0; }
+</style>

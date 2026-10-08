@@ -1,0 +1,21 @@
+# build
+dist/
+.astro/
+node_modules/
+
+# raw notes, exports and inventories the owner drops in for AI to read — never published
+_note/
+_source/
+cv/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+*.log
+
+# local tooling / drafts
+.deepeval/
+Claude outputs/
+.claude/

@@ -1,0 +1,32 @@
+---
+/**
+ * @component MetaList
+ * @group primitives
+ * @summary Small facts as label/value pairs (type, role, engine, dates, result).
+ * @use Under a WorkHero title, or in a Profile. 3–5 items.
+ * @avoid Paragraphs as values; labels that repeat the value.
+ * @example
+ * <MetaList items={[{ k: { en: 'Engine', th: 'Engine' }, v: 'Unity 6 · 2D Animation + IK' }, { k: 'When', v: '2025-02 → 2025-03' }]} />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  items: { k: L; v: L }[];
+  /** 'row' wraps items horizontally (hero); 'table' stacks label | value rows (profile). */
+  layout?: 'row' | 'table';
+}
+const { items, layout = 'row' } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<dl class:list={['meta', layout]}>
+  {items.map((i) => (<div><dt class="eyebrow l10n">{tx(i.k, lang)}</dt><dd>{tx(i.v, lang)}</dd></div>))}
+</dl>
+
+<style>
+  .meta { font-size: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px 28px; }
+  .row div { display: grid; max-width: 100%; }
+  .table div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule); }
+  .table div:last-child { border-bottom: 1px solid var(--rule); }
+  .table dt { line-height: 1.9; }
+  dd { margin: 0; }
+</style>

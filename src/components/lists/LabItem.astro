@@ -1,0 +1,115 @@
+---
+/**
+ * @component LabItem
+ * @group lists
+ * @summary An open question from the Lab: the work, the question it is testing, how far it got on the process line, its status — as a card (for HorizontalStrip) or a row (for lists).
+ * @use Lab preview (cards in HorizontalStrip) and the /lab index (rows). The object/body slots let Engineering trail reuse the exact kit card frame with its own facts and evidence links. Every Lab item says what is still unproven — link to its page where a ClaimLedger lives.
+ * @avoid Presenting Lab items as finished products; "coming soon" teasers. A glyph or object that is not the work's own thing (made-up parts, a generic icon).
+ * @behavior Card with an object (`glyph` + a `real` slot): the header (same height as any card) shows the minimal Pictogram on the left third; point at the card (mouse ~90ms, keyboard focus) and a textured charcoal column (gradient, fine hatch, grain, a dark halo behind the object — Endfield's database column; the same in light and dark mode) sweeps across with a soft slanted edge while it darkens from grey, the whole glyph steps back without cell dissolution or mosaic, and the detailed object opens out centred on the same third point — oversized, cropped by the card, never outside it — with a tag (SYSTEM / REAL / RENDER). The column is charcoal in light mode and near-black in dark mode (--obj-col, like Endfield's column); the object follows the mode (IsoObject materials are lit from above in both). Inside a HorizontalStrip nothing opens while the strip moves. Touch: the first tap opens it, the second follows the link. Reduced motion: instant.
+ * @example
+ * <LabItem work="memory" question={{ en: 'Does compact understanding beat episodic recall?' }} reached="use" variant="card" />
+ * <LabItem work="memory" variant="card" glyph={['######', '###+##', '######', '####+#', '#+####', '######']}>
+ *   <IsoObject slot="real" … />   (the detailed object = the abstract work's "real" — see docs/OBJECTS.md)
+ * </LabItem>
+ */
+import CategoryTick from '../primitives/CategoryTick.astro';
+import StatusTag from '../primitives/StatusTag.astro';
+import Plate from '../media/Plate.astro';
+import Pictogram from '../media/Pictogram.astro';
+import ObjectReveal from '../media/ObjectReveal.astro';
+import { langOf, tx, href as hrefOf, type L } from '../../lib/i18n';
+import { work, workHref } from '../../lib/works';
+import { PROCESS } from '../../lib/vocab';
+export interface Props {
+  work: string;
+  /** The open question, as a question. Defaults to the work's one line. */
+  question?: L;
+  /** Last step reached on the process line (idea · question · build · use · decide · trace). */
+  reached?: string;
+  variant?: 'card' | 'row';
+  /** Opt-in plate header in the work's color (cards only). */
+  plate?: boolean;
+  /** Cards: the minimal pixel glyph of the work's object (Pictogram rows: '#' grey, '+' accent). */
+  glyph?: string[];
+  /** Cards: trace the glyph from this transparent cutout instead (asset key), `glyphCols` cells across. */
+  glyphFrom?: string;
+  glyphCols?: number;
+  /** What the `real` slot shows: 'system' = the detailed IsoObject of an abstract work, 'real' = a photo / screen, 'render' = a render. */
+  realKind?: 'system' | 'real' | 'render';
+  /** Where the item links when the work has no page of its own (a locale-free path, e.g. '/timeline/'). */
+  to?: string;
+  base?: string;
+}
+const { work: id, question, reached, variant = 'row', plate = false, base, glyph, glyphFrom, glyphCols, realKind = 'system', to } = Astro.props;
+const lang = langOf(Astro.url);
+const w = await work(id);
+const d = w.data;
+const href = d.page ? workHref(id, lang, base ?? '/work/') : to ? hrefOf(to, lang) : undefined;
+const at = reached ? PROCESS.findIndex((p) => p.key === reached) : -1;
+const Tag = href ? 'a' : 'article';
+const customObject = variant === 'card' && Astro.slots.has('object');
+const hasReal = variant === 'card' && (Astro.slots.has('real') || customObject);
+const hasGlyph = variant === 'card' && !!(glyph || glyphFrom);
+const TAG = tx({ system: { en: 'SYSTEM', th: 'ระบบ', ja: 'システム' }, real: { en: 'REAL', th: 'ของจริง', ja: '実物' }, render: { en: 'RENDER', th: 'เรนเดอร์', ja: 'レンダー' } }[realKind], lang);
+---
+<Tag class:list={['lab', variant]} href={href} data-cat={d.cat} data-work={id} data-obj={hasReal ? '' : undefined} data-object-host={hasReal ? '' : undefined} tabindex={href ? undefined : 0}>
+  {variant === 'card' && (
+    <div class:list={['lab-h', { 'lab-obj': hasGlyph || hasReal }]} aria-hidden="true">
+      {plate && <Plate shape="wide" inset="0" />}
+      {customObject ? <slot name="object" /> : hasReal ? (
+        <ObjectReveal glyph={glyph} glyphFrom={glyphFrom} glyphCols={glyphCols} tag={TAG} cat={d.cat} indexed>
+          <slot name="real" />
+        </ObjectReveal>
+      ) : (
+        <>
+          <span class="lab-n disp"></span>
+          {hasGlyph && <span class="lab-g"><Pictogram grid={glyph} from={glyphFrom} cols={glyphCols} /></span>}
+        </>
+      )}
+    </div>
+  )}
+  <div class="lab-b"><slot name="body">
+    <span class="lab-meta"><span class="eyebrow">{d.type}</span><CategoryTick cat={d.cat} kind={d.kind} /></span>
+    <h3 class="disp">{d.title}</h3>
+    <p class="lab-q">{tx(question ?? d.line, lang)}</p>
+    <span class="lab-foot">
+      {d.status && <StatusTag status={d.status} />}
+      {at >= 0 && (
+        <span class="lab-pl" title={tx(PROCESS[at].label, lang)}>
+          {PROCESS.map((_, i) => <i class:list={{ on: i <= at }}></i>)}
+          <span class="eyebrow l10n">{tx(PROCESS[at].label, lang)}</span>
+        </span>
+      )}
+    </span>
+  </slot></div>
+</Tag>
+
+<style>
+  .lab { color: inherit; text-decoration: none; }
+  .card { display: grid; align-content: start; gap: 10px; background: color-mix(in srgb, var(--surface) 80%, transparent); padding-bottom: 20px; outline-offset: 4px; counter-increment: lab; }
+  .lab-h { position: relative; height: clamp(96px, 16vh, 150px); overflow: hidden; border-bottom: 1px solid var(--rule); }
+  .lab-n { position: absolute; right: 14px; bottom: 0; font-size: clamp(56px, 6vw, 84px); line-height: 1; color: var(--ink); }
+  .lab-n::before { content: counter(lab, decimal-leading-zero); }
+  .card .lab-b { padding-inline: 18px; }
+  .lab-b { display: grid; gap: 8px; }
+  .lab-meta { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
+  h3 { font-size: 22px; line-height: 1.15; }
+  .lab-q { font-size: 15px; color: var(--ink2); }
+  .lab-foot { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+  .lab-pl { display: inline-flex; gap: 3px; align-items: center; }
+  .lab-pl i { width: 10px; height: 4px; background: var(--rule); }
+  .lab-pl i.on { background: var(--ctxs); }
+  .lab-pl .eyebrow { margin-left: 6px; }
+  a.card:hover h3, a.row:hover h3 { text-decoration: underline; text-decoration-color: var(--ctxs); text-underline-offset: 4px; }
+  .row { display: block; padding: 20px 0; border-top: 1px solid var(--rule); }
+  :global(.rows) > .row:last-child { border-bottom: 1px solid var(--rule); }
+  .row .lab-b { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); column-gap: clamp(20px, 3vw, 40px); }
+  .row .lab-meta, .row h3 { grid-column: 1; }
+  .row .lab-q { grid-column: 2; grid-row: 1 / span 2; font-size: 18px; color: var(--ink); }
+  .row .lab-foot { grid-column: 2; }
+  @media (max-width: 760px) { .row .lab-b { grid-template-columns: minmax(0, 1fr); } .row .lab-q, .row .lab-foot { grid-column: 1; grid-row: auto; } }
+  :global(.hs-track) { counter-reset: lab; }
+  .lab-h :global(.wo) { height: 100%; aspect-ratio: auto; }
+  .lab-g { position: absolute; left: 33.3%; top: 50%; width: 26%; transform: translate(-50%, -50%); }
+  :global(.hs.armed .hs-track) > .lab.on { opacity: 1; }
+</style>

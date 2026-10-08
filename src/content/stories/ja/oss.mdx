@@ -1,0 +1,78 @@
+---
+work: oss
+recipe: build-log
+summary: 他者のツールに対する2件のマージ済み修正、根本原因を特定したバグ報告、設計へのフィードバック。いずれも、実際に使っていて壊れたものから始まっています。
+---
+
+import '../../../styles/stories/oss.css';
+import { oss } from '../../../lib/facts';
+
+{/* Opens with the three references (the same facts as the Work reel and Home: OSS_REFS in src/lib/facts.ts), then one
+    part per repo; the PR cards carry the detail, so the prose stays short. Merged code and reported bugs never read the same.
+    Sources: Facts §5, AgentsMesh #98/#99/#102, ai-config-sync-manager #28, context-mode #878. */}
+<ProjectHeader work="oss" layout="text" roles={['バグ報告', 'コードへの貢献', 'メンテナーとの協働']} />
+
+<RefBoard items={[['#102', '#agentsmesh'], ['#28', '#windows'], ['#878', '#context-mode']].map(([ref, to]) => { const r = oss(ref); return { ref: r.ref, repo: r.repo, state: r.state, merged: r.merged, text: r.short, to }; })} />
+
+<div class="oss-main">
+  <aside>
+    <ConstraintBlock label={{ en: 'Maintainer constraint', ja: 'メンテナーの制約' }}
+      statement={{ en: 'The maintainer kept check on its fast checksum path.', ja: 'メンテナーは check の高速なチェックサム経路を維持しました。' }}
+      why={{ en: 'So the stale-output detection had to be a read-only follow-up.', ja: 'そのため、古い出力の検出は読み取り専用のフォローアップにする必要がありました。' }} source="AgentsMesh PR #99 → #102" />
+    <EvidenceLink href="https://github.com/sampleXbro/agentsmesh/pull/99#issuecomment-5019299345" label="Maintainer discussion" kind="pr" shows={{ en: 'Design constraint and follow-up', ja: 'デザイン上の制約とフォローアップ' }} />
+  </aside>
+  <Section id="agentsmesh" title="AgentsMesh" mark="AgentsMesh" tight>
+  <p>生成された <code>AGENTS.md</code> を編集しても、<code>check</code> は引き続き通過しました。Issue #98 でこの現象を再現できます。<code>check</code> は正規のファイルをハッシュしていましたが、生成された出力はハッシュしていませんでした。</p>
+  <EvidenceLink href="https://github.com/sampleXbro/agentsmesh/issues/98" label="Issue #98" kind="issue" shows={{ en: 'Reproduction and expected behavior', ja: '再現手順と期待される動作' }} />
+
+  <p>PR #99 では修正を提案しました。メンテナーはすでにチェックサムベースの修正を進めており、<code>check</code> の速度を保つためにそちらを残しました。そのうえで、私の提案のうち読み取り専用の古い出力の検出部分を、フォローアップとして切り出すよう依頼されました。#99 はマージされずにクローズされました。</p>
+  <PRCard repo="sampleXbro/agentsmesh" number={99} state="closed" href="https://github.com/sampleXbro/agentsmesh/pull/99"
+    title="fix(check): detect generated-output drift"
+    problem={{ en: 'Generated-output drift passed the documented fast check.', ja: '生成された出力のずれが、文書化された高速チェックを通過していました。' }}
+    change={{ en: 'Proposed detecting output drift, including stale files; the maintainer chose a checksum-based base fix and requested the stale-output piece separately.', ja: '古いファイルを含む出力のずれを検出する方法を提案しました。メンテナーはチェックサムベースの修正を基本に採用し、古い出力の部分を別途依頼しました。' }} />
+
+  <p>PR #102 は、そのフォローアップです。生成を実行せずに古い生成出力を見つけ、core、API、CLI、MCP の check 経路で報告します。メンテナーが修正を加えたうえで、マージしました。</p>
+  <PRCard repo="sampleXbro/agentsmesh" number={102} state="merged" date="2026-07-21" href="https://github.com/sampleXbro/agentsmesh/pull/102"
+    title="fix(check): detect stale generated outputs" issues={['#98', '#99']}
+    problem={{ en: 'Files left in managed output locations could be absent from the lock’s output map without being reported as stale.', ja: '管理対象の出力場所に残ったファイルが、lock の出力マップから欠けていても、古いものとして報告されない場合がありました。' }}
+    change={{ en: 'Added read-only stale-output detection and exposed its result across the check surfaces, without running the generation pipeline.', ja: '読み取り専用の古い出力検出を追加し、結果を check のすべての経路に公開しました。生成パイプラインは実行しません。' }} />
+</Section>
+</div>
+
+<div class="oss-other">
+  <Section id="windows" tight title={{ en: 'Windows backup paths', ja: 'Windows でのバックアップパス' }} mark={{ en: 'Windows fix', ja: 'Windows 修正' }}>
+  <p>Windows では、ドライブ文字で始まる絶対パスによって、ai-config-sync-manager のバックアップがバックアップ先の外に出ることがありました。PR #28 では対象パスをサニタイズし、POSIX のレイアウトを維持して、回帰テストを追加しました。</p>
+  <PRCard repo="slash9494/ai-config-sync-manager" number={28} state="merged" date="2026-07-09" href="https://github.com/slash9494/ai-config-sync-manager/pull/28"
+    title="fix: sanitize Windows backup paths"
+    problem={{ en: 'An absolute Windows project path broke backup placement during sync.', ja: 'Windows の絶対パスのプロジェクトで、同期時にバックアップ先が正しくなくなっていました。' }}
+    change={{ en: 'Sanitized absolute backup targets, preserved POSIX layout, and added regression coverage.', ja: '絶対パスのバックアップ先をサニタイズし、POSIX のレイアウトを維持して、回帰テストを追加しました。' }} />
+</Section>
+  <Section id="context-mode" tight title={{ en: 'context-mode: a root cause, not a fix', ja: 'context-mode: 修正ではなく根本原因の特定' }} mark={{ en: 'Root cause', ja: '根本原因' }}>
+  <p>Markdown の非常に長い段落が、4 KiB のチャンク上限を超えて通過していました。Issue #878 には、最小の再現手順、SQLite による根拠、ソース上の位置を含む根本原因、修正案、回帰テストの一覧があります。その後、他のユーザーが新しいバージョンで、はるかに大きなチャンクを再現しました。</p>
+  <p>Issue はまだ開いています。リンクしている pull request #1091 も開いており、マージされていません。</p>
+  <EvidenceLink href="https://github.com/mksglu/context-mode/issues/878" label="Issue #878" kind="issue" shows={{ en: 'open · reproduction, root cause, proposed fix', ja: '未解決 · 再現手順、根本原因、修正案' }} />
+</Section>
+</div>
+
+<details class="oss-traces">
+  <summary>小さな記録 · 報告と提案</summary>
+  <Section title={{ en: 'Smaller traces', ja: '小さな記録' }} mark={{ en: 'Traces', ja: '記録' }}>
+  <p><b>rulesync #2253</b> は機能要望で、<code>fetch</code> が Claude Code と Codex のプラグインマニフェストを読めるようにするものでした。メンテナーはコードに照らしてこの不足を再確認し、プラグインの取り込みをより広いプラグインルートのインポーター（#382）に統合したうえで、この Issue を not planned としてクローズしました。私のコードはマージされていません。</p>
+  <EvidenceLink href="https://github.com/dyoshikawa/rulesync/issues/2253" label="rulesync #2253" kind="issue" shows={{ en: 'closed · not planned (moved into #382)', ja: 'クローズ · not planned（#382 に統合）' }} />
+  <p><b>ICM #313</b> — Windows で同時書き込みを行うと SQLite store が破損しました。うまくいった復旧手順（<code>.recover</code>、全文検索インデックスの再構築、整合性チェック、アトミックな入れ替え）を記録し、WAL と busy timeout、doctor / repair コマンド、バックアップ、JSONL エクスポートを提案しました。メンテナーは2026年8月26日、リリースを通じて completed としてクローズしました。どの提案が採用されたかは、まだ確認していません。</p>
+  <EvidenceLink href="https://github.com/rtk-ai/icm/issues/313" label="ICM #313" kind="issue" shows={{ en: 'closed · completed by the maintainer', ja: 'クローズ · メンテナーが完了' }} />
+</Section>
+</details>
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Found the problems in use, reproduced and root-caused them, set the direction, reviewed the code and tests, and steered the follow-up through maintainer review.', ja: '利用中に問題を見つけ、再現して根本原因を特定し、方向性を決め、コードとテストをレビューしました。メンテナーのレビューを通じて、フォローアップを進めました。' } },
+  { who: 'ai', did: { en: 'Helped write code and tests for the AgentsMesh and ai-config-sync-manager pull requests, under my direction and review.', ja: 'AgentsMesh と ai-config-sync-manager のプルリクエストのコードとテストの作成を支援しました。私の指示とレビューのもとで行いました。' } },
+  { who: 'upstream', did: { en: 'The AgentsMesh maintainer chose the base checksum design, requested the follow-up, made corrections and merged it. The ai-config-sync-manager maintainer reviewed and merged PR #28. The rulesync and ICM maintainers decided what to do with the reports.', ja: 'AgentsMesh のメンテナーはチェックサムの基本設計を選び、フォローアップを依頼し、修正を加えてマージしました。ai-config-sync-manager のメンテナーは PR #28 をレビューしてマージしました。rulesync と ICM のメンテナーは、報告への対応を決めました。' } }
+]} />
+
+<OutcomeBlock outcome={{ en: 'AgentsMesh PR #102 and ai-config-sync-manager PR #28 merged. AgentsMesh PR #99 closed after the maintainer chose another base design. context-mode #878 is an open, root-caused report; rulesync #2253 and ICM #313 were reports and proposals, not code.', ja: 'AgentsMesh PR #102 と ai-config-sync-manager PR #28 はマージ済みです。AgentsMesh PR #99 は、メンテナーが別の基本設計を選んだためクローズされました。context-mode #878 は根本原因が特定された、未解決の報告です。rulesync #2253 と ICM #313 はコードではなく、報告と提案です。' }}
+  evidence={[
+    { label: 'AgentsMesh #102', href: 'https://github.com/sampleXbro/agentsmesh/pull/102', kind: 'pr', shows: { en: 'merged', ja: 'マージ済み' } },
+    { label: 'ai-config-sync-manager #28', href: 'https://github.com/slash9494/ai-config-sync-manager/pull/28', kind: 'pr', shows: { en: 'merged', ja: 'マージ済み' } },
+    { label: 'context-mode #878', href: 'https://github.com/mksglu/context-mode/issues/878', kind: 'issue', shows: { en: 'open', ja: '未解決' } }
+  ]} />

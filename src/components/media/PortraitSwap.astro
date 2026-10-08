@@ -1,0 +1,95 @@
+---
+/**
+ * @component PortraitSwap
+ * @group media
+ * @summary The About page's picture: one square frame showing one picture at a time — the GitHub avatar, the Instagram one, a real photo — with the line under it saying which it is (a link when it is an account, plain text for the photo). Pressing the picture shows the next one.
+ * @use About, in place of a single portrait. Each item: the picture key, its alt, its line, and the account URL when there is one.
+ * @avoid More than four pictures; switching on its own (auto-play); pictures that are not the owner; a link on the real photo.
+ * @behavior Pressed (click, Enter or Space), the picture changes with the shared block → image sweep (scripts/wipe.ts) while the counter on it and the line under it roll to the new one (the label roll, --t-roll). The last picture goes back to the first. Only the line in view can be reached with Tab. Reduced motion: an instant swap.
+ * @example
+ * <PortraitSwap items={[
+ *   { src: 'portrait/github-avatar.jpg', alt: { en: 'GitHub avatar' }, label: 'GitHub · VVeb1250', href: 'https://github.com/VVeb1250' },
+ *   { src: 'portrait/photo-2025.webp', alt: { en: 'Photo of Web' }, label: { en: 'Photo · 2025' } }
+ * ]} />
+ */
+import { Image } from 'astro:assets';
+import ExternalLink from '../primitives/ExternalLink.astro';
+import { img } from '../../lib/media';
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  items: { src: string; alt: L; label: L | string; href?: string }[];
+}
+const { items } = Astro.props;
+const lang = langOf(Astro.url);
+const label = (v: L | string) => (typeof v === 'string' ? v : tx(v, lang));
+const next = tx({ en: 'show the next picture', th: 'ดูรูปถัดไป', ja: '次の写真を見る' }, lang);
+const p2 = (n: number) => String(n).padStart(2, '0');
+---
+<figure class="pw" style="--i:0">
+  <button type="button" class="pw-stage" aria-label={`${tx(items[0].alt, lang)} — ${next}`} data-next={next}>
+    {items.map((it, i) => (
+      <Image class="pw-img" src={img(it.src)} alt={tx(it.alt, lang)} widths={[240, 480]} sizes="240px" loading="eager" data-on={i === 0 ? '' : undefined} />
+    ))}
+    <span class="pw-n num" aria-hidden="true"><span class="pw-win"><span class="pw-reel">{items.map((_, i) => <span>{p2(i + 1)}</span>)}</span></span>/{p2(items.length)}</span>
+  </button>
+  <figcaption class="pw-cap">
+    <span class="pw-win"><span class="pw-reel">
+      {items.map((it, i) => (
+        <span class="pw-l" inert={i !== 0}>{it.href ? <ExternalLink href={it.href} bare>{label(it.label)}</ExternalLink> : label(it.label)}</span>
+      ))}
+    </span></span>
+  </figcaption>
+</figure>
+
+<style>
+  /* sized by its column, never by its longest line (inline-size containment); the line wraps to two in a narrow column */
+  .pw { display: grid; gap: 10px; margin: 0; width: 100%; min-width: 0; container-type: inline-size; --lh: 22px; }
+  /* the stage clips: the sweep's block and the incoming picture stay inside the frame */
+  .pw-stage { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; background: var(--sunk); overflow: hidden; cursor: pointer; border-radius: 0; }
+  .pw-stage:focus-visible { outline: 2px solid var(--ctxs); outline-offset: 3px; }
+  .pw-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+  .pw-img[data-on] { opacity: 1; }
+  /* the counter on the picture says there is more than one */
+  .pw-n { position: absolute; right: 8px; bottom: 8px; z-index: 5; display: inline-flex; align-items: center; padding: 3px 6px; background: var(--ink); color: var(--bg);
+    font: 600 10px/1 var(--f-mono); letter-spacing: 0.08em; transition: background-color var(--t-cursor) var(--e-enter); }
+  .pw-n .pw-win { --lh: 10px; }
+  .pw-stage:is(:hover, :focus-visible) .pw-n { background: var(--ctxs); color: var(--acc-ink, var(--bg)); }
+  /* one-line windows: the counter and the line under the picture roll to the current item */
+  .pw-win { display: block; height: var(--lh); overflow: hidden; }
+  .pw-reel { display: flex; flex-direction: column; transform: translateY(calc(var(--i) * -1 * var(--lh))); transition: transform var(--t-roll) var(--e-enter); }
+  .pw-reel > span { display: block; height: var(--lh); line-height: var(--lh); white-space: nowrap; }
+  .pw-cap { font: 500 12px/1 var(--f-mono); letter-spacing: 0.02em; color: var(--ink2); min-width: 0; }
+  @container (max-width: 180px) {
+    .pw-cap { --lh: 34px; }
+    .pw-cap .pw-reel > span { white-space: normal; line-height: 16px; display: flex; align-items: flex-start; }
+  }
+  .pw-l :global(.xl) { padding-bottom: 0; border-bottom-color: transparent; }
+  .pw-l :global(.xl:hover) { border-bottom-color: var(--ctxs); }
+  @media (prefers-reduced-motion: reduce) { .pw-reel, .pw-n { transition: none; } }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/lifecycle';
+  import { blockSwap } from '../../scripts/wipe';
+  onPage(() => {
+    const offs = [...document.querySelectorAll<HTMLElement>('.pw')].map((root) => {
+      const stage = root.querySelector<HTMLButtonElement>('.pw-stage')!;
+      const imgs = [...root.querySelectorAll<HTMLImageElement>('.pw-img')];
+      const lines = [...root.querySelectorAll<HTMLElement>('.pw-l')];
+      let cur = 0;
+      const go = () => {
+        const was = cur;
+        cur = (cur + 1) % imgs.length;
+        root.style.setProperty('--i', String(cur));
+        lines.forEach((l, k) => { l.inert = k !== cur; });
+        stage.setAttribute('aria-label', `${imgs[cur].alt} — ${stage.dataset.next}`);
+        const to = imgs[cur];
+        void blockSwap(stage, 1, () => { imgs.forEach((im) => im.toggleAttribute('data-on', im === to)); return to; },
+          { from: imgs[was], ready: to.decode().catch(() => {}) });
+      };
+      stage.addEventListener('click', go);
+      return () => stage.removeEventListener('click', go);
+    });
+    return () => offs.forEach((off) => off());
+  });
+</script>

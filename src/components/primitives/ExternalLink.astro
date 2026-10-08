@@ -1,0 +1,30 @@
+---
+/**
+ * @component ExternalLink
+ * @group primitives
+ * @summary An outbound link that says where it goes: label + domain + ↗. Opens in the same tab unless `newTab`.
+ * @use Repos, marketplace pages, live demos, Pixiv. For a link that proves a specific claim, use EvidenceLink.
+ * @avoid Bare URLs in text; "click here".
+ * @example
+ * <ExternalLink href="https://github.com/VVeb1250">GitHub</ExternalLink>
+ */
+import type { HTMLAttributes } from 'astro/types';
+export interface Props extends HTMLAttributes<'a'> {
+  href: string;
+  newTab?: boolean;
+  /** Hide the domain (when the label already is the domain). */
+  bare?: boolean;
+}
+const { href, newTab = false, bare = false, ...attrs } = Astro.props;
+let host = '';
+try { host = new URL(href).hostname.replace(/^www\./, ''); } catch {}
+---
+<a {...attrs} class="xl" href={href} target={newTab ? '_blank' : undefined} rel={newTab ? 'noopener' : undefined}><span class="xl-l"><slot /></span>{!bare && host && <span class="xl-h">{host}</span>}<span class="xl-a" aria-hidden="true">↗</span></a>
+
+<style>
+  .xl { display: inline-flex; gap: 8px; align-items: baseline; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; transition: border-color var(--t-cursor); }
+  .xl:hover { border-color: var(--ctxs); }
+  .xl-h { font: 500 11px/1 var(--f-mono); color: var(--ink2); }
+  .xl-a { font: 500 12px/1 var(--f-mono); color: var(--ink2); transition: transform var(--t-cursor) var(--e-enter); }
+  .xl:hover .xl-a { transform: translate(2px, -2px); color: var(--ctxs); }
+</style>

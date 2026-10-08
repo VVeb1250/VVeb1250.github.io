@@ -1,0 +1,46 @@
+---
+/**
+ * @component ContributionBlock
+ * @group blocks
+ * @summary A breakdown of the owner's contribution by area (art, rigging, control code, integration…), each with what was done and the evidence for it.
+ * @use Team works, where "what exactly did you do" is the recruiter's first question. 2–5 areas. Pair with AttributionBlock when others' parts matter.
+ * @avoid Listing areas you only watched; tool/skill clouds; unverifiable counts.
+ * @example
+ * <ContributionBlock areas={[
+ *   { area: { en: 'Art' }, did: { en: 'Map art, UI and the crystal staff, drawn by hand. Map sheets up to 4000 × 4000 px.' } },
+ *   { area: { en: 'Player control' }, did: { en: 'Player control and scene scroll in C#.' }, evidence: [{ label: 'PlayerController.cs', shows: '370 lines', kind: 'file' }] }
+ * ]} />
+ */
+import EvidenceLink from '../primitives/EvidenceLink.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  areas: { area: L; did: L; evidence?: { label: string; href?: string; shows?: L; kind?: 'pr' | 'release' | 'commit' | 'page' | 'video' | 'file' | 'private' }[] }[];
+  title?: L;
+}
+const { areas, title } = Astro.props;
+const lang = langOf(Astro.url);
+const heading = title ? tx(title, lang) : tx({ en: 'My part', th: 'ส่วนที่ผมทำ', ja: '自分の担当' }, lang);
+---
+<section class="contrib" aria-label={heading}>
+  <h3 class="eyebrow l10n">{heading}</h3>
+  <ol>
+    {areas.map((a, i) => (
+      <li>
+        <span class="num idx">{String(i + 1).padStart(2, '0')}</span>
+        <h4 class="disp">{tx(a.area, lang)}</h4>
+        <p>{tx(a.did, lang)}</p>
+        {a.evidence?.length ? <div class="evs">{a.evidence.map((e) => <EvidenceLink {...e} />)}</div> : null}
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .contrib { display: grid; gap: 14px; }
+  ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 28px clamp(20px, 3vw, 40px); }
+  li { display: grid; gap: 8px; align-content: start; border-top: 1px solid var(--ink); padding-top: 12px; }
+  .idx { font: 500 11px/1 var(--f-mono); color: var(--ink3); }
+  h4 { font-size: 24px; line-height: 1.1; }
+  p { color: var(--ink2); font-size: 15px; }
+  .evs { display: grid; gap: 6px; }
+</style>

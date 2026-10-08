@@ -1,0 +1,57 @@
+---
+work: vaja
+recipe: art-led
+summary: เกม action RPG 2 มิติที่พัฒนาเป็นทีม 3 คน ในฐานะหัวหน้าโปรเจกต์ ผมเชื่อมงาน art กับโค้ดเข้าด้วยกัน ทั้งวาดภาพหลักส่วนใหญ่ จัดฉาก rigging กับ animation และระบบควบคุมตัวละคร
+---
+
+import '../../../styles/stories/vaja.css';
+
+{/* Art and playable build lead. Facts §2.1; all media come from the real game. */}
+<ProjectHeader work="vaja" layout="stack">
+  <MediaFrame slot="media" src="vaja/scene-celestia-grounded.webp" alt={{ en: 'Gameplay frame: Vaja standing on the ground in a crystal cavern', th: 'เฟรมจากเกม: Vaja ยืนอยู่บนพื้นในถ้ำคริสตัล' }} width="full" eager
+    caption={{ en: 'Celestia Crystal Cavern · frame from the recorded build', th: 'Celestia Crystal Cavern · เฟรมจาก build ที่บันทึกไว้' }} />
+</ProjectHeader>
+
+<div class="vaja-build">
+  <div>
+    <h2>build ที่เล่นได้ ใช้สาธิตในวิชา</h2>
+    <p>ระบบควบคุมผู้เล่น การเลื่อนฉาก ตรรกะของ UI การจัดการ scene และระบบเซฟ</p>
+    <EvidenceLink label="PlayerController.cs" shows={{ en: '370 lines', th: '370 บรรทัด' }} kind="file" />
+  </div>
+  <figure>
+    <VideoEmbed src="vaja/highlight-720.mp4" poster="vaja/highlight-poster.webp" label={{ en: 'Gameplay, 51 seconds, no sound', th: 'Gameplay · 51 วินาที · ไม่มีเสียง' }} />
+    <figcaption>Gameplay · 51 วินาที · ไม่มีเสียง · ตัดจาก build ที่บันทึกไว้</figcaption>
+  </figure>
+</div>
+
+## จากชีตสู่ฉาก
+
+ภาพ map ถูกวาดเป็นชีตของชิ้นส่วนแยกกัน แล้วค่อยประกอบเป็นฉากใน Unity
+
+<div class="vaja-art">
+  <MediaFrame src="vaja/sheet-forest.webp" alt={{ en: 'Forest map-art sheet: ground strips, grass, rocks, stone slabs, plants, branches, two trunks, two trees and a small Vaja sprite, each on its own', th: 'ชีต map-art ป่า: แถบพื้น หญ้า หิน แผ่นหิน ต้นไม้ กิ่งไม้ ลำต้นสองต้น ต้นไม้สองต้น และ sprite Vaja เล็กๆ แยกกันแต่ละชิ้น' }} frame="plain" width="wide"
+    marks={[{ n: 1, x: 58, y: 78 }, { n: 2, x: 44, y: 27 }, { n: 3, x: 15, y: 18 }]}
+    title={{ en: 'Forest map-art sheet', th: 'ชีต map-art ป่า' }}
+    caption={{ en: 'Pieces like ① the trunks, ② the stone slab and ③ the grass strip are what the Westbrook scene is built from.', th: 'ชิ้นส่วนอย่าง ① ลำต้น ② แผ่นหิน และ ③ แถบหญ้า คือสิ่งที่ฉาก Westbrook ประกอบขึ้นมา' }}
+    source={{ en: 'Game source art · 4000 × 4000, shown reduced', th: 'art ต้นฉบับของเกม · 4000 × 4000 แสดงแบบย่อ' }} />
+  <div>
+    <MediaFrame src="vaja/scene-westbrook.webp" alt={{ en: 'Westbrook Stonescape scene', th: 'ฉาก Westbrook Stonescape' }} width="wide" caption={{ en: 'Westbrook Stonescape · scene composed from the map art', th: 'Westbrook Stonescape · ฉากที่ประกอบจาก map art' }} />
+    <MediaFrame src="vaja/object.webp" alt={{ en: 'Vaja holding the crystal staff', th: 'Vaja ถือไม้เท้าคริสตัล' }} frame="plain" width="text" caption={{ en: 'Vaja and the crystal staff', th: 'Vaja และไม้เท้าคริสตัล' }} />
+  </div>
+</div>
+
+## การโจมตี ทีละเฟรม
+
+ทำ rig ด้วย Unity 2D skeletal animation และ IK เลื่อนดูการโจมตีแรกของ Vaja นี่คือ 10 เฟรมที่ส่งออกจาก build
+
+<ScrubFrames src="vaja/strip-attack1-padded.webp" frames={10} name="Vaja · attack1" fps={12} />
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Project head. Most of the main art (map art, UI art, the crystal staff), scene composition, skeletal rigging, IK and animation; player control, scene scrolling, UI logic, scene management and the save system.', th: 'ในฐานะหัวหน้าโปรเจกต์ ผมวาด art หลักส่วนใหญ่ (map art, UI art, ไม้เท้าคริสตัล) จัดองค์ประกอบฉาก ทำ skeletal rig, IK และ animation ระบบควบคุมผู้เล่น การเลื่อนฉาก ตรรกะ UI การจัดการ scene และระบบเซฟ' } },
+  { who: 'team', did: { en: 'The main concept, game design and story came mainly from a teammate. Teammates also made the effects and some of the skill art.', th: 'ไอเดียหลัก เกมดีไซน์ และเรื่องราวมาจากเพื่อนร่วมทีมเป็นหลัก ส่วนเอฟเฟกต์และ art ของ skill บางส่วนก็เป็นผลงานของเพื่อนร่วมทีมเช่นกัน' } },
+  { who: { en: 'External assets', th: 'Asset ภายนอก' }, did: { en: 'Some assets came from outside the team.', th: 'Asset บางส่วนมาจากภายนอกทีม' } }
+]} />
+
+<OutcomeBlock
+  outcome={{ en: 'A playable build, demoed for the course.', th: 'build ที่เล่นได้ ใช้สาธิตในวิชา' }}
+  current={{ en: 'Finished as a course project in March 2025.', th: 'เสร็จเป็นโปรเจกต์วิชาในเดือนมีนาคม 2025' }} />

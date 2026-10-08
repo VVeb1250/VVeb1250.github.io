@@ -1,0 +1,33 @@
+---
+/**
+ * @component Quote
+ * @group primitives
+ * @summary A short quote with its real source: a work's own tagline, a rule it follows, a maintainer's review comment, the owner's principle.
+ * @use Sparingly — one per page. `size="lg"` for words that belong to the work itself (a package's own tagline). Not for the owner's principles or slogans (Story §0.3).
+ * @avoid Invented testimonials, quotes without a source, famous-person quotes.
+ * @example
+ * <Quote text="Make AI-built frontends feel designed." source="WhipUI" size="lg" />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  text: L;
+  /** Who/where it comes from. Required unless it is the work's own tagline. */
+  source?: L;
+  size?: 'md' | 'lg';
+}
+const { text, source, size = 'md' } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<figure class:list={['qt', size]}>
+  <blockquote><p>{tx(text, lang)}</p></blockquote>
+  {source && <figcaption class="eyebrow l10n">— {tx(source, lang)}</figcaption>}
+</figure>
+
+<style>
+  .qt { display: grid; gap: 10px; max-width: 40ch; }
+  blockquote { margin: 0; }
+  p { font-size: 20px; line-height: 1.45; color: var(--ink); }
+  p::before { content: '“'; } p::after { content: '”'; }
+  .lg p { font-family: var(--f-disp); font-stretch: var(--disp-stretch); font-weight: 600; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.12; text-wrap: balance; }
+  :global(:root[lang='th']) .lg p { line-height: 1.35; }
+</style>

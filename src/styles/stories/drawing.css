@@ -1,0 +1,50 @@
+/* A drawing-specific sketchbook: full compositions first, then scenes and reference studies.
+   Each image keeps its original ratio. Scope PhotoCard adjustments here, never to the shared .pc class. */
+.dr-cover { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.8fr); align-items: start; gap: clamp(20px, 4vw, 56px); padding: 12px 12px 0; }
+.dr-cover-main, .dr-cover-side { display: grid; gap: clamp(24px, 4vw, 52px); min-width: 0; }
+.dr-cover-side { padding-top: clamp(28px, 6vw, 84px); }
+.dr-cover figure.pc, .dr-page figure.pc { width: 100%; max-width: none; }
+.dr-cover .pc-note, .dr-pages .pc-note { min-height: 22px; padding: 0; }
+.dr-cover .pc-card, .dr-pages .pc-card { padding: 8px 8px 0; }
+.dr-hint { grid-column: 1 / -1; margin: 0; font: 500 11px/1.5 var(--f-mono); color: var(--ink3); }
+.dr-intro { display: flex; align-items: start; justify-content: space-between; gap: 24px 48px; border-top: 1px solid var(--rule); padding-top: 20px; }
+.dr-intro > p { margin: 0; max-width: 48ch; font-size: 17px; line-height: 1.7; }
+.dr-index { display: grid; gap: 10px; flex-shrink: 0; }
+.dr-index a { font: 500 12px/1.5 var(--f-mono); color: var(--ink2); text-decoration: underline; }
+.dr-index a:hover { color: var(--ctxs); }
+.story > .dr-chapter { margin-top: var(--space-section); }
+.dr-chapter, .dr-process { scroll-margin-top: calc(var(--hdr-h) + 76px); }
+.dr-chapter { display: grid; grid-template-columns: minmax(130px, 0.35fr) minmax(0, 1.65fr); gap: clamp(24px, 4vw, 64px); border-top: 1px solid var(--rule); padding-top: 24px; }
+.dr-chapter-heading { align-self: start; position: sticky; top: calc(var(--hdr-h) + 72px); }
+.dr-chapter h2, .dr-process h2 { margin: 0; font: 500 13px/1.5 var(--f-mono); color: var(--ink2); }
+.dr-pages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: clamp(28px, 4vw, 56px); padding: 6px 10px 10px; min-width: 0; }
+.dr-page { min-width: 0; }
+.dr-page:nth-child(even):not(.panorama) { margin-top: 32px; }
+.dr-page.panorama { grid-column: 1 / -1; }
+.dr-illustrations .dr-page:first-child { grid-column: 1 / -1; }
+.dr-scenes .dr-page:last-child { grid-column: 1 / -1; width: 80%; justify-self: start; }
+.dr-process { grid-column: 2; display: grid; gap: 20px; margin-top: 16px; }
+.dr-process h2 { border-top: 1px solid var(--rule); padding-top: 16px; }
+.dr-clips { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.7fr); align-items: start; gap: clamp(16px, 3vw, 40px); }
+.dr-clips figure { margin: 0; min-width: 0; }
+.dr-clips video { width: 100%; height: auto; border: 1px solid var(--rule); }
+@media (max-width: 860px) {
+  .dr-chapter { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .dr-chapter-heading { position: static; }
+  .dr-process { grid-column: 1; }
+  .dr-intro { flex-direction: column; }
+  .dr-index { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+}
+@media (max-width: 520px) {
+  .dr-cover { grid-template-columns: minmax(0, 1fr); padding-inline: 4px; gap: 24px; }
+  .dr-cover-main { gap: 24px; }
+  .dr-cover-side { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding-top: 0; }
+  .dr-cover .pc-card, .dr-pages .pc-card { padding: 5px 5px 0; }
+  .dr-cover .pc-note, .dr-pages .pc-note { min-height: 14px; }
+  .dr-pages { gap: 28px 18px; padding-inline: 4px; }
+  .dr-page.wide, .dr-page.panorama { grid-column: 1 / -1; }
+  .dr-page:nth-child(even):not(.panorama) { margin-top: 12px; }
+  .dr-scenes .dr-page:last-child { width: 100%; }
+  .dr-clips { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .dr-clips figure:last-child { width: 80%; justify-self: center; }
+}

@@ -1,0 +1,49 @@
+---
+/**
+ * @component ClaimLedger
+ * @group blocks
+ * @summary The honest state of an open (Lab) project in four rows: what exists now, what looks useful, what is still unproven, what may become unnecessary.
+ * @use Every Lab project, following Story §12: do not present Lab projects as proven breakthroughs.
+ * @avoid Leaving "unproven" empty to look finished; moving items to "exists" without evidence.
+ * @example
+ * <ClaimLedger
+ *   exists={[{ en: 'M1 (core mechanics) and M2A (safe control plane) are closed.' }]}
+ *   unproven={[{ en: 'Whether compact understanding beats episodic recall.' }]}
+ *   unnecessary={[{ en: 'Parts that models start doing well on their own.' }]} />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  exists?: L[];
+  useful?: L[];
+  unproven?: L[];
+  unnecessary?: L[];
+}
+const p = Astro.props;
+const lang = langOf(Astro.url);
+const rows: [string, L, L[] | undefined][] = [
+  ['exists', { en: 'Exists now', th: 'มีอยู่ตอนนี้', ja: '今あるもの' }, p.exists],
+  ['useful', { en: 'Looks useful', th: 'ดูมีประโยชน์', ja: '役立ちそう' }, p.useful],
+  ['unproven', { en: 'Still unproven', th: 'ยังไม่พิสูจน์', ja: '未証明' }, p.unproven],
+  ['unnecessary', { en: 'May become unnecessary', th: 'อาจไม่จำเป็นในอนาคต', ja: '不要になるかも' }, p.unnecessary]
+];
+---
+<dl class="ledger">
+  {rows.filter(([, , v]) => v?.length).map(([k, label, v]) => (
+    <div data-k={k}><dt class="eyebrow l10n">{tx(label, lang)}</dt><dd><ul>{v!.map((l) => <li>{tx(l, lang)}</li>)}</ul></dd></div>
+  ))}
+</dl>
+
+<style>
+  .ledger { display: grid; }
+  .ledger > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-top: 1px solid var(--rule); }
+  .ledger > div:last-child { border-bottom: 1px solid var(--rule); }
+  dt { line-height: 1.9; display: flex; align-items: center; gap: 8px; }
+  dt::before { content: ''; width: 8px; height: 8px; flex: none; border: 1.5px solid var(--ink); }
+  [data-k='exists'] dt::before { background: var(--ink); }
+  [data-k='useful'] dt::before { background: linear-gradient(90deg, var(--ink) 50%, transparent 50%); }
+  [data-k='unproven'] dt::before { border-style: dashed; }
+  [data-k='unnecessary'] dt::before { border-color: var(--ink3); }
+  dd { margin: 0; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  @media (max-width: 560px) { .ledger > div { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+</style>

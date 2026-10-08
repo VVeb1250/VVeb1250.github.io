@@ -1,0 +1,13 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §3.6.
+title: "agentic-rag-homework"
+cat: ai
+year: 2026
+type: COURSEWORK
+line:
+  en: "Workshop homework notebook: a RAG pipeline with a reranker and a sweep over its knobs."
+  ja: "ワークショップの課題ノートブック。reranker を含む RAG パイプラインと、そのパラメータの総当たり検証。"
+  th: "โน้ตบุ๊กการบ้านจาก workshop: pipeline RAG ที่มี reranker และทดลองปรับค่าต่างๆ ทีละค่า"
+tags: [coursework]
+links:
+  - { kind: github, url: "https://github.com/VVeb1250/agentic-rag-homework", label: GitHub }
+sources: [portfolio-facts §3.6, GitHub repo checked 2026-09-30]

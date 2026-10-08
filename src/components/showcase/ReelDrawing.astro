@@ -1,0 +1,49 @@
+---
+/**
+ * @component ReelDrawing
+ * @group showcase
+ * @summary Drawing on the Work reel: four of the owner's drawings laid down like cards on a desk, overlapping and a little tilted — the sketchbook, not a gallery wall.
+ * @use Inside WorkReel, once, last (it is a hobby, shown as one).
+ * @avoid Calling it an art portfolio; adding dates or captions the owner has not written; a plate (the art is the color).
+ * @behavior Static. The whole panel opens the Drawing page, where each card opens large.
+ * @example
+ * <ReelDrawing />
+ */
+import { Image } from 'astro:assets';
+import ReelPanel from './ReelPanel.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { img, lqStyle } from '../../lib/media';
+const lang = langOf(Astro.url);
+const cards: { src: string; alt: L; cls: string }[] = [
+  { src: 'drawing/fence.webp', alt: { en: 'A girl in a sailor uniform by a wire fence, hair blowing in the wind', th: 'เด็กผู้หญิงในชุดกะลาสี อยู่ข้างรั้วลวด ผมปลิวในลม', ja: 'セーラー服の女の子が金網の柵のそばに立つ。髪が風になびく' }, cls: 'c1' },
+  { src: 'drawing/standing.webp', alt: { en: 'A full-length girl in a black and white dress with a large bag', th: 'เด็กผู้หญิงเต็มตัว ชุดเดรสขาวดำ มีกระเป๋าใบใหญ่', ja: '白黒のドレスの全身の女の子。大きなバッグを持つ' }, cls: 'c2' },
+  { src: 'drawing/flashlight.webp', alt: { en: 'A girl with cat ears in a flashlight beam, MEOW!! on the wall', th: 'เด็กผู้หญิงมีหูแมวในลำแสงไฟฉาย มีคำว่า MEOW!! บนกำแพง', ja: '懐中電灯の光の中の猫耳の女の子。壁に MEOW!!' }, cls: 'c3' },
+  { src: 'drawing/pink.webp', alt: { en: 'A girl with long silver hair making a peace sign, on pink', th: 'เด็กผู้หญิงผมเงินยาว ทำมือสันติ บนพื้นสีชมพู', ja: 'ピンク背景で、ピースサインをする長い銀髪の女の子' }, cls: 'c4' }
+];
+const pics = await Promise.all(cards.map(async (c) => { const m = img(c.src); return { ...c, m, lq: await lqStyle(m) }; }));
+---
+<ReelPanel work="drawing" aim>
+  <div class="v-draw">
+    {pics.map((p) => (
+      <figure class:list={['card', p.cls]}>
+        <Image src={p.m} alt={tx(p.alt, lang)} style={p.lq} data-lq widths={[400, 700].filter((w) => w <= p.m.width)} sizes="(max-width: 1023px) 45vw, 360px" loading="lazy" />
+      </figure>
+    ))}
+  </div>
+</ReelPanel>
+
+<style>
+  /* four cards on a desk: the landscape one across the back, three in front, each tilted by hand */
+  .v-draw { position: relative; height: min(var(--rp-vh, 560px), 640px); min-height: 380px; }
+  .card { position: absolute; margin: 0; padding: 8px 8px 22px; background: var(--surface); border: 1px solid var(--rule); box-shadow: 0 10px 28px -18px color-mix(in srgb, var(--shade) 60%, transparent); transform: rotate(var(--r)); }
+  .card :global(img) { display: block; width: 100%; height: auto; }
+  .c1 { --r: -2deg; left: 4%; top: 2%; width: 58%; }
+  .c2 { --r: 2.5deg; right: 4%; top: 0; width: 27%; }
+  .c3 { --r: 1.5deg; left: 22%; bottom: 0; width: 40%; z-index: 1; }
+  .c4 { --r: -3deg; right: 14%; bottom: 4%; width: 24%; z-index: 2; }
+  @media (max-width: 1023px) {
+    .v-draw { height: auto; min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .card { position: static; width: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>

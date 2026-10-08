@@ -1,0 +1,78 @@
+---
+work: oss
+recipe: build-log
+summary: ผมร่วมแก้ไขสองจุดที่ได้รับการ merge แล้วใน tool ของผู้อื่น รายงาน bug ที่หาสาเหตุได้ และให้ feedback เรื่องดีไซน์ ทุกเรื่องเริ่มจากเครื่องมือที่ผมใช้อยู่แล้วเกิดปัญหา
+---
+
+import '../../../styles/stories/oss.css';
+import { oss } from '../../../lib/facts';
+
+{/* Opens with the three references (the same facts as the Work reel and Home: OSS_REFS in src/lib/facts.ts), then one
+    part per repo; the PR cards carry the detail, so the prose stays short. Merged code and reported bugs never read the same.
+    Sources: Facts §5, AgentsMesh #98/#99/#102, ai-config-sync-manager #28, context-mode #878. */}
+<ProjectHeader work="oss" layout="text" roles={['รายงาน bug', 'โค้ดที่ส่งเข้าไป', 'ทำงานร่วมกับ maintainer']} />
+
+<RefBoard items={[['#102', '#agentsmesh'], ['#28', '#windows'], ['#878', '#context-mode']].map(([ref, to]) => { const r = oss(ref); return { ref: r.ref, repo: r.repo, state: r.state, merged: r.merged, text: r.short, to }; })} />
+
+<div class="oss-main">
+  <aside>
+    <ConstraintBlock label={{ en: 'Maintainer constraint', th: 'ข้อจำกัดของ maintainer' }}
+      statement={{ en: 'The maintainer kept check on its fast checksum path.', th: 'maintainer ยังคงให้ check ใช้ checksum path ที่เร็วของตัวเอง' }}
+      why={{ en: 'So the stale-output detection had to be a read-only follow-up.', th: 'ดังนั้นการตรวจจับ output ที่ค้างต้องเป็น follow-up แบบอ่านอย่างเดียว' }} source="AgentsMesh PR #99 → #102" />
+    <EvidenceLink href="https://github.com/sampleXbro/agentsmesh/pull/99#issuecomment-5019299345" label="Maintainer discussion" kind="pr" shows={{ en: 'Design constraint and follow-up', th: 'ข้อจำกัดของดีไซน์และ follow-up' }} />
+  </aside>
+  <Section id="agentsmesh" title="AgentsMesh" mark="AgentsMesh" tight>
+  <p><code>check</code> ยังผ่านอยู่แม้ผมจะแก้ <code>AGENTS.md</code> ที่ถูก generate ออกมา Issue #98 แสดงให้เห็นว่า <code>check</code> hash ไฟล์ canonical แต่ไม่ได้ hash output ที่ generate ออกมา</p>
+  <EvidenceLink href="https://github.com/sampleXbro/agentsmesh/issues/98" label="Issue #98" kind="issue" shows={{ en: 'Reproduction and expected behavior', th: 'วิธีทำซ้ำและพฤติกรรมที่คาดไว้' }} />
+
+  <p>PR #99 เสนอวิธีแก้ไข แต่ maintainer มี checksum-based fix อยู่แล้วและเลือกใช้วิธีนั้น เพราะทำให้ <code>check</code> เร็ว เขาขอให้แยกส่วนตรวจ stale output แบบอ่านอย่างเดียวของผมไปเป็น follow-up #99 ถูกปิดโดยไม่ได้ merge</p>
+  <PRCard repo="sampleXbro/agentsmesh" number={99} state="closed" href="https://github.com/sampleXbro/agentsmesh/pull/99"
+    title="fix(check): detect generated-output drift"
+    problem={{ en: 'Generated-output drift passed the documented fast check.', th: 'output ที่ถูก generate เปลี่ยนไปแล้ว แต่ยังผ่าน fast check ที่มีในเอกสาร' }}
+    change={{ en: 'Proposed detecting output drift, including stale files; the maintainer chose a checksum-based base fix and requested the stale-output piece separately.', th: 'เสนอให้ตรวจจับ output ที่เปลี่ยนไป รวมถึงไฟล์ที่ค้าง maintainer เลือก base fix แบบ checksum และขอให้แยกส่วนไฟล์ค้างออกไปทำต่างหาก' }} />
+
+  <p>PR #102 คือ follow-up ดังกล่าว ซึ่งหา generated output ที่ค้างโดยไม่ต้องรัน generation และรายงานผ่านเส้นทาง check ของ core, API, CLI และ MCP maintainer แก้ไขและ merge ให้</p>
+  <PRCard repo="sampleXbro/agentsmesh" number={102} state="merged" date="2026-07-21" href="https://github.com/sampleXbro/agentsmesh/pull/102"
+    title="fix(check): detect stale generated outputs" issues={['#98', '#99']}
+    problem={{ en: 'Files left in managed output locations could be absent from the lock’s output map without being reported as stale.', th: 'ไฟล์ที่ค้างอยู่ในตำแหน่ง output ที่ระบบจัดการ อาจหายไปจาก output map ของ lock โดยไม่ถูกรายงานว่าค้าง' }}
+    change={{ en: 'Added read-only stale-output detection and exposed its result across the check surfaces, without running the generation pipeline.', th: 'เพิ่มการตรวจจับ stale output แบบอ่านอย่างเดียว และแสดงผลผ่านทุกจุดของ check โดยไม่ต้องรัน generation pipeline' }} />
+</Section>
+</div>
+
+<div class="oss-other">
+  <Section id="windows" tight title={{ en: 'Windows backup paths', th: 'path ของ backup บน Windows' }} mark={{ en: 'Windows fix', th: 'แก้บน Windows' }}>
+  <p>บน Windows path ของไดรฟ์แบบ absolute ทำให้ backup ของ ai-config-sync-manager หลุดออกนอก backup root ได้ PR #28 ทำความสะอาด path ของเป้าหมาย คง layout แบบ POSIX และเพิ่ม regression test</p>
+  <PRCard repo="slash9494/ai-config-sync-manager" number={28} state="merged" date="2026-07-09" href="https://github.com/slash9494/ai-config-sync-manager/pull/28"
+    title="fix: sanitize Windows backup paths"
+    problem={{ en: 'An absolute Windows project path broke backup placement during sync.', th: 'path โปรเจกต์ของ Windows แบบ absolute ทำให้ backup ไปผิดที่ตอน sync' }}
+    change={{ en: 'Sanitized absolute backup targets, preserved POSIX layout, and added regression coverage.', th: 'ทำความสะอาดเป้าหมายของ backup ที่เป็น absolute คง layout แบบ POSIX และเพิ่ม regression test' }} />
+</Section>
+  <Section id="context-mode" tight title={{ en: 'context-mode: a root cause, not a fix', th: 'context-mode: เจอสาเหตุ แต่ยังไม่ได้แก้' }} mark={{ en: 'Root cause', th: 'สาเหตุ' }}>
+  <p>paragraph Markdown ที่ยาวเกินไปบางอันหลุดผ่านขีดจำกัด chunk 4 KiB ไปได้ Issue #878 มีวิธีทำซ้ำแบบย่อ หลักฐานจาก SQLite สาเหตุพร้อมตำแหน่งในซอร์ส ข้อเสนอแก้ไข และ regression matrix ต่อมาผู้ใช้คนอื่นทำซ้ำได้ โดยได้ chunk ที่ใหญ่กว่ามากบนเวอร์ชันใหม่</p>
+  <p>Issue ยังเปิดอยู่ pull request ที่ลิงก์ไว้ #1091 ยังเปิดและยังไม่ merge</p>
+  <EvidenceLink href="https://github.com/mksglu/context-mode/issues/878" label="Issue #878" kind="issue" shows={{ en: 'open · reproduction, root cause, proposed fix', th: 'เปิดอยู่ · วิธีทำซ้ำ สาเหตุ ข้อเสนอแก้ไข' }} />
+</Section>
+</div>
+
+<details class="oss-traces">
+  <summary>งานเล็ก · รายงานและข้อเสนอ</summary>
+  <Section title={{ en: 'Smaller traces', th: 'งานเล็ก' }} mark={{ en: 'Traces', th: 'ร่องรอย' }}>
+  <p><b>rulesync #2253</b> เป็น feature request ให้ <code>fetch</code> อ่าน plugin manifest ของ Claude Code และ Codex maintainer ตรวจช่องว่างนี้กับโค้ดอีกครั้ง แล้วรวมการนำเข้า plugin เข้ากับ plugin-root importer ที่กว้างกว่า (#382) และปิดเรื่องนี้เป็น not planned ไม่มีโค้ดของผมที่ถูก merge</p>
+  <EvidenceLink href="https://github.com/dyoshikawa/rulesync/issues/2253" label="rulesync #2253" kind="issue" shows={{ en: 'closed · not planned (moved into #382)', th: 'ปิดแล้ว · not planned (ย้ายไปอยู่ใน #382)' }} />
+  <p><b>ICM #313</b> — SQLite store เสียหายเมื่อเขียนพร้อมกันบน Windows ผมจดวิธีกู้ที่ได้ผล (<code>.recover</code>, สร้าง full-text index ใหม่, integrity check, atomic swap) และเสนอ WAL พร้อม busy timeout, คำสั่ง doctor / repair, backup และ JSONL export maintainer ปิดเรื่องเป็น completed ในวันที่ 26 สิงหาคม 2026 ผ่าน release ผมยังไม่ได้ตรวจสอบว่าข้อเสนอใดถูกนำไปใช้บ้าง</p>
+  <EvidenceLink href="https://github.com/rtk-ai/icm/issues/313" label="ICM #313" kind="issue" shows={{ en: 'closed · completed by the maintainer', th: 'ปิดแล้ว · maintainer แก้เสร็จแล้ว' }} />
+</Section>
+</details>
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Found the problems in use, reproduced and root-caused them, set the direction, reviewed the code and tests, and steered the follow-up through maintainer review.', th: 'ผมพบปัญหาระหว่างการใช้งานจริง ทำซ้ำและหาสาเหตุ กำหนดทิศทาง ตรวจทานโค้ดและ test และติดตาม follow-up ผ่านการรีวิวของ maintainer' } },
+  { who: 'ai', did: { en: 'Helped write code and tests for the AgentsMesh and ai-config-sync-manager pull requests, under my direction and review.', th: 'ช่วยเขียนโค้ดและ test ของ pull request ของ AgentsMesh และ ai-config-sync-manager ภายใต้การกำกับและการรีวิวของผม' } },
+  { who: 'upstream', did: { en: 'The AgentsMesh maintainer chose the base checksum design, requested the follow-up, made corrections and merged it. The ai-config-sync-manager maintainer reviewed and merged PR #28. The rulesync and ICM maintainers decided what to do with the reports.', th: 'maintainer ของ AgentsMesh เลือกดีไซน์ checksum เป็นฐาน ขอ follow-up แก้ไข และ merge ให้ maintainer ของ ai-config-sync-manager รีวิวและ merge PR #28 ส่วนการตัดสินใจกับรายงานของ rulesync และ ICM เป็นของ maintainer ของสองโปรเจกต์นั้น' } }
+]} />
+
+<OutcomeBlock outcome={{ en: 'AgentsMesh PR #102 and ai-config-sync-manager PR #28 merged. AgentsMesh PR #99 closed after the maintainer chose another base design. context-mode #878 is an open, root-caused report; rulesync #2253 and ICM #313 were reports and proposals, not code.', th: 'AgentsMesh PR #102 และ ai-config-sync-manager PR #28 merge แล้ว AgentsMesh PR #99 ถูกปิดหลัง maintainer เลือกดีไซน์ฐานอีกแบบ context-mode #878 เป็นรายงานที่ยังเปิดอยู่และหาสาเหตุได้แล้ว rulesync #2253 กับ ICM #313 เป็นรายงานและข้อเสนอ ไม่ใช่โค้ด' }}
+  evidence={[
+    { label: 'AgentsMesh #102', href: 'https://github.com/sampleXbro/agentsmesh/pull/102', kind: 'pr', shows: { en: 'merged', th: 'merged' } },
+    { label: 'ai-config-sync-manager #28', href: 'https://github.com/slash9494/ai-config-sync-manager/pull/28', kind: 'pr', shows: { en: 'merged', th: 'merged' } },
+    { label: 'context-mode #878', href: 'https://github.com/mksglu/context-mode/issues/878', kind: 'issue', shows: { en: 'open', th: 'เปิดอยู่' } }
+  ]} />

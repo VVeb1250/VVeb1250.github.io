@@ -1,0 +1,60 @@
+---
+work: cesca
+recipe: free
+summary: CESCa — ค่ายที่นักเรียนมัธยมปลายมาเรียนหัวข้อระดับมหาวิทยาลัยและทำโปรเจกต์ ผมเป็นทีมงานฝ่ายวิชาการ (academic staff / TA) ที่ #20 (Game Design, 2025) และ #21 (Networking, 2026) ในฐานะอาสาสมัคร
+---
+
+import '../../../styles/stories/cesca.css';
+
+{/* Facts §6.5, §6.6. #21's role is self-reported (weaker external evidence than #20): say what he did, no title beyond
+    "academic staff / TA". Photos: the camp's photographers (their marks stay on the pictures), chosen by the owner
+    2026-10-07; the owner blurs the students' faces in the originals and runs `npm run media` (scripts/media-map.json).
+    Owner's folders: 2024 = #20 (April 2025), 2025 = #21 (April 2026), by the camp marks on the pictures.
+    The two camps are one page; the Timeline's #21 row opens #n21. Captions never say who is who.
+    Colors: #20 in cesca20 (the page), #21 in cesca21 (its section). */}
+
+<ProjectHeader work="cesca" layout="stack" roles={['Academic staff / TA', 'อาสาสมัคร']}>
+  <MediaFrame slot="media" src="cesca/n20-candles.webp" alt={{ en: 'Campers and staff holding hands in a circle around candles that spell CESCa #20, seen from above', th: 'ผู้เข้าค่ายและทีมงานจับมือกันเป็นวงกลมรอบเทียนที่เรียงเป็น CESCa #20 ถ่ายจากด้านบน' }} width="full" eager
+    caption={{ en: 'CESCa #20 · the candles', th: 'CESCa #20 · เทียน' }} source={{ en: 'Photo: CESCa #20', th: 'ภาพ: CESCa #20' }} />
+</ProjectHeader>
+
+<ProjectContext label={{ en: 'What it is', th: 'ค่ายนี้คืออะไร' }} lead={{ en: 'High-school students come to learn university topics and build projects.', th: 'นักเรียนมัธยมปลายมาเรียนหัวข้อระดับมหาวิทยาลัยและทำโปรเจกต์' }}>
+  <p>ค่ายมีทีมงานราว 80–120 คน ผมเป็นหนึ่งในทีมงานทั้งสองปี ในฐานะอาสาสมัครฝ่ายวิชาการ</p>
+</ProjectContext>
+
+<section id="n20" class="cesca-n">
+  <div class="cesca-txt">
+    <span class="cesca-no disp num">#20</span>
+    <p class="cesca-meta">2025 · Game Design</p>
+    <ul>
+      <li>ให้คำแนะนำและดูแลโปรเจกต์ของนักเรียน</li>
+      <li>จัดทำสไลด์และเอกสาร และช่วยงานของผู้อื่นด้วย</li>
+      <li>ให้คำปรึกษาแก่น้องๆ</li>
+      <li>มีส่วนร่วมในการออกแบบการเรียนรู้บางส่วน</li>
+    </ul>
+  </div>
+  <div class="cesca-ph three">
+    <MediaFrame src="cesca/n20-lab-a.webp" alt={{ en: 'A staff member leaning in to look at a camper’s screen in the computer lab', th: 'ทีมงานโน้มตัวดูหน้าจอของผู้เข้าค่ายในห้องคอมพิวเตอร์' }} width="wide" source={{ en: 'Photo: CESCa #20', th: 'ภาพ: CESCa #20' }} />
+    <MediaFrame src="cesca/n20-lab-b.webp" alt={{ en: 'Staff and campers looking at a game project on an iMac in the lab', th: 'ทีมงานกับผู้เข้าค่ายดูโปรเจกต์เกมบน iMac ในห้องแล็บ' }} width="wide" source={{ en: 'Photo: CESCa #20', th: 'ภาพ: CESCa #20' }} />
+    <MediaFrame src="cesca/n20-lab-c.webp" alt={{ en: 'A staff member standing behind a camper at a computer during an evening session', th: 'ทีมงานยืนอยู่หลังผู้เข้าค่ายที่กำลังทำงานบนคอมพิวเตอร์ในคาบตอนเย็น' }} width="wide" source={{ en: 'Photo: CESCa #20', th: 'ภาพ: CESCa #20' }} />
+  </div>
+</section>
+
+<section id="n21" class="cesca-n" data-cat="cesca21">
+  <div class="cesca-txt">
+    <span class="cesca-no disp num">#21</span>
+    <p class="cesca-meta">2026 · Networking</p>
+    <ul>
+      <li>ดูแลโปรเจกต์และงานการเรียนรู้ของนักเรียน</li>
+      <li>จัดทำสไลด์และเอกสาร และช่วยงานของผู้อื่นด้วย</li>
+      <li>ให้คำปรึกษาแก่น้องๆ</li>
+      <li>มีส่วนร่วมในการออกแบบการเรียนรู้บางส่วน</li>
+    </ul>
+  </div>
+  <div class="cesca-ph two">
+    <MediaFrame src="cesca/n21-lab-a.webp" alt={{ en: 'Staff pointing at a row of iMacs with network cables while campers type; an IP address and subnet mask on the screen behind', th: 'ทีมงานชี้ไปที่แถว iMac ที่เสียบสาย network ขณะผู้เข้าค่ายพิมพ์งาน มี IP address กับ subnet mask บนจอด้านหลัง' }} width="wide" source={{ en: 'Photo: CESCa #21', th: 'ภาพ: CESCa #21' }} />
+    <MediaFrame src="cesca/n21-lab-b.webp" alt={{ en: 'A staff member explaining something at a camper’s computer in the lab', th: 'ทีมงานกำลังอธิบายบางอย่างที่คอมพิวเตอร์ของผู้เข้าค่ายในห้องแล็บ' }} width="wide" source={{ en: 'Photo: CESCa #21', th: 'ภาพ: CESCa #21' }} />
+  </div>
+</section>
+
+<OutcomeBlock outcome={{ en: 'Academic staff / TA at two camps: Game Design at #20, Networking at #21.', th: 'ทีมงานฝ่ายวิชาการ (TA) สองค่าย: Game Design ที่ #20 และ Networking ที่ #21' }} />

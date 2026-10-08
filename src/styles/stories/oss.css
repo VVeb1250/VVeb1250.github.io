@@ -1,0 +1,14 @@
+/* The upstream design constraint stays beside the proposal and the follow-up.
+   The Windows fix and the unmerged bug report remain distinct, with their own evidence. */
+.oss-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); gap: clamp(28px, 6vw, 88px); align-items: start; }
+.oss-main > aside { display: grid; gap: 24px; position: sticky; top: calc(var(--hdr-h) + 80px); }
+.oss-main > .sec { margin-top: 0; }
+.oss-main .sec > p { margin-block: 24px 12px; }
+.oss-main .sec > .pr { margin-block: 28px; }
+.oss-other { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 6vw, 88px); align-items: start; }
+.oss-other .sec > p { margin-block: 20px; }
+.oss-traces { border-block: 1px solid var(--rule); padding-block: 20px; }
+.oss-traces summary { cursor: pointer; font-size: 18px; }
+.oss-traces .sec { margin-top: 28px; }
+@media (max-width: 900px) { .oss-main, .oss-other { grid-template-columns: minmax(0, 1fr); } .oss-main > aside { position: static; } }
+@media (hover: none) { .oss-main > aside { position: static; } }

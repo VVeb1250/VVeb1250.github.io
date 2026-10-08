@@ -1,0 +1,57 @@
+---
+/**
+ * @component BeforeAfter
+ * @group media
+ * @summary Two real captures of the same thing, compared with a draggable divider (also works with keyboard: it is a range input).
+ * @use Before/after a change you made: redesign, a fix, a WhipUI run vs plain agent output, an old drawing vs a new one. Both images must be the same size and framing.
+ * @avoid Comparing unrelated images; "after" images that were retouched.
+ * @example
+ * <BeforeAfter before="whipui/plain.webp" after="whipui/with-whipui.webp" alt={{ en: 'The same page built without and with WhipUI' }} />
+ */
+import { Image } from 'astro:assets';
+import { langOf, tx, t, type L } from '../../lib/i18n';
+import { img, lqStyle } from '../../lib/media';
+export interface Props {
+  before: string;
+  after: string;
+  alt: L;
+  beforeLabel?: L;
+  afterLabel?: L;
+  /** Starting divider position in %, default 50. */
+  start?: number;
+}
+const { before, after, alt, beforeLabel, afterLabel, start = 50 } = Astro.props;
+const lang = langOf(Astro.url);
+const a = img(before), b = img(after);
+const [lqa, lqb] = await Promise.all([lqStyle(a), lqStyle(b)]);
+const lb = beforeLabel ? tx(beforeLabel, lang) : t('before', lang);
+const la = afterLabel ? tx(afterLabel, lang) : t('after', lang);
+---
+<div class="ba" style={`--p:${start}%`}>
+  <Image class="ba-a" style={lqb} data-lq src={b} alt={`${la}: ${tx(alt, lang)}`} sizes="(max-width: 1280px) 92vw, 1180px" widths={[600, 1000, 1400].filter((w) => w <= b.width)} />
+  <div class="ba-clip" aria-hidden="true"><Image style={lqa} data-lq src={a} alt="" sizes="(max-width: 1280px) 92vw, 1180px" widths={[600, 1000, 1400].filter((w) => w <= a.width)} /></div>
+  <span class="ba-line" aria-hidden="true"></span>
+  <span class="ba-l eyebrow l10n left">{lb}</span><span class="ba-l eyebrow l10n right">{la}</span>
+  <input type="range" min="0" max="100" value={start} aria-label={`${lb} / ${la}`} />
+</div>
+
+<style>
+  .ba { position: relative; overflow: hidden; border: 1px solid var(--rule); background: var(--sunk); touch-action: pan-y; }
+  .ba :global(img) { display: block; width: 100%; height: auto; }
+  .ba-clip { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--p)) 0 0); }
+  .ba-clip :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .ba-line { position: absolute; top: 0; bottom: 0; left: var(--p); width: 2px; margin-left: -1px; background: var(--ctxs); pointer-events: none; }
+  .ba-l { position: absolute; top: 10px; background: var(--bg); color: var(--ink); padding: 3px 6px; }
+  .ba-l.left { left: 10px; } .ba-l.right { right: 10px; }
+  input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; margin: 0; }
+  input:focus-visible + * , .ba:has(input:focus-visible) { outline: 2px solid var(--acc); outline-offset: 3px; }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/lifecycle';
+  onPage(() => {
+    const on = (e: Event) => { const i = e.target as HTMLInputElement; if (!i.closest('.ba')) return; (i.closest('.ba') as HTMLElement).style.setProperty('--p', `${i.value}%`); };
+    document.addEventListener('input', on);
+    return () => document.removeEventListener('input', on);
+  });
+</script>

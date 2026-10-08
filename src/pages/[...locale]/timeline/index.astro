@@ -1,0 +1,31 @@
+---
+/**
+ * /timeline — everything worth keeping, by year, newest first: work, competitions and teaching, finished or not.
+ * Replaces /archive (redirected). A row with a page opens it; a row without one opens in place (TimelineRow).
+ * Facts: every row is a YAML file in src/content/works/ (each names its Facts section in `sources`).
+ */
+import PageShell from '../../../layouts/PageShell.astro';
+import TimelineList from '../../../components/lists/TimelineList.astro';
+import { localePaths, langOf, tx } from '../../../lib/i18n';
+import { timeline } from '../../../lib/works';
+export const getStaticPaths = () => localePaths();
+const lang = langOf(Astro.url);
+const T = { en: 'Timeline', th: 'ไทม์ไลน์', ja: '年表' };
+const n = (await timeline()).length;
+---
+<PageShell title={tx(T, lang)} nav="timeline" description="Work, competitions and teaching by Teethawat Kumying, newest first.">
+  <div class="wrap">
+    <header class="top" data-mark={tx(T, lang)}>
+      <h1 class="disp" data-mark-trigger>{tx(T, lang)}<span class="cnt num">[{String(n).padStart(2, '0')}]</span></h1>
+      <p>{tx({ en: 'Everything worth keeping, newest first — work, competitions, teaching and drawing, finished or not.', th: 'ทุกอย่างที่ควรเก็บไว้ ใหม่สุดก่อน — งาน การแข่งขัน การสอน และรูปวาด ทั้งที่เสร็จและไม่เสร็จ', ja: '残しておきたいものすべてを新しい順に。作品、大会、指導、絵。完成したものも、しなかったものも。' }, lang)}</p>
+    </header>
+    <TimelineList filter />
+  </div>
+</PageShell>
+<style>
+  .top { padding-block: clamp(40px, 6vw, 88px) clamp(32px, 4vw, 56px); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px clamp(32px, 6vw, 96px); align-items: end; }
+  h1 { font-size: clamp(72px, 13vw, 200px); line-height: 0.84; letter-spacing: -0.02em; display: flex; align-items: flex-start; gap: 0.08em; }
+  .cnt { font: 500 clamp(14px, 1.3vw, 18px)/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink3); margin-top: 0.4em; }
+  .top p { font-size: clamp(17px, 1.5vw, 20px); color: var(--ink2); max-width: 40ch; }
+  @media (max-width: 900px) { .top { grid-template-columns: minmax(0, 1fr); } }
+</style>

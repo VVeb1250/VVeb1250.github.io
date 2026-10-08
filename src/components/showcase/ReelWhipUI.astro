@@ -1,0 +1,37 @@
+---
+/**
+ * @component ReelWhipUI
+ * @group showcase
+ * @summary WhipUI on the Work reel: the package's own tagline large, how it is installed, which hosts it runs in and how fast it moved — the words are the picture.
+ * @use Inside WorkReel, once.
+ * @avoid Claiming a measured quality gain (none is measured); presenting the tagline as the owner's slogan (it is the package's).
+ * @behavior The install command copies with one press (CopyText).
+ * @example
+ * <ReelWhipUI />
+ */
+import ReelPanel from './ReelPanel.astro';
+import CopyText from '../primitives/CopyText.astro';
+import { langOf, tx } from '../../lib/i18n';
+import { work, metaLabel } from '../../lib/works';
+const lang = langOf(Astro.url);
+const d = (await work('whipui')).data;
+---
+<ReelPanel work="whipui">
+  <div class="v-whip">
+    {d.quote && <blockquote class="q disp">“{tx(d.quote, lang)}”<cite class="eyebrow">{tx({ en: 'The package’s tagline', th: 'คำโปรยของแพ็กเกจ', ja: 'パッケージのキャッチコピー' }, lang)}</cite></blockquote>}
+    <div class="cmd"><span class="eyebrow">{metaLabel('install', lang)}</span><CopyText text="npx whipui init" /></div>
+    <dl class="meta">{d.meta.filter((m) => m.k !== 'install').map((m) => <div><dt class="eyebrow">{metaLabel(m.k, lang)}</dt><dd>{tx(m.v, lang)}</dd></div>)}</dl>
+  </div>
+</ReelPanel>
+
+<style>
+  .v-whip { display: grid; gap: 22px; align-content: center; }
+  .q { font-size: clamp(40px, 4.6vw, 76px); line-height: 1; max-width: 16ch; display: grid; gap: 14px; }
+  cite { font-style: normal; color: var(--ink3); }
+  .cmd { display: inline-flex; gap: 14px; align-items: baseline; justify-self: start; padding: 12px 16px; border: 1px solid var(--ink); }
+  .cmd :global(.copy) { font-size: 16px; }
+  .cmd :global(.copy-v) { color: var(--ink); }
+  .meta { display: grid; gap: 6px; font-size: 14px; margin-top: 8px; }
+  .meta div { display: flex; gap: 12px; align-items: baseline; }
+  dd { margin: 0; }
+</style>

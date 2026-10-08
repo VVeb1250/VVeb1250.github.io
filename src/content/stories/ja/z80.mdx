@@ -1,0 +1,70 @@
+---
+work: z80
+recipe: tool-in-use
+summary: 授業の本物の Z80 ツールチェーンを動かすブラウザ IDE。元のワークフローが煩雑だったため、約9日で作りました。
+---
+
+{/* The integrated workspace leads; the four-step capture sequence proves its workflow. Facts §2.2. */}
+<ProjectHeader work="z80" layout="split" roles={['課題', '方向性', '連携']}>
+  <MediaFrame slot="media" src="z80/live-compile-to-simulator.webp" alt={{ en: 'Workspace: lab1.asm, the C16 console and Z80sim memory at 2000h', ja: 'Workspace：lab1.asm、C16 のコンソール、2000h の Z80sim メモリ' }} frame="screen" width="wide" eager
+    caption={{ en: 'Source, assembly output and simulator memory in one workspace.', ja: 'ソース、アセンブル結果、シミュレータのメモリを1つのワークスペースで表示。' }} source={{ en: 'Live site', ja: '公開サイト' }} />
+</ProjectHeader>
+
+<ProjectContext label={{ en: 'Friction', ja: '不便な点' }} lead={{ en: 'The original workflow was cumbersome.', ja: '従来のやり方は、使えるようになるまでが大変で、使わないコマンドまで覚える必要がありました。' }}>
+  <p>セットアップに時間がかかり、使わないコマンドも覚える必要がありました。そこで、書く・アセンブルする・実行するを1か所で行える場所を作りました。</p>
+</ProjectContext>
+
+## 公開サイトでのエンドツーエンド
+
+すべて公開サイトでキャプチャしました。HALT までの実行は、付属のサンプルプログラムです。
+
+<SplitScroll steps={[
+  { title: { en: 'Assemble: no errors', ja: 'アセンブル：エラーなし' }, text: { en: 'The real C16.EXE runs in the console and ends with “End of Assembly -- No Errors”.', ja: '実際の C16.EXE がコンソールで動作し、「End of Assembly -- No Errors」で終わります。' },
+    src: 'z80/live-assemble-success.webp', alt: { en: 'Console: End of Assembly -- No Errors', ja: 'コンソール：End of Assembly -- No Errors' }, source: { en: 'Live site', ja: '公開サイト' } },
+  { title: { en: 'Load into the simulator', ja: 'simulator に読み込む' }, text: { en: 'Z80sim reports “File load success at 2000h”: the HEX file is in the simulator.', ja: 'Z80sim に「File load success at 2000h」と表示されます。HEX ファイルが simulator に入りました。' },
+    src: 'z80/live-simulator-loaded.webp', alt: { en: 'Z80sim: File load success at 2000h', ja: 'Z80sim：File load success at 2000h' }, source: { en: 'Live site', ja: '公開サイト' } },
+  { title: { en: 'Source to memory, in one screen', ja: 'ソースからメモリまで、1画面で' }, text: { en: 'The source, the console’s “No Errors” and the machine code at 2000h, side by side. This shows compile → simulator; it does not show the program running.', ja: 'ソース、コンソールの「No Errors」、2000h の機械語を並べて表示します。これはコンパイルから simulator までを示すもので、プログラムが動いている様子は示していません。' },
+    src: 'z80/live-compile-to-simulator.webp', alt: { en: 'Workspace: lab1.asm, the C16 console and Z80sim memory at 2000h', ja: 'Workspace：lab1.asm、C16 のコンソール、2000h の Z80sim メモリ' }, source: { en: 'Live site', ja: '公開サイト' } },
+  { title: { en: 'Run to HALT', ja: 'HALT まで実行' }, text: { en: 'The built-in sample lab1.asm, loaded at 8000h and run with G 8000: “Program halted”, PC 800B, 48 machine cycles.', ja: '付属のサンプル lab1.asm を 8000h に読み込み、G 8000 で実行します。「Program halted」、PC 800B、48 マシンサイクルです。' },
+    src: 'z80/live-program-halted.webp', alt: { en: 'Z80sim: Program halted, PC 800B', ja: 'Z80sim：Program halted、PC 800B' }, source: { en: 'Live site · sample program', ja: '公開サイト · サンプルプログラム' } }
+]} />
+
+## ブラウザで動く本物のツールチェーン
+
+授業で使われる assembler と simulator を、WebAssembly にコンパイルした DOSBox で動かしています。
+
+<FlowDiagram n="01" caption={{ en: 'Toolchain', ja: 'ツールチェーン' }} nodes={[
+  { id: 'ed', col: 0, label: 'Monaco editor', sub: '.ASM' },
+  { id: 'as', col: 1, label: 'C16.EXE', sub: 'DOSBOX → WASM', core: true },
+  { id: 'hx', col: 2, label: 'Intel HEX', sub: '+ LISTING' },
+  { id: 'sim', col: 3, label: 'Z80sim', sub: 'ET-BOARD SIMULATOR' }
+]} edges={[
+  { from: 'ed', to: 'as', active: true },
+  { from: 'as', to: 'hx', active: true },
+  { from: 'hx', to: 'sim', active: true, label: { en: 'loads on its own', ja: '自動で読み込み' } }
+]} />
+
+複数ファイルのワークスペースをブラウザ内に保持し、Intel HEX とリスティングに組み立てます。コンパイル済みのファイルは自動的に Z80sim に読み込まれ、各ファイルのビルド状態は3色のいずれかで表示されます。TH / EN の切り替えと、UI のツアーがあります。
+
+デスクトップ版として Electron ビルドも用意しており、私自身も使っています。
+
+<EvidenceLink href="https://github.com/VVeb1250/z80-workspace/releases/tag/v0.1.4" label="Desktop downloads" kind="release" shows={{ en: 'GitHub Releases · v0.1.4', ja: 'GitHub Releases · v0.1.4' }} />
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Noticed the problem, set the direction, integrated the real tools into one workspace, decided what counted as done.', ja: '課題に気づき、方向性を決め、本物のツールを1つのワークスペースにまとめ、完成の基準を決めました。' } },
+  { who: 'ai', did: { en: 'Most of the implementation, heavily AI-assisted, under my steering.', ja: '実装の大部分は AI が行い、私が方向付けしました。' } },
+  { who: 'upstream', did: { en: 'C16.EXE and the Z80 ET-Board simulator (the course’s tools), DOSBox, the Monaco editor.', ja: 'C16.EXE と Z80 ET-Board simulator（授業のツール）、DOSBox、Monaco editor。' } }
+]} />
+
+<OutcomeBlock outcome={{ en: 'Complete: it does what I wanted it to do. Used by me and a few others; the course needed this workflow for only 2 labs.', ja: '完成しています。意図した通りに動作します。私と数名が使っており、授業ではこのワークフローが2つのラボでのみ必要でした。' }}
+  current={{ en: 'The web version is online on GitHub Pages.', ja: 'Web 版は GitHub Pages で公開されています。' }} />
+
+<details>
+  <summary>利用メモ · GoatCounter</summary>
+  <MediaFrame src="z80/goatcounter.webp" alt={{ en: 'GoatCounter pages panel: 69 visits, /z80-workspace 54, assemble-toolbar 8, download-export-lst 3, assemble-console-command 3', ja: 'GoatCounter のページパネル：69 visits、/z80-workspace 54、assemble-toolbar 8、download-export-lst 3、assemble-console-command 3' }} frame="screen" width="text"
+    caption={{ en: '69 visits, 11 assembles (8 from the toolbar, 3 from the console), 20 Jul – 26 Sep 2026. The counts may include my own testing.', ja: '69 visits、アセンブル11回（ツールバーから8回、コンソールから3回）、2026年7月20日〜9月26日。私自身のテストも含まれている可能性があります。' }} source="GoatCounter" />
+</details>
+
+<Draft>
+  <p>以前作ったツール DOSBox Handmade は、DOSBox と KKU Z80 simulator をラップするだけのもので、DOSBox の検出、ワークスペースのマウント、simulator の起動を行っていました。Z80 Workspace は、この一連の流れ全体を置き換えました。</p>
+</Draft>

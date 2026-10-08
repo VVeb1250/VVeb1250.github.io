@@ -1,0 +1,57 @@
+---
+work: vaja
+recipe: art-led
+summary: A 2D action RPG made by a team of 3. As project head I bridged the visual production and the code — most of the main art, the scenes, rigging and animation, and the player control.
+---
+
+import '../../../styles/stories/vaja.css';
+
+{/* Art and playable build lead. Facts §2.1; all media come from the real game. */}
+<ProjectHeader work="vaja" layout="stack">
+  <MediaFrame slot="media" src="vaja/scene-celestia-grounded.webp" alt={{ en: 'Gameplay frame: Vaja standing on the ground in a crystal cavern' }} width="full" eager
+    caption={{ en: 'Celestia Crystal Cavern · frame from the recorded build' }} />
+</ProjectHeader>
+
+<div class="vaja-build">
+  <div>
+    <h2>A playable build, demoed for the course.</h2>
+    <p>Player control, scene scrolling, UI logic, scene management and the save system.</p>
+    <EvidenceLink label="PlayerController.cs" shows={{ en: '370 lines' }} kind="file" />
+  </div>
+  <figure>
+    <VideoEmbed src="vaja/highlight-720.mp4" poster="vaja/highlight-poster.webp" label={{ en: 'Gameplay, 51 seconds, no sound' }} />
+    <figcaption>Gameplay · 51 s · no sound · cut from a recorded build</figcaption>
+  </figure>
+</div>
+
+## From the sheet to the scene
+
+The map art was drawn as sheets of separate pieces, then composed into scenes in Unity.
+
+<div class="vaja-art">
+  <MediaFrame src="vaja/sheet-forest.webp" alt={{ en: 'Forest map-art sheet: ground strips, grass, rocks, stone slabs, plants, branches, two trunks, two trees and a small Vaja sprite, each on its own' }} frame="plain" width="wide"
+    marks={[{ n: 1, x: 58, y: 78 }, { n: 2, x: 44, y: 27 }, { n: 3, x: 15, y: 18 }]}
+    title={{ en: 'Forest map-art sheet' }}
+    caption={{ en: 'Pieces like ① the trunks, ② the stone slab and ③ the grass strip are what the Westbrook scene is built from.' }}
+    source={{ en: 'Game source art · 4000 × 4000, shown reduced' }} />
+  <div>
+    <MediaFrame src="vaja/scene-westbrook.webp" alt={{ en: 'Westbrook Stonescape scene' }} width="wide" caption={{ en: 'Westbrook Stonescape · scene composed from the map art' }} />
+    <MediaFrame src="vaja/object.webp" alt={{ en: 'Vaja holding the crystal staff' }} frame="plain" width="text" caption={{ en: 'Vaja and the crystal staff' }} />
+  </div>
+</div>
+
+## Attack, frame by frame
+
+Rigged with Unity 2D skeletal animation and IK. Scroll through Vaja's first attack: these are the 10 frames exported from the build.
+
+<ScrubFrames src="vaja/strip-attack1-padded.webp" frames={10} name="Vaja · attack1" fps={12} />
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Project head. Most of the main art (map art, UI art, the crystal staff), scene composition, skeletal rigging, IK and animation; player control, scene scrolling, UI logic, scene management and the save system.' } },
+  { who: 'team', did: { en: 'The main concept, game design and story came mainly from a teammate. Teammates also made the effects and some of the skill art.' } },
+  { who: { en: 'External assets' }, did: { en: 'Some assets came from outside the team.' } }
+]} />
+
+<OutcomeBlock
+  outcome={{ en: 'A playable build, demoed for the course.' }}
+  current={{ en: 'Finished as a course project in March 2025.' }} />

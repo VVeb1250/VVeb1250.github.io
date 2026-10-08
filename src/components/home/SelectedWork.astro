@@ -1,0 +1,122 @@
+---
+/**
+ * @component SelectedWork
+ * @group home
+ * @summary The column holding the featured compositions. Its selection bar tracks scroll position, mouse intent or keyboard focus; its fog follows the project in view. Each SketchReveal owns its hosted interaction independently.
+ * @use Home, inside <Section id="work">. Children mark their root with data-feature and data-cat. A hosted SketchReveal uses data-skr-host. The main project block carries data-pj and its main link data-skr-go; extra evidence and attribution stay outside that clickable block. Each work owns its composition.
+ * @avoid Generic project cards; more than 3–4 features; opening reveals from scroll selection on desktop.
+ * @behavior Scroll: the feature under the middle of the screen (or the nearest edge within the middle half) becomes current; the fog follows scroll only. Mouse: resting ~90ms on another feature makes it current while the mouse is there. Keyboard: focus on a feature's link makes it current. Click / tap anywhere on a feature's `data-pj` block that is not itself a link → its `data-skr-go` link (deeper transition from the press point). After returning from a work page, the origin feature gets .is-locked and the bar locks onto it for 1.4s. The bar is hidden on touch devices. Reduced motion: the same states, switched without movement.
+ * @example
+ * <SelectedWork>
+ *   <VajaFeature />
+ *   <Z80Feature />
+ *   <OSSFeature />
+ * </SelectedWork>
+ */
+---
+<div class="sw"><span class="sel-bar" aria-hidden="true"></span><slot /></div>
+
+<style is:global>
+  /* --sw-pad: the room for the selection bar; features that run off the page edge subtract it */
+  .sw { --sw-pad: 18px; position: relative; display: grid; gap: clamp(64px, 8vw, 112px); padding-left: var(--sw-pad); }
+  .sel-bar { position: absolute; left: 0; top: 0; width: 3px; height: 0; background: var(--acc); opacity: 0; transition: transform var(--t-cursor) var(--e-enter), height var(--t-cursor) var(--e-enter), opacity 0.2s; }
+  .sw.has-cur .sel-bar, .sw.has-lock .sel-bar { opacity: 1; }
+  /* the whole project is the link */
+  .sw [data-pj]:has(a[data-skr-go]) { cursor: pointer; }
+  .sw > [data-feature][data-current] .go { --go-on: 1; }
+  [data-feature].is-locked { animation: feat-lock var(--t-enter) var(--e-enter); }
+  @keyframes feat-lock { from { transform: translateX(-24px); } }
+  @media (hover: none) { .sel-bar { display: none; } .sw { --sw-pad: 0px; } }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/lifecycle';
+  import { onScroll } from '../../scripts/scroll';
+  onPage(() => {
+    const offs: Array<() => void> = [];
+    document.querySelectorAll<HTMLElement>('.sw').forEach((list) => {
+      const bar = list.querySelector<HTMLElement>(':scope > .sel-bar');
+      const feats = [...list.querySelectorAll<HTMLElement>(':scope > [data-feature]')];
+      if (!bar || !feats.length) return;
+      const place = (el: HTMLElement) => {
+        const lr = list.getBoundingClientRect(), r = el.getBoundingClientRect();
+        bar.style.height = `${r.height}px`;
+        bar.style.transform = `translateY(${r.top - lr.top}px)`;
+      };
+      let cur: HTMLElement | null = null, byScroll: HTMLElement | null = null, byMouse: HTMLElement | null = null, byFocus: HTMLElement | null = null;
+      let intent = 0;
+      const pick = () => {
+        const f = byMouse ?? byFocus ?? byScroll;
+        list.classList.toggle('has-cur', !!f);
+        if (f) place(f);
+        if (f === cur) return;
+        if (cur) cur.removeAttribute('data-current');
+        cur = f;
+        if (f) f.setAttribute('data-current', '');
+      };
+      // scroll: the feature under the middle of the screen; in a gap between two, the nearer edge within the middle half.
+      // The fog follows this one only (a hover must not repaint the whole background)
+      let fogCat: string | null | undefined;
+      const onS = (_y: number, vh: number) => {
+        const mid = vh / 2;
+        let best: HTMLElement | null = null, bd = vh * 0.25;
+        for (const f of feats) {
+          const r = f.getBoundingClientRect();
+          const d = r.top > mid ? r.top - mid : r.bottom < mid ? mid - r.bottom : 0;
+          if (d < bd || (d === 0 && bd > 0)) { bd = d; best = f; }
+        }
+        if (best !== byScroll) { byScroll = best; pick(); }
+        const cat = best?.dataset.cat ?? null;
+        if (cat !== fogCat) { fogCat = cat; document.dispatchEvent(new CustomEvent('atmo:cat', { detail: cat })); }
+      };
+      const offScroll = onScroll(onS);
+      // mouse: rest ~90ms on a feature (a pointer passing over does nothing)
+      const over = (e: PointerEvent) => {
+        if (e.pointerType !== 'mouse') return;
+        const f = (e.target as Element).closest<HTMLElement>('[data-feature]');
+        if (!f || !list.contains(f) || f === byMouse) return;
+        clearTimeout(intent);
+        intent = window.setTimeout(() => { byMouse = f; pick(); }, 90);
+      };
+      const leave = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; clearTimeout(intent); byMouse = null; pick(); };
+      // keyboard: a visible focus inside a feature (a focus that only follows a mouse click does not count)
+      const fin = (e: FocusEvent) => {
+        const t = e.target as Element, f = t.closest<HTMLElement>('[data-feature]');
+        if (f && list.contains(f) && t.matches(':focus-visible')) { byFocus = f; pick(); }
+      };
+      const fout = (e: FocusEvent) => { if (!list.contains(e.relatedTarget as Node | null)) { byFocus = null; pick(); } };
+      // click / tap anywhere on a project → its main link (links and buttons inside keep their own job; selecting text does not navigate)
+      const click = (e: MouseEvent) => {
+        if (e.defaultPrevented || e.button !== 0) return;
+        const t = e.target as Element, pj = t.closest<HTMLElement>('[data-pj]');
+        if (!pj || !list.contains(pj) || t.closest('a, button, input, select, textarea, label, [role="button"]')) return;
+        if (String(getSelection() ?? '').trim()) return;
+        const go = pj.querySelector<HTMLAnchorElement>('a[data-skr-go]');
+        if (!go) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey) { window.open(go.href, '_blank', 'noopener'); return; }
+        go.click();
+      };
+      list.addEventListener('pointerover', over);
+      list.addEventListener('pointerleave', leave);
+      list.addEventListener('focusin', fin);
+      list.addEventListener('focusout', fout);
+      list.addEventListener('click', click);
+      const mo = new MutationObserver(() => {
+        const locked = list.querySelector<HTMLElement>('[data-feature].is-locked');
+        list.classList.toggle('has-lock', !!locked);
+        if (locked) place(locked); else if (cur) place(cur);
+      });
+      mo.observe(list, { subtree: false, childList: false, attributes: true, attributeFilter: ['class'] });
+      feats.forEach((f) => mo.observe(f, { attributes: true, attributeFilter: ['class'] }));
+      const ro = new ResizeObserver(() => { if (cur) place(cur); });
+      ro.observe(list);
+      offs.push(() => {
+        clearTimeout(intent); offScroll(); mo.disconnect(); ro.disconnect();
+        list.removeEventListener('pointerover', over); list.removeEventListener('pointerleave', leave);
+        list.removeEventListener('focusin', fin); list.removeEventListener('focusout', fout); list.removeEventListener('click', click);
+        cur?.removeAttribute('data-current');
+      });
+    });
+    return () => offs.forEach((f) => f());
+  });
+</script>

@@ -1,0 +1,6 @@
+/* MSU story: the problem beside the stage photo */
+.msu-what { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+.msu-what h2 { font-family: var(--f-disp); font-stretch: var(--disp-stretch); font-weight: 700; font-size: clamp(28px, 3vw, 42px); line-height: 1.05; margin-bottom: 16px; }
+.msu-what p { color: var(--ink2); max-width: 52ch; font-size: 17px; }
+.msu-what p + p { margin-top: 1em; }
+@media (max-width: 860px) { .msu-what { grid-template-columns: minmax(0, 1fr); } }

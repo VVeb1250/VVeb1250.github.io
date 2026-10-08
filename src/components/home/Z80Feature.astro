@@ -1,0 +1,150 @@
+---
+/**
+ * @component Z80Feature
+ * @group home
+ * @summary Z80 Workspace on Home: the workspace leads on the left, its purpose sits beside it, and three real workflow states form a proof rail below. Attribution and the Electron release link stay outside the clickable project. Hosted hover or focus opens the screen; scrolling on desktop does not.
+ * @use Home → Selected work. Composition-level for this work only. The project block (text + workspace, `data-pj`) is the link; the proof rail, attribution and Electron release link stay outside it.
+ * @avoid Claiming more than the captures show (the HALT is the built-in sample only); a before state that invents tools the course did not use; a heavy SVG object here (the isometric sketch with a screen on its face was slow to open); a plate behind the screen.
+ * @behavior The integrated workspace glyph resolves into the real built-in sample HALT capture on hosted hover or keyboard focus. Touch opens in the middle screen band. The proof rail and attribution sit below and stack under 820px. Reduced motion switches states without movement.
+ * @example
+ * <Z80Feature />
+ */
+import { Image } from 'astro:assets';
+import MetaLine from '../primitives/MetaLine.astro';
+import GoLink from '../primitives/GoLink.astro';
+import SketchReveal from '../media/SketchReveal.astro';
+import AttributionBlock from '../blocks/AttributionBlock.astro';
+import EvidenceLink from '../primitives/EvidenceLink.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { img, lqStyle } from '../../lib/media';
+import { work, workHref, vtLabel, ctxOf } from '../../lib/works';
+export interface Props {
+  /** The real live-site capture. Default: the built-in sample after HALT. */
+  screen?: string;
+  screenAlt?: L;
+  /** Why it exists, in one or two sentences (Facts §2.2: the workflow was fragmented; built for convenience). */
+  why?: L;
+  /** The states, in the order they happen: what happened, which tool did it, and the real crop that shows it (optional). */
+  states?: { title: L; tool: L; crop?: string; alt?: L }[];
+  credit?: L;
+  note?: L;
+  base?: string;
+}
+const {
+  screen = 'z80/live-program-halted.webp',
+  screenAlt = { en: 'The built-in lab1.asm sample in Z80 Workspace: source and console beside Z80sim, which reports Program halted after running from 8000h', th: 'ตัวอย่าง lab1.asm ที่มีมาให้ใน Z80 Workspace: source กับ console อยู่ข้าง Z80sim ที่รายงานว่า Program halted หลังรันจาก 8000h', ja: 'Z80 Workspace に付属する lab1.asm のサンプル：ソースとコンソールが Z80sim の横にあり、8000h から実行後に Program halted と表示' },
+  why = { en: 'The course’s assembler, C16.EXE, and its board simulator are separate DOS programs, and the workflow around them was fragmented. I built one place to write, assemble and run.', th: 'แบบเก่ายุ่งยากกว่าจะใช้ได้ ต้องจำ command การใช้งานที่ไม่จำเป็นสำหรับผม', ja: '授業のアセンブラ C16.EXE とボードシミュレータは、別々の古い DOS プログラムで、周辺の作業もばらばらでした。書く・アセンブルする・実行するを1か所にまとめました。' },
+  states = [
+    { title: { en: 'Assembles with no errors', th: 'ประกอบได้ ไม่มี error', ja: 'エラーなしでアセンブル' }, tool: { en: 'C16.EXE (Cross-16) in DOSBox, compiled to WebAssembly', th: 'C16.EXE (Cross-16) ใน DOSBox คอมไพล์เป็น WebAssembly', ja: 'DOSBox 上の C16.EXE（Cross-16）、WebAssembly にコンパイル' }, crop: 'z80/state-assembled.webp', alt: { en: 'Console: c16 lab1.asm -H lab1.h -L lab1.lst … End of Assembly -- No Errors', th: 'Console: c16 lab1.asm -H lab1.h -L lab1.lst … End of Assembly -- No Errors', ja: 'コンソール：c16 lab1.asm -H lab1.h -L lab1.lst … End of Assembly -- No Errors' } },
+    { title: { en: 'Loads into the simulator', th: 'โหลดเข้า simulator', ja: 'simulator に読み込み' }, tool: { en: 'Z80sim, the course’s ET-Board simulator', th: 'Z80sim ซึ่งเป็น ET-Board simulator ของวิชา', ja: '授業の ET-Board simulator である Z80sim' }, crop: 'z80/state-loaded.webp', alt: { en: 'Z80sim: Filename lab1.h, Message: File load success at 2000h', th: 'Z80sim: Filename lab1.h, Message: File load success at 2000h', ja: 'Z80sim：Filename lab1.h、Message：File load success at 2000h' } },
+    { title: { en: 'Runs to HALT', th: 'รันจนถึง HALT', ja: 'HALT まで実行' }, tool: { en: 'The built-in sample lab1.asm, run from 8000h', th: 'โปรแกรมตัวอย่าง lab1.asm ที่มีมาให้ รันจาก 8000h', ja: '付属のサンプル lab1.asm を 8000h から実行' }, crop: 'z80/state-halted.webp', alt: { en: 'Z80sim: address 8000, Message: Program halted.', th: 'Z80sim: address 8000, Message: Program halted.', ja: 'Z80sim：address 8000、Message：Program halted.' } }
+  ],
+  credit = { en: 'I set the problem, the direction and what counted as done; the implementation was heavily AI-assisted.', th: 'ผมกำหนดปัญหา ทิศทาง และว่าอะไรถือว่าเสร็จ ส่วนการ implement ใช้ AI มาก', ja: '課題と方向性、完成の基準を私が決めました。実装は AI による部分が大きいです。' },
+  note = { en: 'Built-in lab1.asm sample after HALT · captured on the live site. The steps below show assembly and loading separately.', th: 'ตัวอย่าง lab1.asm ที่มีมาให้ หลัง HALT · แคปจากเว็บจริง ขั้นตอนด้านล่างแยกการประกอบกับการโหลดออกจากกัน', ja: '付属の lab1.asm サンプル、HALT 後 · 公開サイトでキャプチャ。以下の手順では、アセンブルと読み込みを分けて示しています。' },
+  base
+} = Astro.props;
+const lang = langOf(Astro.url);
+const w = await work('z80');
+const d = w.data;
+const href = d.page ? workHref('z80', lang, base) : undefined;
+const vt = { 'data-vt': 'deeper', 'data-vt-cat': ctxOf(w), 'data-vt-label': vtLabel(w), 'data-work': 'z80' };
+const crops = await Promise.all(states.map(async (st) => {
+  if (!st.crop) return null;
+  const m = img(st.crop);
+  return { m, lq: await lqStyle(m) };
+}));
+// One integrated workspace: explorer, source, simulator and the assembly console below.
+const workspaceGlyph = [
+  '################',
+  '###.#######.####',
+  '###.#..###..#..#',
+  '###.###..##.####',
+  '###.#.###...#..#',
+  '###.#######.####',
+  '###.........####',
+  '###.++++++++####',
+  '###.###.###.####',
+  '################'
+];
+---
+<div class="zf" data-feature data-skr-host data-go data-work="z80" data-cat={ctxOf(w)}>
+  <div class="zf-pj" data-pj>
+    <div class="zf-txt">
+      <span class="eyebrow">{d.type} · {d.year}</span>
+      <h2 class="disp" data-vt-title>{href ? <a href={href} {...vt}>{d.title}</a> : d.title}</h2>
+      {d.fact && <MetaLine items={[d.fact]} tone="ink" />}
+      <p class="zf-line">{tx(d.line, lang)}</p>
+      {href && <a class="zf-go" href={href} data-skr-go {...vt}><GoLink /></a>}
+    </div>
+    <div class="zf-scr">
+      <SketchReveal host glyph={workspaceGlyph} glyphScale={0.82} ratio="16 / 9" size="fill" realWidth={0.96} index="02" tag={{ en: 'SAMPLE RUN', th: 'รันตัวอย่าง', ja: 'サンプル実行' }} real={{ src: screen, alt: screenAlt }} />
+    </div>
+  </div>
+  <div class="zf-more">
+    <div class="zf-proof">
+    {why && <p class="zf-why">{tx(why, lang)}</p>}
+    <ol class="zf-rail">
+      {states.map((st, i) => (
+        <li style={`--i:${i}`}>
+          <span class="zf-n num">{String(i + 1).padStart(2, '0')}</span>
+          <div class="zf-s">
+            <b>{tx(st.title, lang)}</b>
+            <span class="zf-tool">{tx(st.tool, lang)}</span>
+            {crops[i] && <span class="zf-crop"><Image style={crops[i]!.lq} data-lq src={crops[i]!.m} alt={st.alt ? tx(st.alt, lang) : ''} widths={[crops[i]!.m.width]} sizes={`${crops[i]!.m.width}px`} /></span>}
+          </div>
+        </li>
+      ))}
+    </ol>
+    {note && <p class="zf-note">{tx(note, lang)}</p>}
+    </div>
+    <div class="zf-credits">
+    {credit && <AttributionBlock rows={[
+      { who: 'me', did: { en: 'Problem, direction, integration.', th: 'ปัญหา ทิศทาง การเชื่อมต่อ', ja: '課題、方向性、連携。' } },
+      { who: 'ai', did: { en: 'Most of the implementation, heavily AI-assisted, under my steering.', th: 'AI เป็นผู้เขียนโค้ดส่วนใหญ่ ภายใต้การควบคุมของผม', ja: '実装の大部分は AI が行い、私が方向付けしました。' } },
+      { who: 'upstream', did: { en: 'C16.EXE and the Z80 ET-Board simulator (the course’s tools), DOSBox, the Monaco editor.', th: 'C16.EXE กับ Z80 ET-Board simulator (เครื่องมือของวิชา) DOSBox และ Monaco editor', ja: 'C16.EXE と Z80 ET-Board simulator（授業のツール）、DOSBox、Monaco editor。' } }
+    ]} />}
+    <EvidenceLink href="https://github.com/VVeb1250/z80-workspace/releases/tag/v0.1.4" label="Electron build" kind="release" shows={{ en: 'GitHub Releases' }} />
+    </div>
+  </div>
+</div>
+
+<style>
+  /* the project block (text over the screen, 8 columns) and the rail beside the screen (4 columns) */
+  .zf { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(16px, 2vw, 28px); row-gap: clamp(24px, 3vw, 36px); align-items: end; }
+  .zf-pj { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(20px, 2.6vw, 32px); align-items: center; }
+  .zf-txt { grid-column: 10 / span 3; grid-row: 1; display: grid; gap: 16px; justify-items: start; }
+  .zf-scr { grid-column: 1 / span 8; grid-row: 1; }
+  h2 { font-size: clamp(34px, 4.4vw, 56px); line-height: 1.02; }
+  h2 a { color: inherit; text-decoration: none; }
+  h2 a:hover { text-decoration: underline; text-decoration-color: var(--ctxs); text-underline-offset: 0.1em; }
+  .zf-line { color: var(--ink2); max-width: 52ch; }
+  .zf-why { max-width: 52ch; }
+  .zf-go { text-decoration: none; color: inherit; }
+
+  /* ---- the rail: the states in the order they happen, joined by one line; they light in turn once the screen is up ---- */
+  .zf-more { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 18px; align-content: start; }
+  .zf-proof { grid-column: 1 / span 8; grid-row: 1; display: grid; gap: 24px; align-content: start; }
+  .zf-credits { grid-column: 10 / span 3; grid-row: 1; display: grid; gap: 18px; align-content: start; }
+  .zf-rail { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; position: relative; }
+  .zf-rail li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; position: relative; border-top: 1px solid var(--rule); }
+  .zf-n { align-self: start; font: 500 11px/1 var(--f-mono); color: var(--ink2); background: var(--bg); padding: 5px 0; text-align: center; position: relative; transition: background-color var(--t-cursor), color var(--t-cursor); }
+  .zf-s { display: grid; gap: 4px; justify-items: start; min-width: 0; }
+  .zf-s b { font-size: 15px; font-weight: 600; }
+  .zf-tool { font: 500 11px/1.45 var(--f-mono); letter-spacing: 0.02em; color: var(--ink2); }
+  .zf-crop { display: block; margin-top: 6px; max-width: 100%; background: #0f1215; border: 1px solid var(--rule); line-height: 0; overflow: hidden; }
+  .zf-crop :global(img) { display: block; max-width: 100%; height: auto; }
+  .zf-note { font: 500 11px/1.45 var(--f-mono); color: var(--ink3); }
+  .zf-credit { font-size: 14px; color: var(--ink2); padding-top: 10px; border-top: 1px solid var(--rule); }
+  @media (max-width: 1024px) {
+    .zf-pj, .zf-more { grid-column: 1 / -1; }
+    .zf-txt { grid-column: 9 / span 4; }
+    .zf-scr { grid-column: 1 / span 7; }
+    .zf-proof { grid-column: 1 / span 7; }
+    .zf-credits { grid-column: 9 / span 4; }
+    .zf-scr { max-width: 720px; }
+  }
+  @media (max-width: 820px) { .zf-txt, .zf-scr, .zf-proof, .zf-credits { grid-column: 1 / -1; grid-row: auto; } .zf-rail { grid-template-columns: minmax(0, 1fr); } .zf-rail li { grid-template-columns: 24px minmax(0, 1fr); } }
+  @media (prefers-reduced-motion: reduce) {
+    .zf-n, .zf-crop :global(img) { transition: none !important; animation: none !important; }
+  }
+</style>

@@ -1,0 +1,91 @@
+---
+/**
+ * @component FlowDiagram
+ * @group media
+ * @summary A technical figure drawn from data — boxes in columns, arrows between them, the active path as a thick band in the context color with a dashed direction line (Endfield blueprint grammar). No hand-written SVG needed.
+ * @use Toolchains, pipelines, system sketches, a rule's decision path — only real parts and real connections. Mark the path the story is about as `active`.
+ * @avoid Diagrams of plans presented as built systems (say "sketch" in `note`); more than ~10 boxes; decorative arrows.
+ * @props-note Nodes sit in columns (`col` 0, 1, 2 …) and stack top to bottom in the order given. Edges run left → right between columns, or downward inside one column.
+ * @example
+ * <FlowDiagram n="02" caption={{ en: 'Toolchain' }} nodes={[
+ *   { id: 'ed', col: 0, label: 'Monaco editor', sub: '.ASM' },
+ *   { id: 'as', col: 1, label: 'C16.EXE', sub: 'DOSBOX → WASM', core: true },
+ *   { id: 'hx', col: 2, label: 'Intel HEX', sub: '+ LISTING' },
+ *   { id: 'sim', col: 3, label: 'Z80sim', sub: 'ET-BOARD' }
+ * ]} edges={[{ from: 'ed', to: 'as', active: true }, { from: 'as', to: 'hx', active: true }, { from: 'hx', to: 'sim', active: true, label: 'auto' }]} />
+ */
+import Figure from './Figure.astro';
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  n: string;
+  caption: L;
+  nodes: { id: string; col: number; label: L; sub?: L; core?: boolean }[];
+  edges: { from: string; to: string; active?: boolean; dashed?: boolean; label?: L }[];
+  note?: L;
+}
+const { n, caption, nodes, edges, note } = Astro.props;
+const lang = langOf(Astro.url);
+const PAD = 16, GX = 72, GY = 26;
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const box = nodes.map((nd) => {
+  const l = tx(nd.label, lang), s = nd.sub ? tx(nd.sub, lang) : '';
+  const w = Math.min(230, Math.max(116, l.length * 7.9 + 28, s.length * 6.4 + 28));
+  return { ...nd, l, s, w, h: s ? 58 : 42 };
+});
+const cols = [...new Set(box.map((b) => b.col))].sort((a, b) => a - b);
+const colOf = new Map(box.map((b) => [b.id, b.col]));
+const colW = new Map(cols.map((c) => [c, Math.max(...box.filter((b) => b.col === c).map((b) => b.w))]));
+const colH = new Map(cols.map((c) => [c, box.filter((b) => b.col === c).reduce((a, b) => a + b.h, 0) + GY * (box.filter((b) => b.col === c).length - 1)]));
+const H = Math.max(...colH.values()) + PAD * 2 + 16;
+// vertical positions first (they do not depend on x)
+const top = new Map<string, number>();
+for (const c of cols) {
+  let y = (H - colH.get(c)!) / 2;
+  for (const b of box.filter((bb) => bb.col === c)) { top.set(b.id, y); y += b.h + GY; }
+}
+const midY = (id: string) => top.get(id)! + box.find((b) => b.id === id)!.h / 2;
+const lblW = (e: Props['edges'][number]) => (e.label ? tx(e.label, lang).length * 6.4 + 10 : 0);
+// the gap after each column is wide enough for the labels of the edges leaving it
+const gapAfter = new Map(cols.map((c) => [c, Math.max(GX, ...edges.filter((e) => e.label && colOf.get(e.from) === c && colOf.get(e.to) !== c).map((e) => {
+  const straight = Math.abs(midY(e.from) - midY(e.to)) < 1;
+  return straight ? lblW(e) + 28 : 2 * (lblW(e) + 14);
+}))]));
+const colX = new Map<number, number>();
+let x = PAD;
+for (const c of cols) { colX.set(c, x); x += colW.get(c)! + gapAfter.get(c)!; }
+const W = x - gapAfter.get(cols[cols.length - 1])! + PAD;
+const pos = new Map<string, { x: number; y: number; w: number; h: number }>();
+for (const b of box) pos.set(b.id, { x: colX.get(b.col)! + (colW.get(b.col)! - b.w) / 2, y: top.get(b.id)!, w: b.w, h: b.h });
+const paths = edges.map((e) => {
+  const a = pos.get(e.from), b = pos.get(e.to);
+  if (!a || !b) throw new Error(`[FlowDiagram] edge ${e.from} → ${e.to}: unknown node id`);
+  let d: string, lx: number, ly: number, end: [number, number], dir: 'r' | 'd';
+  const lw = lblW(e);
+  if (colOf.get(e.from) === colOf.get(e.to)) {
+    if (b.y < a.y) throw new Error(`[FlowDiagram] edge ${e.from} → ${e.to}: inside a column, edges run downward — list "${e.from}" above "${e.to}"`);
+    const cx = a.x + a.w / 2; d = `M${cx} ${a.y + a.h} V${b.y - 8}`; lx = cx + 8; ly = (a.y + a.h + b.y) / 2 + 4; end = [cx, b.y]; dir = 'd';
+  } else {
+    if (b.x < a.x) throw new Error(`[FlowDiagram] edge ${e.from} → ${e.to}: edges run left → right — give "${e.to}" a higher col`);
+    const x1 = a.x + a.w, y1 = a.y + a.h / 2, x2 = b.x, y2 = b.y + b.h / 2;
+    if (Math.abs(y1 - y2) < 1) { d = `M${x1} ${y1} H${x2 - 8}`; lx = x1 + (x2 - x1 - lw) / 2 + 5; ly = y1 - 8; }
+    else {
+      // label rides the first horizontal run, so the bend moves right far enough to hold it
+      const mx = Math.round(lw ? x1 + Math.max((x2 - x1) / 2, lw + 14) : (x1 + x2) / 2);
+      d = `M${x1} ${y1} H${mx} V${y2} H${x2 - 8}`; lx = x1 + 6; ly = y1 - 8;
+    }
+    end = [x2, y2]; dir = 'r';
+  }
+  const [ex, ey] = end;
+  const arrow = dir === 'r' ? `${ex - 9},${ey - 5} ${ex - 1},${ey} ${ex - 9},${ey + 5}` : `${ex - 5},${ey - 9} ${ex},${ey - 1} ${ex + 5},${ey - 9}`;
+  return { ...e, d, lx, ly, arrow, lbl: e.label ? tx(e.label, lang) : '' };
+});
+const svg = `<svg viewBox="0 0 ${Math.ceil(W)} ${Math.ceil(H)}" role="img" aria-label="${esc(tx(caption, lang))}: ${esc(box.map((b) => b.l).join(', '))}">
+<g class="dg-grid">${Array.from({ length: Math.ceil(W / 20) + 1 }, (_, i) => `<line x1="${i * 20}" y1="0" x2="${i * 20}" y2="${Math.ceil(H)}"/>`).join('')}</g>
+${paths.filter((p) => p.active).map((p) => `<path class="dg-flow" d="${p.d}"/>`).join('')}
+${paths.map((p) => (p.active ? `<path class="dg-dir" d="${p.d}"/>` : `<path class="dg-wire${p.dashed ? ' dash' : ''}" d="${p.d}"/>`) + `<polygon class="dg-arrow" points="${p.arrow}"/>` + (p.lbl ? `<text class="dg-sm" x="${p.lx}" y="${p.ly}">${esc(p.lbl)}</text>` : '')).join('')}
+${box.map((b) => { const q = pos.get(b.id)!; return `<rect class="dg-box${b.core ? ' core' : ''}" x="${q.x}" y="${q.y}" width="${b.w}" height="${b.h}"/><text class="dg-lbl" x="${q.x + 12}" y="${q.y + (b.s ? 24 : 26)}">${esc(b.l)}</text>${b.s ? `<text class="dg-sm" x="${q.x + 12}" y="${q.y + 42}">${esc(b.s)}</text>` : ''}`; }).join('')}
+</svg>`;
+---
+<Figure n={n} caption={caption} note={note} minWidth={Math.min(760, Math.ceil(W * 0.9))}>
+  <Fragment set:html={svg} />
+</Figure>

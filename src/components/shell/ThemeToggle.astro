@@ -1,0 +1,44 @@
+---
+/**
+ * @component ThemeToggle
+ * @group shell
+ * @summary Cycles Auto → Light → Dark. Auto follows the device. Remembered per browser.
+ * @use Inside SiteNav (already there).
+ * @avoid Sun/moon icons without text.
+ * @behavior Switching: a plane in the new mode's ground slides in from the right (the toggle's side) on the click, covers the page, the theme switches underneath, and the plane slides on out to the left (~0.8s, soft 10° edges, transform only — no page capture; scripts/theme.ts). Nothing inside the page animates while it switches. A step that does not change what shows (Auto → Light on a light device) just changes the setting. Reduced motion: instant.
+ * @example
+ * <ThemeToggle />
+ */
+import { langOf, t } from '../../lib/i18n';
+const lang = langOf(Astro.url);
+const labels = { auto: t('system', lang), light: t('light', lang), dark: t('dark', lang) };
+---
+<button class="theme" type="button" data-labels={JSON.stringify(labels)} aria-label={t('theme', lang)}>
+  <span class="theme-dot" aria-hidden="true"></span><span class="theme-l">{labels.auto}</span>
+</button>
+
+<style>
+  .theme { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--rule); border-radius: 2px; padding: 5px 8px; cursor: pointer; font: 500 12px/1 var(--f-mono); color: var(--ink2); }
+  .theme:hover { color: var(--ink); border-color: var(--ink3); }
+  .theme-dot { width: 9px; height: 9px; border: 1.5px solid currentColor; border-radius: 50%; background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+  :global(:root[data-theme='light']) .theme-dot { background: transparent; }
+  :global(:root[data-theme='dark']) .theme-dot { background: currentColor; }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/lifecycle';
+  import { setTheme, storedTheme } from '../../scripts/theme';
+  const order = ['auto', 'light', 'dark'] as const;
+  onPage(() => {
+    const btn = document.querySelector<HTMLButtonElement>('.theme');
+    if (!btn) return;
+    const labels = JSON.parse(btn.dataset.labels || '{}');
+    const show = () => { const m = storedTheme(); btn.querySelector('.theme-l')!.textContent = labels[m]; btn.setAttribute('aria-description', labels[m]); };
+    show();
+    // the switch itself (and its sweep) is scripts/theme.ts; the label follows any switch, the kit's included
+    const click = () => setTheme(order[(order.indexOf(storedTheme()) + 1) % order.length]);
+    btn.addEventListener('click', click);
+    document.addEventListener('themechange', show);
+    return () => { btn.removeEventListener('click', click); document.removeEventListener('themechange', show); };
+  });
+</script>

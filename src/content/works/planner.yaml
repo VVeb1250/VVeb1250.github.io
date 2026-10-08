@@ -1,0 +1,11 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §3.1.
+title: "Study Planner"
+cat: sys
+year: 2025
+type: WEB APP
+line:
+  en: "Team of 7. Primary backend and application logic, integration fixes, and a Vercel deploy for questionnaire feedback. 39 of 80 commits."
+  ja: "チーム7人。主にバックエンドとアプリケーションのロジックを担当し、統合時の不具合を修正しました。アンケートのフィードバック用に Vercel へデプロイしています。全80コミット中39コミット。"
+  th: "ทีม 7 คน ดูแล backend และ logic ของแอปเป็นหลัก แก้ปัญหาการเชื่อมต่อ และ deploy บน Vercel สำหรับหน้าเก็บความเห็นแบบสอบถาม คิดเป็น 39 จาก 80 commit"
+tags: [team, coursework]
+sources: [portfolio-facts §3.1]

@@ -1,0 +1,167 @@
+---
+/**
+ * @component PhotoCard
+ * @group media
+ * @summary A hobby picture as a printed photo card: a paper card with a window for the picture (at its own shape — portrait, landscape or square) and a writing area underneath for one line in the owner's words.
+ * @use The owner's drawings, sketches and photographs — the personal layer (About, a Desk/Notes section). A few loose cards in a `<div class="pc-row">`; a series (4–8, e.g. sketches → final) inside a HorizontalStrip. In a row the cards share one picture height (`size` is ignored there). Tilt a few of them a little so a row looks laid down by hand. When a page sizes cards with its own layout, pass `sizes` so the browser loads a sharp image at that width.
+ * @avoid Work screenshots or evidence (use MediaFrame); more than a sentence of text; tilts bigger than ±4°; the same tilt on every card.
+ * @behavior Hover / focus: the card straightens and lifts (240ms). Tap / click / Enter opens the same card large in the middle of the screen (one shared <dialog> for the page). The card's own picture shows at once at the right shape; the large one is fetched only then and replaces it when decoded — if that takes over 150ms the loading HUD sits on the picture meanwhile (never the previous card's picture). Esc, a click outside or ✕ closes it and focus returns to the card. Reduced motion: no movement. `signed`: the owner's handwritten signature sits at the bottom-right of the paper strip under the picture (the strip grows to hold it) and again on the large card; its ink is colored at build time from the picture (its most saturated pixels, lightness set per theme to read on the paper).
+ * @example
+ * <div class="pc-row">
+ *   <PhotoCard src="vaja/object.webp" alt={{ en: 'Vaja holding the crystal staff' }} caption={{ en: 'Vaja, drawn by hand' }} meta="2025 · DIGITAL" tilt={-2} />
+ *   <PhotoCard src="vaja/scene-westbrook.webp" alt={{ en: 'Westbrook Stonescape' }} caption={{ en: 'Westbrook Stonescape' }} tilt={1.5} />
+ * </div>
+ */
+import { Image, getImage } from 'astro:assets';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { img, lqStyle, signInk } from '../../lib/media';
+import signature from '../../assets/signature/web.svg';
+export interface Props {
+  src: string;
+  alt: L;
+  /** The line written on the card — the owner's words. */
+  caption?: L;
+  /** Small mono line under the caption: year, medium, place. */
+  meta?: L;
+  /** Degrees, −4 … 4. Default 0. */
+  tilt?: number;
+  size?: 'sm' | 'md' | 'lg';
+  /** Responsive image sizes when the surrounding layout overrides the card's default width. */
+  sizes?: string;
+  /** The owner's signature at the bottom-right of the paper, inked in the picture's own accent. Only on his own drawings. */
+  signed?: boolean;
+}
+const { src, alt, caption, meta, tilt = 0, size = 'md', sizes, signed = false } = Astro.props;
+const lang = langOf(Astro.url);
+const m = img(src);
+const lq = await lqStyle(m);
+const ink = signed ? await signInk(m) : null;
+const t = Math.max(-4, Math.min(4, tilt));
+const W = { sm: 220, md: 280, lg: 360 }[size];
+const widths = sizes
+  ? [...new Set([W, W * 2, 1080, Math.min(1400, m.width)].filter((x) => x <= m.width))]
+  : [W, W * 2].filter((x) => x <= m.width).concat(m.width < W ? [m.width] : []);
+const big = await getImage({ src: m, width: Math.min(1400, m.width), format: 'webp' });
+---
+<figure class="pc" style={`--tilt:${t}deg;--w:${W}px;--sig-w:clamp(48px, 6.5vw, 80px);--ar:${(m.width / m.height).toFixed(4)}`} tabindex="0" role="button" aria-label={tx(caption ?? alt, lang)} aria-haspopup="dialog" data-big={big.src} data-bw={m.width} data-bh={m.height}>
+  <div class="pc-card">
+    <div class="pc-win">
+      <Image style={lq} data-lq src={m} alt={tx(alt, lang)} widths={widths} sizes={sizes ?? `${W}px`} loading="lazy" />
+    </div>
+    <figcaption class="pc-note">
+      {ink && <span class="pc-sig" aria-hidden="true" style={`--sig-l:${ink.light};--sig-d:${ink.dark};--sig-img:url(${signature.src})`}></span>}
+      {caption && <span class="pc-cap">{tx(caption, lang)}</span>}
+      {meta && <span class="pc-meta">{tx(meta, lang)}</span>}
+    </figcaption>
+  </div>
+</figure>
+
+<style>
+  .pc { cursor: zoom-in; position: relative; margin: 0; width: min(100%, var(--w)); transform: rotate(var(--tilt)); transition: transform var(--t-cursor) var(--e-enter); outline: none; }
+  .pc-card { position: relative; z-index: 1; padding: 10px 10px 0; background: var(--surface); border: 1px solid var(--rule); box-shadow: 0 14px 28px -18px color-mix(in srgb, var(--shade) 75%, transparent), 0 2px 4px -2px color-mix(in srgb, var(--shade) 30%, transparent); }
+  .pc-win { position: relative; border: 1px solid color-mix(in srgb, var(--ink) 55%, transparent); background: var(--sunk); }
+  /* the signature lives on the paper strip under the picture; the strip grows to hold it (light-dark follows the site's theme: tokens set color-scheme) */
+  .pc-note:has(.pc-sig) { position: relative; min-height: calc(var(--sig-w) / 1.97 + 12px); }
+  .pc-sig { position: absolute; right: 2px; bottom: 6px; width: var(--sig-w); aspect-ratio: 564 / 286; background: light-dark(var(--sig-l), var(--sig-d)); mask: var(--sig-img) center / contain no-repeat; -webkit-mask: var(--sig-img) center / contain no-repeat; pointer-events: none; }
+  .pc-win :global(img) { display: block; width: 100%; height: auto; }
+  .pc-note { display: grid; gap: 4px; justify-items: center; text-align: center; min-height: 64px; align-content: center; padding: 12px 6px 16px; }
+  .pc-cap { font-size: 15px; line-height: 1.35; color: var(--ink); text-wrap: balance; }
+  .pc-meta { font: 500 10px/1.3 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); }
+  .pc:hover, .pc:focus-visible { transform: rotate(0deg) translateY(-4px); }
+  .pc:focus-visible .pc-card { outline: 2px solid var(--acc); outline-offset: 3px; }
+  /* in a row (pc-row or a HorizontalStrip) cards share one picture height, so portrait, square and landscape line up;
+     very wide pictures are capped at 1.5× that height in width (they come out a little shorter, never towering). */
+  :global(.pc-row), :global(.hs-track) { --row-h: clamp(190px, 34vh, 280px); }
+  :global(.pc-row) > .pc, :global(.hs-track) > .pc { width: calc(min(var(--ar) * var(--row-h), var(--row-h) * 1.5) + 22px); }
+  /* never wider than the row: on a phone a landscape card shrinks to the column instead of widening the page */
+  :global(.pc-row) > .pc { max-width: 100%; }
+  :global(.pc-row) { display: flex; flex-wrap: wrap; gap: clamp(28px, 4vw, 48px) clamp(24px, 3.4vw, 44px); align-items: flex-start; padding: 8px 28px 16px 4px; }
+  @media (prefers-reduced-motion: reduce) { .pc { transition: none; } }
+</style>
+
+<style is:global>
+  /* the viewer: the card itself, large — no black lightbox, no blur (cheap to open on any device) */
+  .pc-view { padding: 0; border: 0; background: transparent; max-width: none; max-height: none; overflow: visible; }
+  .pc-view::backdrop { background: color-mix(in srgb, var(--bg) 78%, transparent); }
+  .pc-view[open] { display: grid; place-items: center; width: 100vw; height: 100svh; }
+  .pc-view .pcv-card { position: relative; background: var(--surface); border: 1px solid var(--rule); padding: 14px 14px 0; box-shadow: 0 30px 60px -30px color-mix(in srgb, var(--shade) 80%, transparent); max-width: min(92vw, 1000px); }
+  .pc-view .pcv-win { position: relative; border: 1px solid color-mix(in srgb, var(--ink) 55%, transparent); background: var(--sunk); }
+  .pc-view .pcv-win img { display: block; max-width: 100%; max-height: calc(100svh - 190px); width: auto; height: auto; margin: 0 auto; }
+  .pc-view .pcv-sig { position: absolute; right: 14px; bottom: 10px; width: clamp(72px, 10vw, 120px); aspect-ratio: 564 / 286; background: light-dark(var(--sig-l), var(--sig-d)); mask: var(--sig-img) center / contain no-repeat; -webkit-mask: var(--sig-img) center / contain no-repeat; pointer-events: none; }
+  .pc-view .pcv-note { position: relative; display: grid; gap: 4px; justify-items: center; text-align: center; padding: 14px 8px 18px; }
+  .pc-view .pcv-cap { font-size: 17px; color: var(--ink); }
+  .pc-view .pcv-signed .pcv-note { min-height: calc(clamp(72px, 10vw, 120px) / 1.97 + 20px); }
+  .pc-view .pcv-meta { font: 500 10px/1.3 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); }
+  .pc-view .pcv-x { position: absolute; right: -1px; top: -38px; background: var(--ink); color: var(--bg); border: 0; font: 500 11px/1 var(--f-mono); letter-spacing: 0.08em; padding: 9px 11px; cursor: pointer; }
+</style>
+
+<script>
+  import { onPage, reducedMotion, cssMs } from '../../scripts/lifecycle';
+  import { hud, type Hud } from '../../scripts/lq';
+  onPage(() => {
+    const cards = [...document.querySelectorAll<HTMLElement>('.pc')];
+    if (!cards.length) return;
+    const lang = document.documentElement.lang;
+    const close = lang === 'th' ? 'ปิด' : lang === 'ja' ? '閉じる' : 'Close';
+    const d = document.createElement('dialog');
+    d.className = 'pc-view';
+    d.innerHTML = `<div class="pcv-card"><button type="button" class="pcv-x">${close} ✕</button><div class="pcv-win"></div><div class="pcv-note"><span class="pcv-cap"></span><span class="pcv-meta"></span><span class="pcv-sig" hidden aria-hidden="true"></span></div></div>`;
+    document.body.append(d);
+    const win = d.querySelector<HTMLElement>('.pcv-win')!, box = d.querySelector<HTMLElement>('.pcv-card')!;
+    let opener: HTMLElement | null = null, token = 0, wait: Hud | null = null;
+    const drop = () => { token++; wait?.el.remove(); wait = null; };
+    const text = (sel: string, v: string) => { const e = d.querySelector<HTMLElement>(sel)!; e.textContent = v; e.hidden = !v; };
+    const open = (c: HTMLElement) => {
+      opener = c;
+      drop();
+      const my = token, small = c.querySelector('img')!;
+      d.setAttribute('aria-label', small.alt);
+      // a fresh <img> each time, starting from the card's own picture (already loaded): never the previous card's
+      // picture, and the right shape from the first frame
+      const im = document.createElement('img');
+      im.alt = small.alt; im.width = +c.dataset.bw!; im.height = +c.dataset.bh!; im.decoding = 'async';
+      if (!(small.complete && small.naturalWidth)) Object.assign(im.style, { backgroundImage: small.style.backgroundImage, backgroundSize: 'cover' });
+      im.src = small.currentSrc || small.src;
+      win.replaceChildren(im);
+      // the large picture, fetched only now; swapped in once decoded. Slower than 150ms → the HUD says so meanwhile
+      const big = new Image();
+      big.src = c.dataset.big!;
+      const t = window.setTimeout(() => { if (my === token && d.open) wait = hud(im, { preview: false }); }, 150);
+      big.decode().then(() => {
+        if (my !== token) return;
+        clearTimeout(t);
+        im.src = big.src; im.style.backgroundImage = '';
+        wait?.done(); wait = null;
+      }, () => {
+        if (my !== token) return;
+        clearTimeout(t);
+        (wait ??= hud(im, { preview: false })).fail();
+      });
+      // the signature, when the card carries one: same colors, on the large card's paper
+      const sg = c.querySelector<HTMLElement>('.pc-sig'), sv = d.querySelector<HTMLElement>('.pcv-sig')!;
+      sv.hidden = !sg; sv.style.cssText = sg?.style.cssText ?? '';
+      box.classList.toggle('pcv-signed', !!sg);
+      text('.pcv-cap', c.querySelector('.pc-cap')?.textContent ?? '');
+      text('.pcv-meta', c.querySelector('.pc-meta')?.textContent ?? '');
+      d.showModal();
+      if (reducedMotion()) return;
+      // grow from the card that was tapped
+      const a = c.getBoundingClientRect(), b = box.getBoundingClientRect();
+      const k = a.width / b.width, dx = a.left + a.width / 2 - (b.left + b.width / 2), dy = a.top + a.height / 2 - (b.top + b.height / 2);
+      box.animate([{ transform: `translate(${dx}px, ${dy}px) scale(${k})`, opacity: 0.4 }, { transform: 'none', opacity: 1 }], { duration: cssMs('--t-enter'), easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+    };
+    // cards inside a PhotoStack are flipped by the stack; its ⤢ button opens the card on top
+    const click = (e: Event) => {
+      const t = e.target as Element;
+      const z = t.closest<HTMLElement>('.pst-zoom');
+      if (z) { const top = z.closest('.pst')?.querySelector<HTMLElement>('.pst-slot[data-top] .pc'); if (top) open(top); return; }
+      const c = t.closest<HTMLElement>('.pc'); if (c && !c.closest('.pst')) open(c);
+    };
+    const key = (e: KeyboardEvent) => { const c = (e.target as Element).closest<HTMLElement>('.pc'); if (c && !c.closest('.pst') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); open(c); } };
+    const dClick = (e: Event) => { if (e.target === d || (e.target as Element).closest('.pcv-x')) d.close(); };
+    const back = () => { drop(); opener?.focus(); };
+    document.addEventListener('click', click); document.addEventListener('keydown', key);
+    d.addEventListener('click', dClick); d.addEventListener('close', back);
+    return () => { document.removeEventListener('click', click); document.removeEventListener('keydown', key); if (d.open) d.close(); d.remove(); };
+  });
+</script>

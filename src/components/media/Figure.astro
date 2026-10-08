@@ -1,0 +1,83 @@
+---
+/**
+ * @component Figure
+ * @group media
+ * @summary A numbered technical figure: "FIG. 01" + caption on a thin rule, then a diagram (inline SVG or an image) on a faint panel. Wide diagrams scroll sideways on phones instead of shrinking to unreadable — the cut-off edge fades and a "drag ↔" hint appears only while there is more to see.
+ * @use Architecture, data flow, signal paths, state machines — drawn from the real system.
+ * @avoid Diagrams of things that do not exist; boxes-and-arrows that encode nothing; decorative "tech" lines.
+ * @example
+ * <Figure n="01" caption={{ en: 'System sketch — not the final architecture' }} minWidth={520}>
+ *   <svg viewBox="0 0 560 300" role="img" aria-label="…">…</svg>
+ * </Figure>
+ */
+import { langOf, tx, t, type L } from '../../lib/i18n';
+export interface Props {
+  /** Figure number, e.g. "01". */
+  n: string;
+  caption: L;
+  /** Below this width (px) the diagram scrolls horizontally instead of shrinking. Default 520. */
+  minWidth?: number;
+  /** One line under the figure: honesty note or source. */
+  note?: L;
+}
+const { n, caption, minWidth = 520, note } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<figure class="fig" style={`--minw:${minWidth}px`}>
+  <figcaption class="fig-h"><span class="eyebrow num">{t('fig', lang)} {n}<span class="fig-hint" aria-hidden="true"> · {tx({ en: 'drag ↔', th: 'ลากดู ↔', ja: '横にスクロール ↔' }, lang)}</span></span><span class="eyebrow l10n">{tx(caption, lang)}</span></figcaption>
+  <div class="fig-b" tabindex="0"><div class="fig-in"><slot /></div></div>
+  {note && <p class="fig-n">{tx(note, lang)}</p>}
+</figure>
+
+<style>
+  .fig { display: grid; gap: 12px; }
+  .fig-h { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--rule); padding-top: 12px; flex-wrap: wrap; }
+  .fig-b { padding: clamp(12px, 2.4vw, 28px); background: color-mix(in srgb, var(--surface) 55%, transparent); overflow-x: auto; }
+  .fig-in { min-width: var(--minw); }
+  .fig-hint { display: none; color: var(--ctxs); }
+  .fig[data-over] .fig-hint { display: inline; }
+  .fig-b[data-more='r'] { mask-image: linear-gradient(to right, #000 82%, transparent); }
+  .fig-b[data-more='l'] { mask-image: linear-gradient(to left, #000 82%, transparent); }
+  .fig-b[data-more='lr'] { mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent); }
+  .fig-in :global(svg) { display: block; width: 100%; height: auto; max-width: 880px; margin: 0 auto; }
+  .fig-n { font: 400 11px/1.4 var(--f-mono); color: var(--ink3); }
+  /* shared diagram vocabulary for inline SVGs: use these classes so diagrams follow the theme and context color */
+  .fig :global(.dg-grid) { stroke: var(--rule); stroke-width: 1; }
+  .fig :global(.dg-box) { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+  .fig :global(.dg-box.core) { stroke-width: 3.5; }
+  .fig :global(.dg-lbl) { font: 600 13px var(--f-body); fill: var(--ink); }
+  .fig :global(.dg-sm) { font: 400 10px var(--f-mono); fill: var(--ink2); letter-spacing: 0.04em; }
+  .fig :global(.dg-flow) { fill: none; stroke: var(--ctx); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+  .fig :global(.dg-dir) { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 2 9; stroke-linecap: round; }
+  .fig :global(.dg-wire) { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .fig :global(.dg-wire.dash) { stroke-dasharray: 5 5; }
+  .fig :global(.dg-arrow) { fill: var(--ink); }
+  .fig :global(.dg-hot) { fill: var(--ctxs); }
+  .fig :global(.dg-frame) { fill: none; stroke: var(--ink3); stroke-width: 1.5; stroke-dasharray: 3 5; }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/lifecycle';
+  onPage(() => {
+    const figs = [...document.querySelectorAll<HTMLElement>('.fig')];
+    if (!figs.length) return;
+    const update = (fig: HTMLElement) => {
+      const b = fig.querySelector<HTMLElement>('.fig-b')!;
+      const over = b.scrollWidth - b.clientWidth > 2;
+      fig.toggleAttribute('data-over', over);
+      const l = over && b.scrollLeft > 2, r = over && b.scrollLeft < b.scrollWidth - b.clientWidth - 2;
+      const v = (l ? 'l' : '') + (r ? 'r' : '');
+      if (v) b.dataset.more = v; else delete b.dataset.more;
+    };
+    const ro = new ResizeObserver((es) => es.forEach((e) => update((e.target as HTMLElement).closest('.fig')!)));
+    const offs = figs.map((fig) => {
+      const b = fig.querySelector<HTMLElement>('.fig-b')!;
+      const on = () => update(fig);
+      b.addEventListener('scroll', on, { passive: true });
+      ro.observe(b);
+      update(fig);
+      return () => b.removeEventListener('scroll', on);
+    });
+    return () => { ro.disconnect(); offs.forEach((f) => f()); };
+  });
+</script>

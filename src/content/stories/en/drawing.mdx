@@ -1,0 +1,108 @@
+---
+work: drawing
+recipe: art-led
+summary: Drawings, scenes and practice pages from my sketchbook.
+---
+
+import '../../../styles/stories/drawing.css';
+
+{/* The owner supplied this set for the site on 2026-10-08. Descriptions below are visual alt text,
+    not artwork titles. Reference pictures and handwritten study notes remain in the original frames.
+    Filenames mix last-edited dates and story dates, so they are not used as artwork dates. */}
+
+export const pages = [
+  {
+    id: 'illustrations', title: 'Illustrations',
+    images: [
+      ['03_dec_23', 'A green-haired character holding a flag beneath a turquoise dragon and golden birds', 'wide'],
+      ['18_apr_25', 'A silver-haired character in a black dress against a gray painted background', ''],
+      ['26_apr_68', 'A girl holding a camera, with a blue sky and railing behind her', ''],
+      ['11_may_68', 'A dark-haired girl in a yellow shirt leaning forward beside a fence', ''],
+      ['8_may_67', 'Two characters seated on a large blue mechanical turret', 'wide']
+    ]
+  },
+  {
+    id: 'scenes', title: 'Scenes',
+    images: [
+      ['13_aug_67', 'Clouds above a green field, painted with soft brush strokes', 'wide'],
+      ['8_aug_25', 'A shooting star above dark hills and tall clouds at dusk', 'wide'],
+      ['24_sep_67', 'A bright sparkler against a blue and pink evening sky', 'panorama'],
+      ['18_feb_68', 'A figure facing a green valley beneath a bright blue sky', 'wide'],
+      ['5_jan_68', 'A small character in a sunlit landscape with a tree and distant hills', 'wide'],
+      ['6_jan_68', 'A painted game scene with a small character, a wolf and interface sketches', 'wide']
+    ]
+  },
+  {
+    id: 'practice', title: 'Practice pages',
+    images: [
+      ['11_aug_25', 'A school-uniform photo reference beside three figure studies and a colored drawing', 'panorama'],
+      ['13_nov_24', 'Character redraws with red handwritten observations beside them', ''],
+      ['29_may_68', 'A page of head studies with orange handwritten notes', 'wide'],
+      ['10_feb_25', 'Line drawing of a seated long-haired character', ''],
+      ['21_mar_67', 'Line drawing of a long-haired girl with petals in the air', ''],
+      ['6_jun_67', 'A close line drawing of a girl holding a spoon near her face', ''],
+      ['31_oct_25', 'A line drawing of a girl with bunny ears beside a small character sketch', ''],
+      ['21_jan_26', 'A line drawing of a cat-eared girl holding a phone', ''],
+      ['5_mar_26', 'A page of perspective exercises, objects and character sketches', 'wide']
+    ]
+  }
+];
+
+<ProjectHeader work="drawing" layout="stack">
+  <div slot="media" class="dr-cover">
+    <div class="dr-cover-main">
+      <PhotoCard signed src="drawing/fence.webp" alt={{ en: 'A girl in a sailor uniform by a wire fence, her long black hair blowing, leaves in the wind' }} tilt={-1} size="lg" sizes="(max-width: 520px) 90vw, (max-width: 1280px) 60vw, 760px" />
+      <PhotoCard signed src="drawing/flashlight.webp" alt={{ en: 'A girl with cat ears against a tiled wall in a flashlight beam, MEOW!! scrawled beside her' }} tilt={0.8} size="lg" sizes="(max-width: 520px) 90vw, (max-width: 1280px) 60vw, 760px" />
+    </div>
+    <div class="dr-cover-side">
+      <PhotoCard signed src="drawing/standing.webp" alt={{ en: 'A full-length girl in a black and white dress with a large bag over her shoulder' }} tilt={1.5} size="lg" sizes="(max-width: 520px) 42vw, (max-width: 1280px) 30vw, 380px" />
+      <PhotoCard signed src="drawing/pink.webp" alt={{ en: 'A girl with long silver hair making a peace sign, on pink' }} tilt={-1.2} size="lg" sizes="(max-width: 520px) 42vw, (max-width: 1280px) 30vw, 380px" />
+    </div>
+    <p class="dr-hint">Open any picture to see it large.</p>
+  </div>
+</ProjectHeader>
+
+<div class="dr-intro">
+  <p>I drew now and then since primary school and practised much more seriously from Grade 12. It has always been a hobby. In year 3 I draw less often.</p>
+  <nav class="dr-index" aria-label="Sketchbook sections">
+    <a href="#illustrations">Illustrations</a>
+    <a href="#process">Drawing process</a>
+    <a href="#scenes">Scenes</a>
+    <a href="#practice">Practice pages</a>
+  </nav>
+</div>
+
+{pages.map((group) => (
+  <section id={group.id} class={`dr-chapter dr-${group.id}`} aria-labelledby={`dr-${group.id}-title`}>
+    <div class="dr-chapter-heading">
+      <h2 id={`dr-${group.id}-title`}>{group.title}</h2>
+    </div>
+    <div class="dr-pages">
+      {group.images.map(([file, alt, shape], i) => (
+        <div class={`dr-page ${shape}`}>
+          <PhotoCard signed src={`drawing/${file}.webp`} alt={{ en: alt }} tilt={[-0.7, 1, -1.1, 0.6][i % 4]} size="lg" sizes={shape === 'panorama' || (group.id === 'illustrations' && i === 0) || (group.id === 'scenes' && i === group.images.length - 1) ? '(max-width: 860px) 90vw, (max-width: 1280px) 75vw, 940px' : shape === 'wide' ? '(max-width: 520px) 90vw, (max-width: 860px) 44vw, 460px' : '(max-width: 860px) 44vw, 460px'} />
+        </div>
+      ))}
+    </div>
+    {group.id === 'illustrations' && (
+      <section id="process" class="dr-process" aria-labelledby="dr-process-title">
+        <h2 id="dr-process-title">Drawing process</h2>
+        <div class="dr-clips">
+          <figure>
+            <VideoEmbed src="drawing/03_dec_23-process.mp4" poster="drawing/03_dec_23.webp" label={{ en: 'Drawing timelapse of the green-haired character, dragon and golden birds' }} />
+          </figure>
+          <figure>
+            <VideoEmbed src="drawing/standing-process.mp4" poster="drawing/standing.webp" label={{ en: 'Drawing timelapse of the full-length character in a black and white dress' }} />
+          </figure>
+        </div>
+      </section>
+    )}
+  </section>
+))}
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'Drawings and studies.' } },
+  { who: { en: 'References' }, did: { en: 'The photo and source images shown beside the studies are reference material.' } }
+]} />
+
+<EvidenceLink href="https://www.pixiv.net/en/users/116719673" label="Pixiv · WhipForAWeeb" kind="page" shows={{ en: 'more drawings' }} />

@@ -1,0 +1,10 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §4.8.
+title: "Motion Grammar"
+cat: ui
+year: 2026
+type: MOTION STUDY
+line:
+  en: "Game UI motion measured frame by frame, turned into the tokens this site runs on."
+  th: "motion ของ UI เกม วัดทีละเฟรม แล้วแปลงเป็น token ที่เว็บนี้ใช้"
+  ja: "ゲームUIのモーションを1フレームずつ測り、このサイトのトークンにした。"
+sources: [portfolio-facts §4.8]

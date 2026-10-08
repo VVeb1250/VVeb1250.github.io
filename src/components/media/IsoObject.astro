@@ -1,0 +1,142 @@
+---
+/**
+ * @component IsoObject
+ * @group media
+ * @summary An isometric object sketch drawn from data — blocks, a cell grid, conveyor lines and callouts, in the site's palette (neutral faces, the work's color for the parts that matter, the signal for what is lit). For things that have no picture of their own: a system, a process, an idea. No background: it sits on the fog like a cutout.
+ * @use Abstract or behind-the-scenes work (Memory Base, a pipeline, an algorithm) where a screenshot would say nothing. Every block and callout is a real part with its real name. How to build one: docs/OBJECTS.md. Real rectangular pictures go ON a face (`screens`); wrap the object in SketchReveal to switch them on.
+ * @avoid Decoration ("tech-looking" cubes that stand for nothing); objects that pretend to be the final architecture (say "sketch" in `note`); more than ~12 blocks.
+ * @behavior Static. Hover / focus: the conveyor dashes run in their direction (process, on request — never on its own). Phones: sub-labels hide, labels grow. Reduced motion: no running dashes.
+ * @props-note Coordinates are in "world" units: x to the lower right, y to the lower left, z up. `box: [x, y, z, w, d, h]`. List parts back to front (painter's order). Materials: n neutral · c the work's color · a signal (lit) · k dark · w wire (dashed outline). Callout `at` is a world point; `x`/`y` place its label in SVG units (viewBox 600 × 440 by default).
+ * @example
+ * <IsoObject label={{ en: 'Memory Base sketch' }} parts={[
+ *   { box: [-70, 150, 0, 80, 80, 30] },
+ *   { box: [10, 182, 22, 100, 16, 8], mat: 'c' },
+ *   { box: [110, 110, 0, 150, 150, 48], mat: 'c' }
+ * ]} flows={[{ z: 30, d: 'M16 190 H106' }]}
+ *   callouts={[{ at: [235, 160, 48], label: 'Memory Base', sub: 'RELEVANCE · BELIEF', x: 452, y: 196 }]} />
+ */
+import { getImage } from 'astro:assets';
+import { img } from '../../lib/media';
+import { langOf, tx, type L } from '../../lib/i18n';
+type Mat = 'n' | 'c' | 'a' | 'k' | 'w';
+export interface Props {
+  /** Blocks, back to front. box = [x, y, z, w, d, h]. */
+  parts: { box: [number, number, number, number, number, number]; mat?: Mat }[];
+  /** Cell grids drawn flat on a plane (e.g. the top of a block). */
+  grids?: { z: number; x: number; y: number; cols: number; rows: number; size: number; gap: number }[];
+  /** Direction lines on a plane at height z, as an SVG path in world x/y (e.g. 'M16 190 H106'). `read` = thinner, one-way read. */
+  flows?: { z: number; d: string; read?: boolean }[];
+  callouts?: { at: [number, number, number]; label: L; sub?: L; x: number; y: number; minor?: boolean }[];
+  /**
+   * Real rectangular pictures (screenshots, photos without transparency) mapped ONTO a face of the object, so they
+   * read as a screen with depth instead of a flat rectangle. face 'top' lies on the plane at height z (x → right-down,
+   * y → left-down); 'left' stands on the front-left side (x across, z up, at y); 'right' on the front-right side
+   * (y across, z up, at x). `reveal: true` keeps it hidden until a SketchReveal around the object is pointed at.
+   */
+  screens?: { src: string; face?: 'top' | 'left' | 'right'; x: number; y: number; z: number; w: number; h: number; reveal?: boolean }[];
+  /** Accessible description of the whole object. */
+  label: L;
+  caption?: L;
+  /** Honesty note, e.g. "System sketch — not the final architecture." */
+  note?: L;
+  /** Where world (0,0,0) lands in the SVG, and a zoom. Default [300, 84], 1. */
+  origin?: [number, number];
+  scale?: number;
+  size?: [number, number];
+}
+const { parts, grids = [], flows = [], callouts = [], screens = [], label, caption, note, origin = [300, 84], scale = 1, size = [600, 440] } = Astro.props;
+const lang = langOf(Astro.url);
+const [ox, oy] = origin, k = scale;
+const C30 = 0.8660254, S30 = 0.5, r1 = (v: number) => Math.round(v * 10) / 10;
+const P = (x: number, y: number, z = 0): [number, number] => [r1(ox + (x - y) * C30 * k), r1(oy + ((x + y) * S30 - z) * k)];
+const pts = (a: [number, number][]) => a.map((p) => p.join(',')).join(' ');
+const box = ([x, y, z, w, d, h]: number[], mt: Mat) => {
+  const T = [P(x, y, z + h), P(x + w, y, z + h), P(x + w, y + d, z + h), P(x, y + d, z + h)];
+  const Lf = [P(x, y + d, z + h), P(x + w, y + d, z + h), P(x + w, y + d, z), P(x, y + d, z)];
+  const R = [P(x + w, y, z + h), P(x + w, y + d, z + h), P(x + w, y + d, z), P(x + w, y, z)];
+  return `<g class="mt-${mt}"><polygon class="fa-l" points="${pts(Lf)}"/><polygon class="fa-r" points="${pts(R)}"/><polygon class="fa-t" points="${pts(T)}"/></g>`;
+};
+const plane = (z: number) => `matrix(${r1(C30 * k * 1000) / 1000},${S30 * k},${-r1(C30 * k * 1000) / 1000},${S30 * k},${ox},${r1(oy - z * k)})`;
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const callout = (c: NonNullable<Props['callouts']>[number]) => {
+  const [ax, ay] = P(...c.at);
+  const t = tx(c.label, lang), s = c.sub ? tx(c.sub, lang) : '';
+  const W = Math.round(Math.max(t.length * 7.6, s.length * 6.1) + 4), below = c.y > ay;
+  const ex = ax < c.x ? c.x : ax > c.x + W ? c.x + W : ax;
+  return `<g class="iso-co${c.minor ? ' iso-co-x' : ''}"><line x1="${ax}" y1="${ay}" x2="${ex}" y2="${c.y}"/><line x1="${c.x}" y1="${c.y}" x2="${c.x + W}" y2="${c.y}"/><circle cx="${ax}" cy="${ay}" r="2.8"/><text class="t1" x="${c.x}" y="${below ? c.y + 17 : c.y - 21}">${esc(t)}</text>${s ? `<text class="t2" x="${c.x}" y="${below ? c.y + 31 : c.y - 7}">${esc(s)}</text>` : ''}</g>`;
+};
+const uid = `iso-${tx(label, 'en').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`;
+let body = '';
+for (const p of parts) body += box(p.box, p.mat ?? 'n');
+for (const g of grids) {
+  let cells = '';
+  for (let i = 0; i < g.cols; i++) for (let j = 0; j < g.rows; j++) cells += `<rect class="iso-cell" x="${g.x + i * (g.size + g.gap)}" y="${g.y + j * (g.size + g.gap)}" width="${g.size}" height="${g.size}"/>`;
+  body += `<g transform="${plane(g.z)}">${cells}</g>`;
+}
+for (const f of flows) body += `<g transform="${plane(f.z)}"><path class="iso-dir${f.read ? ' read' : ''}" d="${f.d}"/></g>`;
+// screens: the picture is drawn in the face's own 2D space, then projected with the face's affine matrix
+const faceM = (sc: (typeof screens)[number]) => {
+  const c = r1(C30 * k * 1000) / 1000, sn = S30 * k;
+  if ((sc.face ?? 'top') === 'top') return plane(sc.z);
+  // left face: across = +x from (x, y); right face: across = −y from (x, y + w), so the picture is never mirrored
+  const [ex, ey] = sc.face === 'left' ? P(sc.x, sc.y, sc.z + sc.h) : P(sc.x, sc.y + sc.w, sc.z + sc.h);
+  return sc.face === 'left' ? `matrix(${c},${sn},0,${k},${ex},${ey})` : `matrix(${c},${-sn},0,${k},${ex},${ey})`;
+};
+let screensSvg = '';
+for (const [i, sc] of screens.entries()) {
+  const m = img(sc.src);
+  const url = (await getImage({ src: m, format: 'webp', width: Math.min(1200, m.width) })).src;
+  const face = sc.face ?? 'top';
+  // local 2D box of the face: top = (x, y) w × h (h along world y); left / right = (0, 0) w × h (h downwards from the top edge)
+  const [lx, ly] = face === 'top' ? [sc.x, sc.y] : [0, 0];
+  screensSvg += `<g class="iso-screen" transform="${faceM(sc)}"${sc.reveal ? ' data-reveal' : ''}><image href="${url}" x="${lx}" y="${ly}" width="${sc.w}" height="${sc.h}" preserveAspectRatio="xMidYMid slice"/><rect class="iso-glass" x="${lx}" y="${ly}" width="${sc.w}" height="${sc.h}" fill="url(#${'__UID__'}-gl)"/><rect class="iso-bezel" x="${lx}" y="${ly}" width="${sc.w}" height="${sc.h}"/></g>`;
+}
+const svg = `<svg class="iso" viewBox="0 0 ${size[0]} ${size[1]}" role="img" aria-label="${esc(tx(label, lang))}"><defs><filter id="${uid}-sh" x="-15%" y="-15%" width="130%" height="150%"><feDropShadow dx="0" dy="16" stdDeviation="14" class="iso-dsh"/></filter><linearGradient id="${uid}-gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g filter="url(#${uid}-sh)">${body}${screensSvg.replaceAll('__UID__', uid)}</g>${callouts.map(callout).join('')}</svg>`;
+---
+<figure class="isof">
+  <Fragment set:html={svg} />
+  {(caption || note) && (
+    <figcaption class="isof-c">
+      {caption && <span class="eyebrow l10n">{tx(caption, lang)}</span>}
+      {note && <span class="isof-n">{tx(note, lang)}</span>}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  /* materials come from --iso-* (tokens.css): lit from above in BOTH modes — top brightest, left mid, right darkest.
+     (Using --surface / --sunk directly inverted the light in dark mode: dark surfaces are darker than sunk.) */
+  /* --iso-c: the work's color for the subject block; in dark mode it is lifted toward the signal tone (--iso-cb) so
+     the object stays vivid instead of the deep, muddy dark-mode --ctx */
+  .isof { margin: 0; display: grid; gap: 10px; --iso-c: color-mix(in oklab, var(--ctx), var(--ctxs) var(--iso-cb, 0%)); }
+  .isof-c { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: space-between; border-top: 1px solid var(--rule); padding-top: 8px; }
+  .isof-n { font: 400 11px/1.4 var(--f-mono); color: var(--ink3); }
+  .isof :global(.iso) { display: block; width: 100%; height: auto; overflow: visible; }
+  .isof :global(.iso polygon) { stroke: var(--iso-edge); stroke-width: 1; stroke-linejoin: round; }
+  .isof :global(.mt-n .fa-t) { fill: var(--iso-nt); } .isof :global(.mt-n .fa-l) { fill: var(--iso-nl); } .isof :global(.mt-n .fa-r) { fill: var(--iso-nr); }
+  .isof :global(.mt-c .fa-t) { fill: color-mix(in oklab, var(--iso-c), var(--iso-hi) 50%); } .isof :global(.mt-c .fa-l) { fill: var(--iso-c); } .isof :global(.mt-c .fa-r) { fill: color-mix(in oklab, var(--iso-c), var(--shade) 30%); }
+  .isof :global(.mt-a .fa-t) { fill: var(--ctxs); } .isof :global(.mt-a .fa-l) { fill: color-mix(in oklab, var(--ctxs), var(--shade) var(--iso-s1)); } .isof :global(.mt-a .fa-r) { fill: color-mix(in oklab, var(--ctxs), var(--shade) var(--iso-s2)); }
+  .isof :global(.mt-k .fa-t) { fill: var(--iso-kt); } .isof :global(.mt-k .fa-l) { fill: var(--iso-kl); } .isof :global(.mt-k .fa-r) { fill: var(--iso-kr); }
+  .isof :global(.mt-w polygon) { fill: none; stroke: var(--ink2); stroke-dasharray: 4 4; }
+  .isof :global(.iso-dsh) { flood-color: var(--shade); flood-opacity: var(--sh-o); }
+  .isof :global(.iso-cell) { fill: none; stroke: color-mix(in oklab, var(--iso-c), var(--shade) 30%); stroke-width: 1.2; opacity: 0.6; }
+  .isof :global(.iso-dir) { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-dasharray: 2 11; stroke-linecap: round; }
+  .isof :global(.iso-dir.read) { stroke-width: 1.8; stroke-dasharray: 2 8; }
+  .isof:hover :global(.iso-dir), .isof:focus-within :global(.iso-dir) { animation: iso-run 900ms linear infinite; }
+  @keyframes iso-run { to { stroke-dashoffset: -26; } }
+  .isof :global(.iso-screen image) { image-rendering: auto; }
+  .isof :global(.iso-glass) { pointer-events: none; }
+  .isof :global(.iso-bezel) { fill: none; stroke: color-mix(in srgb, var(--ink) 70%, transparent); stroke-width: 1.2; }
+  .isof :global(.iso-screen[data-reveal]) { opacity: 0; }
+  :global(.skr.real) .isof :global(.iso-screen[data-reveal]) { opacity: 1; }
+  .isof :global(.iso-co line) { stroke: var(--ink); stroke-width: 1; }
+  .isof :global(.iso-co circle) { fill: var(--ink); }
+  .isof :global(.iso-co text) { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+  .isof :global(.iso-co .t1) { font: 600 13px var(--f-body); fill: var(--ink); }
+  .isof :global(.iso-co .t2) { font: 500 10px var(--f-mono); letter-spacing: 0.06em; fill: var(--ink2); }
+  @media (max-width: 560px) {
+    .isof :global(.iso-co .t2), .isof :global(.iso-co line + line), .isof :global(.iso-co-x) { display: none; }
+    .isof :global(.iso-co .t1) { font-size: 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .isof :global(.iso-dir) { animation: none !important; } }
+</style>

@@ -1,0 +1,41 @@
+---
+/**
+ * @component CopyText
+ * @group primitives
+ * @summary Selectable mono text with a small Copy button (email, install command).
+ * @use Emails and one-line commands people will paste somewhere.
+ * @avoid Long code — use <CodeExcerpt>.
+ * @example
+ * <CopyText text="npx whipui init" />
+ */
+import { langOf, t } from '../../lib/i18n';
+export interface Props {
+  /** The exact text to copy. */
+  text: string;
+}
+const { text } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<span class="copy"><span class="copy-v">{text}</span><button type="button" data-copy={text} data-done={t('copied', lang)}>{t('copy', lang)}</button></span>
+
+<style>
+  .copy { display: inline-flex; gap: 10px; align-items: baseline; font: 500 13px/1 var(--f-mono); }
+  .copy-v { user-select: all; color: var(--ink2); overflow-wrap: anywhere; }
+  button { background: none; border: 1px solid var(--rule); padding: 5px 8px; cursor: pointer; font: 500 11px/1 var(--f-mono); letter-spacing: 0.06em; color: var(--ink2); border-radius: 2px; }
+  button:hover { border-color: var(--ink2); color: var(--ink); }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/lifecycle';
+  onPage(() => {
+    const click = async (e: Event) => {
+      const b = (e.target as Element).closest<HTMLButtonElement>('button[data-copy]');
+      if (!b) return;
+      try { await navigator.clipboard.writeText(b.dataset.copy || ''); } catch { return; }
+      const was = b.textContent; b.textContent = b.dataset.done || 'Copied';
+      setTimeout(() => { b.textContent = was; }, 1400);
+    };
+    document.addEventListener('click', click);
+    return () => document.removeEventListener('click', click);
+  });
+</script>

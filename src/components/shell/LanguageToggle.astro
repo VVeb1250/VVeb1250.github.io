@@ -1,0 +1,27 @@
+---
+/**
+ * @component LanguageToggle
+ * @group shell
+ * @summary EN · TH · JA links to the same page in each language.
+ * @use Inside SiteNav (already there). Can also sit in a footer.
+ * @avoid Flags or a dropdown; three short codes are enough.
+ * @behavior The current language is a `.sel` block (charcoal + identity-blue bar — site chrome); hover plate + press from base.css.
+ * @example
+ * <LanguageToggle />
+ */
+import { LOCALES, langOf, swapLang, t } from '../../lib/i18n';
+const lang = langOf(Astro.url);
+const names = { en: 'English', th: 'ไทย', ja: '日本語' };
+---
+<nav class="lang" aria-label={t('language', lang)}>
+  {LOCALES.map((l) => (
+    <a class="sel" href={swapLang(Astro.url, l)} hreflang={l} lang={l} aria-current={l === lang ? 'true' : undefined} title={names[l]}>{l.toUpperCase()}</a>
+  ))}
+</nav>
+
+<style>
+  .lang { display: flex; gap: 2px; font: 500 12px/1 var(--f-mono); }
+  a { padding: 6px 8px; color: var(--ink2); border: 1px solid transparent; border-radius: 2px; text-decoration: none; --sel-inset: -1px; --sel-shadow: inset 2px 0 0 var(--band); }
+  a:hover { color: var(--ink); }
+  a[aria-current] { color: var(--bg); } /* the block comes from .sel; chrome, so the bar is identity blue */
+</style>

@@ -1,0 +1,65 @@
+---
+/**
+ * @component VideoEmbed
+ * @group media
+ * @summary A local video clip. Short clips (`loop`) play muted only while on screen and pause off screen; long clips show controls.
+ * @use Gameplay captures, screen recordings. Keep clips under ~60 s and ~5 MB; always give a poster.
+ * @avoid Autoplay with sound, background videos behind text, YouTube iframes on the home page (heavy).
+ * @behavior Nothing downloads until the clip is near the viewport (preload="none" + poster). A looping clip that stalls for more than 150ms (first frames or buffering) gets the loading HUD over its last frame until it plays again; clips with controls keep the browser's own indicator. Reduced motion: no autoplay, controls shown.
+ * @example
+ * <VideoEmbed src="vaja/highlight-720.mp4" poster="vaja/highlight-poster.webp" label={{ en: 'Gameplay, 51 seconds, no sound' }} loop />
+ */
+import { getImage } from 'astro:assets';
+import { langOf, tx, type L } from '../../lib/i18n';
+import { vid, img, lqStyle } from '../../lib/media';
+export interface Props {
+  /** Media key, e.g. "vaja/highlight-720.mp4". */
+  src: string;
+  /** Poster image key. */
+  poster: string;
+  /** Accessible description of what the clip shows. */
+  label: L;
+  /** Short silent clip: autoplay in view, loop, no controls. Default false (controls). */
+  loop?: boolean;
+  /** CSS aspect ratio, default from the poster. */
+  ratio?: string;
+}
+const { src, poster, label, loop = false, ratio } = Astro.props;
+const lang = langOf(Astro.url);
+const p = img(poster);
+const posterUrl = (await getImage({ src: p, format: 'webp', width: Math.min(1280, p.width) })).src;
+const lq = await lqStyle(p);
+---
+<video class="vid" src={vid(src)} poster={posterUrl} preload="none" playsinline muted={loop} loop={loop} controls={!loop} data-inview={loop ? '' : undefined} aria-label={tx(label, lang)} data-lq style={`aspect-ratio:${ratio ?? `${p.width}/${p.height}`};${lq}`}></video>
+
+<style>
+  .vid { display: block; width: 100%; height: auto; background: #000; }
+</style>
+
+<script>
+  import { onPage, reducedMotion } from '../../scripts/lifecycle';
+  import { hud, type Hud } from '../../scripts/lq';
+  onPage(() => {
+    const vids = [...document.querySelectorAll<HTMLVideoElement>('video[data-inview]')];
+    if (!vids.length) return;
+    if (reducedMotion() || !('IntersectionObserver' in window)) { vids.forEach((v) => (v.controls = true)); return; }
+    // a stall longer than 150ms shows the loading HUD over the frame it stopped on; playing again clears it
+    const offs = vids.map((v) => {
+      let h: Hud | null = null, t = 0;
+      const wait = () => { clearTimeout(t); t = window.setTimeout(() => { if (!h && !v.paused && v.readyState < 3) h = hud(v, { preview: false }); }, 150); };
+      const go = () => { clearTimeout(t); h?.done(); h = null; };
+      const bad = () => { clearTimeout(t); (h ??= hud(v, { preview: false })).fail(); };
+      v.addEventListener('waiting', wait); v.addEventListener('playing', go); v.addEventListener('pause', go); v.addEventListener('error', bad);
+      return () => { clearTimeout(t); h?.el.remove(); v.removeEventListener('waiting', wait); v.removeEventListener('playing', go); v.removeEventListener('pause', go); v.removeEventListener('error', bad); };
+    });
+    const io = new IntersectionObserver((es) => {
+      for (const e of es) {
+        const v = e.target as HTMLVideoElement;
+        if (e.isIntersecting) { v.preload = 'auto'; v.play().catch(() => { v.controls = true; }); if (v.readyState < 3) v.dispatchEvent(new Event('waiting')); }
+        else v.pause();
+      }
+    }, { threshold: 0.35 });
+    vids.forEach((v) => io.observe(v));
+    return () => { io.disconnect(); vids.forEach((v) => v.pause()); offs.forEach((f) => f()); };
+  });
+</script>

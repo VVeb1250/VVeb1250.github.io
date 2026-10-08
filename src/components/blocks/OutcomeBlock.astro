@@ -1,0 +1,43 @@
+---
+/**
+ * @component OutcomeBlock
+ * @group blocks
+ * @summary What came out of it and where it stands now, plus the keep / change / kill decision when there is one.
+ * @use Near the end of every work page, and in Lab items. The outcome is a fact; "current" is the honest present state.
+ * @avoid Spinning a failure into a win; outcomes without evidence when evidence exists (add `evidence`).
+ * @example
+ * <OutcomeBlock outcome={{ en: 'Used in 2 labs. 69 visits and 11 assembles between 20 July and 26 September 2026.' }}
+ *   current={{ en: 'Online on GitHub Pages.' }} verdict="keep" />
+ */
+import EvidenceLink from '../primitives/EvidenceLink.astro';
+import { langOf, tx, t, type L } from '../../lib/i18n';
+import { VERDICT_LABEL, type Verdict } from '../../lib/vocab';
+export interface Props {
+  outcome: L;
+  current?: L;
+  verdict?: Verdict;
+  /** One line on why that verdict. */
+  because?: L;
+  evidence?: { label: string; href?: string; shows?: L; kind?: 'pr' | 'release' | 'commit' | 'page' | 'video' | 'file' | 'private' }[];
+}
+const { outcome, current, verdict, because, evidence = [] } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<div class="out">
+  <div class="col"><span class="eyebrow l10n">{t('outcome', lang)}</span><p>{tx(outcome, lang)}</p>{evidence.length > 0 && <div class="evs">{evidence.map((e) => <EvidenceLink {...e} />)}</div>}</div>
+  {current && <div class="col"><span class="eyebrow l10n">{t('current', lang)}</span><p>{tx(current, lang)}</p></div>}
+  {verdict && <div class="vd"><span class:list={['vtag', verdict]}>{tx(VERDICT_LABEL[verdict], lang)}</span>{because && <span class="because">{tx(because, lang)}</span>}</div>}
+</div>
+
+<style>
+  .out { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 20px clamp(24px, 4vw, 56px); }
+  .col { display: grid; gap: 10px; align-content: start; border-top: 1px solid var(--rule); padding-top: 14px; }
+  .col p { font-size: 18px; max-width: 40ch; }
+  .evs { display: grid; gap: 6px; }
+  .vd { grid-column: 1 / -1; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+  .vtag { font: 600 12px/1 var(--f-mono); letter-spacing: 0.1em; padding: 6px 9px; border: 1.5px solid var(--ink); }
+  .keep { background: var(--ink); color: var(--bg); }
+  .kill { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .open { border-style: dashed; }
+  .because { color: var(--ink2); font-size: 15px; }
+</style>

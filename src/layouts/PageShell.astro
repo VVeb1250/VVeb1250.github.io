@@ -1,0 +1,121 @@
+---
+/**
+ * PageShell — page shell: <head>, fog, header, main, footer, section marker, transition overlay, global scripts.
+ * Every page uses it. `cat` sets the page's context color (a work page passes its kind).
+ */
+import { ClientRouter } from 'astro:transitions';
+import { Font } from 'astro:assets';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/transitions.css';
+import Atmosphere from '../components/shell/Atmosphere.astro';
+import SiteNav from '../components/shell/SiteNav.astro';
+import Footer from '../components/shell/Footer.astro';
+import SectionMarker from '../components/shell/SectionMarker.astro';
+import PageScrollbar from '../components/shell/PageScrollbar.astro';
+import LoadLine from '../components/shell/LoadLine.astro';
+import { langOf, swapLang, LOCALES, tx } from '../lib/i18n';
+import { SITE } from '../lib/site';
+import type { CatOrSelf } from '../lib/vocab';
+
+export interface Props {
+  title: string;
+  description?: string;
+  /** Context color for the whole page. Work pages pass the work's kind (or its own color key). */
+  cat?: CatOrSelf;
+  /** Opt in: tint the background fog with the page's context color. */
+  fog?: boolean;
+  /** Nav item to mark as current. */
+  nav?: string;
+  /** Hide the site header/footer (kit specimens that render their own). */
+  bare?: boolean;
+  /** Load every script's fonts on this page (the kit shows EN/TH/JA side by side). Japanese otherwise loads on /ja/ only. */
+  allFonts?: boolean;
+  /** Keep the page out of search results (the kit). */
+  noindex?: boolean;
+}
+const { title, description = SITE.description, cat = 'self', fog = false, nav, bare = false, allFonts = false, noindex = false } = Astro.props;
+const lang = langOf(Astro.url);
+const full = title ? `${title} · ${tx(SITE.name, lang)}` : tx(SITE.name, lang);
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+// public/og.png: a screenshot of the Home cover (1200×630, light), shared by every page
+const ogImage = new URL(`${base}og.png`, Astro.site).href;
+---
+<!doctype html>
+<html lang={lang} class="js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{full}</title>
+    {description && <meta name="description" content={description} />}
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={tx(SITE.name, lang)} />
+    <meta property="og:title" content={full} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Teethawat Kumying, Computer Engineering, Khon Kaen University — the top of the home page" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    {LOCALES.map((l) => <link rel="alternate" hreflang={l} href={new URL(swapLang(Astro.url, l), Astro.site)} />)}
+    <!-- self-hosted fonts (astro.config.mjs → fonts). Preload only what this language shows first: the display face
+         everywhere, then the body face of the page's script (Japanese comes in unicode-range slices, not preloadable). -->
+    <Font cssVariable="--font-saira" preload={[{ subset: 'latin' }]} />
+    <Font cssVariable="--font-bai" preload={lang === 'th' ? [{ weight: 700 }] : false} />
+    <Font cssVariable="--font-plex-th" preload={lang === 'th' ? [{ weight: 400 }] : false} />
+    <Font cssVariable="--font-plex" preload={lang === 'th' ? false : [{ subset: 'latin' }]} />
+    <Font cssVariable="--font-mono" />
+    {(lang === 'ja' || allFonts) && <>
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&display=swap" />
+    </>}
+    <script is:inline>
+      // theme + js flag before first paint; re-applied after every client-side swap (the router replaces <html> attributes)
+      (function () {
+        function apply() {
+          var d = document.documentElement, m = null;
+          try { m = localStorage.getItem('theme'); } catch (e) {}
+          if (m === 'light' || m === 'dark') d.setAttribute('data-theme', m); else d.removeAttribute('data-theme');
+          d.classList.add('js');
+        }
+        apply();
+        window.__applyTheme = apply;
+        // safety net: if the page script never runs (a failed module load), content waiting to be revealed is shown
+        // anyway after 3s — [data-reveal] must never stay invisible (scripts/reveal.ts sets __rv)
+        if (!window.__rvT) window.__rvT = setTimeout(function () { if (!window.__rv) document.documentElement.classList.add('rv-off'); }, 3000);
+        if (!window.__themeBound) { window.__themeBound = true; document.addEventListener('astro:after-swap', apply); }
+      })();
+    </script>
+    <ClientRouter fallback="swap" />
+  </head>
+  <body>
+    <Atmosphere />
+    {!bare && <SiteNav current={nav} />}
+    {!bare && <PageScrollbar cat={cat} />}
+    <main id="main" data-cat={cat} data-fog={fog ? '' : undefined} tabindex="-1">
+      <slot />
+    </main>
+    {!bare && <Footer />}
+    <SectionMarker />
+    <LoadLine />
+    <div class="vt-plane" aria-hidden="true" transition:persist="vt-plane"></div>
+    <div class="vt-bar" aria-hidden="true" transition:persist="vt-bar"><div class="vt-bar-t"></div></div>
+    <script>
+      import '../scripts/reveal';
+      import '../scripts/lq';
+      import '../scripts/prefetch-media';
+      import '../scripts/smooth';
+      import '../scripts/transitions';
+    </script>
+  </body>
+</html>
+
+<style>
+  main { position: relative; z-index: 1; display: block; outline: none; }
+</style>

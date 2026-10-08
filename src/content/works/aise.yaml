@@ -1,0 +1,19 @@
+# Competition with its own page (/timeline/aise/). Facts: _note/portfolio-facts.md §6.2. Photo: media-candidates/aise/image.png (owner).
+title: "AISE CAMP #2"
+kind: competition
+cat: ai
+theme: aise
+year: 2024
+date: "2024-07"
+type: IDEA COMPETITION
+page: true
+line:
+  en: A two-day idea competition. Our idea, Stock Report Assistant, used AI to estimate trends that could help with stock-trading decisions.
+  ja: "2日間のアイデアコンペ。私たちのアイデア「Stock Report Assistant」は、株式売買の判断に役立つかもしれないトレンドをAIで推定するものでした。"
+  th: "การแข่งขันไอเดียสองวัน ไอเดียของเราคือ Stock Report Assistant ใช้ AI ประเมินเทรนด์ที่อาจช่วยตัดสินใจเรื่องการซื้อขายหุ้น"
+fact: { en: 3rd prize · second runner-up, th: รางวัลที่ 3 · รองชนะเลิศอันดับสอง, ja: "第3位（Second Runner-up）" }
+meta:
+  - { k: result, v: { en: 3rd prize · second runner-up, th: รางวัลที่ 3 · รองชนะเลิศอันดับสอง, ja: "第3位（Second Runner-up）" } }
+  - { k: when, v: { en: 13–14 Jul 2024, th: 13–14 ก.ค. 2024, ja: "2024年7月13〜14日" } }
+tags: [hackathon, team]
+sources: [portfolio-facts §6.2]

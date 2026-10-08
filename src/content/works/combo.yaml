@@ -1,0 +1,12 @@
+# Short entry (archive/row only). Facts: _note/portfolio-facts.md §4.4.
+title: "Combo skill pack"
+cat: tool
+year: 2026
+type: WORKFLOW PACK
+status: ACTIVE
+line:
+  en: "12 task entries and a router that combine ideas from Karpathy, Ponytail, Matt Pocock and ECC without letting them conflict. In daily use in Codex and Claude Code."
+  ja: "12のタスクエントリと、ルーターからなるワークフロー集。Karpathy、Ponytail、Matt Pocock、ECC のアイデアを、互いに衝突しないように組み合わせています。Codex と Claude Code で日常的に使っています。"
+  th: "รายการ task 12 รายการ กับ router ที่รวมไอเดียจาก Karpathy, Ponytail, Matt Pocock และ ECC โดยไม่ให้ขัดกัน ใช้จริงทุกวันกับ Codex และ Claude Code"
+tags: [lab]
+sources: [portfolio-facts §4.4]

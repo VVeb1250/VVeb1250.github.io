@@ -1,0 +1,34 @@
+---
+/**
+ * @component EvidenceLink
+ * @group primitives
+ * @summary A link to the thing that proves a claim — a merged PR, an issue, a release, a marketplace page, a commit — with what it shows in one short line.
+ * @use Right next to the claim it supports (in ContributionBlock, EvidenceRow, OutcomeBlock). The `shows` text must be checkable on the linked page.
+ * @avoid Linking private repos to strangers; `shows` text the page does not actually show.
+ * @example
+ * <EvidenceLink href="https://github.com/…/pull/102" label="agentsmesh #102" shows="merged" kind="pr" />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  href?: string;
+  /** Short name of the evidence, e.g. "agentsmesh #102". */
+  label: string;
+  /** What it shows, e.g. "merged" or "Reproduction and expected behavior". */
+  shows?: L;
+  kind?: 'pr' | 'issue' | 'release' | 'commit' | 'page' | 'video' | 'file' | 'private';
+}
+const { href, label, shows, kind = 'page' } = Astro.props;
+const lang = langOf(Astro.url);
+const K = { pr: 'PR', issue: 'ISSUE', release: 'REL', commit: 'COMMIT', page: 'PAGE', video: 'VIDEO', file: 'FILE', private: 'PRIVATE' }[kind];
+const Tag = href ? 'a' : 'span';
+---
+<Tag class="ev" href={href}><span class="ev-k">{K}</span><span class="ev-l">{label}</span>{shows && <span class="ev-s">{tx(shows, lang)}</span>}{href && <span class="ev-a" aria-hidden="true">↗</span>}</Tag>
+
+<style>
+  .ev { display: inline-flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font: 500 12px/1.4 var(--f-mono); color: var(--ink); text-decoration: none; }
+  .ev-k { font-size: 10px; letter-spacing: 0.08em; padding: 2px 4px; border: 1px solid var(--rule); color: var(--ink2); }
+  .ev-l { border-bottom: 1px solid var(--rule); }
+  a.ev:hover .ev-l { border-color: var(--ctxs); }
+  .ev-s { color: var(--ink2); }
+  .ev-a { color: var(--ink2); }
+</style>

@@ -1,0 +1,21 @@
+# Process-led work. Issue, review discussion and merged PRs are linked in the story.
+title: OSS Contributions
+cat: tool
+year: 2026
+date: "2026-07"
+type: OPEN SOURCE
+idx: "03"
+page: true
+line:
+  en: "Problems I hit while using other people’s tools, taken upstream: two merged fixes and one root-caused bug report."
+  ja: "他者のツールを使う中で見つけた問題を、上流に持ち込みました。マージ済みの修正2件と、根本原因を特定したバグ報告1件。"
+  th: "ปัญหาที่พบตอนใช้ tool ของคนอื่น แล้วส่งแก้ขึ้น upstream: merge แล้ว 2 PR และรายงาน bug ที่หาสาเหตุได้ 1 เรื่อง"
+fact: { en: 2 PRs merged, th: PR merged 2 ตัว, ja: 2件のPRがマージ }
+tags: [oss]
+sources:
+  - portfolio-facts §5
+  - https://github.com/mksglu/context-mode/issues/878
+  - https://github.com/sampleXbro/agentsmesh/issues/98
+  - https://github.com/sampleXbro/agentsmesh/pull/99
+  - https://github.com/sampleXbro/agentsmesh/pull/102
+  - https://github.com/slash9494/ai-config-sync-manager/pull/28

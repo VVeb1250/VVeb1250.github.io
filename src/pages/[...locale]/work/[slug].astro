@@ -1,0 +1,30 @@
+---
+/**
+ * /work/<id>/ — one page per work (`kind: work`, the default, or `art`) with `page: true` in its YAML and a story in src/content/stories/<lang>/<id>.mdx.
+ * Missing translation → the English story is shown (marked lang="en").
+ */
+import { getCollection, render } from 'astro:content';
+import WorkPage from '../../../layouts/WorkPage.astro';
+import { LOCALES, type Lang } from '../../../lib/i18n';
+import { storyComponents } from '../../../lib/story-components';
+import { WORK_ORDER } from '../../../lib/site';
+import { isEvent } from '../../../lib/works';
+
+export async function getStaticPaths() {
+  const works = (await getCollection('works')).filter((w) => w.data.page && !isEvent(w));
+  const stories = await getCollection('stories');
+  return LOCALES.flatMap((lang) =>
+    works.map((w) => {
+      const own = stories.find((s) => s.id === `${lang}/${w.id}`);
+      const story = own ?? stories.find((s) => s.id === `en/${w.id}`);
+      if (!story) throw new Error(`[work] "${w.id}" has page: true but no src/content/stories/en/${w.id}.mdx`);
+      return { params: { locale: lang === 'en' ? undefined : lang, slug: w.id }, props: { story, fallback: !own, lang } };
+    })
+  );
+}
+const { story, fallback } = Astro.props as { story: any; fallback: boolean; lang: Lang };
+const { Content } = await render(story);
+---
+<WorkPage work={story.data.work} order={WORK_ORDER} storyLang={fallback ? 'en' : undefined}>
+  <Content components={storyComponents} />
+</WorkPage>

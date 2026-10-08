@@ -1,0 +1,17 @@
+/* ICPC story: two years on one page (theme icpc24; the 2025 part uses icpc25's colors). */
+.icpc-year { scroll-margin-top: calc(var(--hdr-h) + 24px); display: grid; gap: clamp(20px, 3vw, 36px); }
+.icpc-y-head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px clamp(16px, 3vw, 40px); border-top: 1px solid var(--ink); padding-top: 12px; }
+.icpc-y { font-size: clamp(72px, 10vw, 148px); line-height: 0.84; letter-spacing: -0.02em; color: transparent; -webkit-text-stroke: 1px var(--ctxm); }
+.icpc-y-head p { font: 500 12px/1.5 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); padding-bottom: 8px; }
+:root[lang='th'] .icpc-y-head p, :root[lang='ja'] .icpc-y-head p { font: 500 14px/1.5 var(--f-body); letter-spacing: 0; text-transform: none; }
+
+.icpc-2024 { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
+.icpc-2025 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
+.icpc-2024 > div, .icpc-2025 > div { display: grid; gap: 16px; justify-items: start; }
+.icpc-2024 p, .icpc-2025 p { max-width: 52ch; font-size: 17px; }
+.icpc-2025 > figure { max-width: 420px; justify-self: end; }
+
+@media (max-width: 860px) {
+  .icpc-2024, .icpc-2025 { grid-template-columns: minmax(0, 1fr); }
+  .icpc-2025 > figure { justify-self: start; }
+}

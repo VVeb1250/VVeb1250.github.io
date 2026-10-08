@@ -1,0 +1,48 @@
+---
+/**
+ * @component ReelYASM
+ * @group showcase
+ * @summary Assembly YASM Helper on the Work reel: two real features (autocomplete, hover docs) overlapping, the install count with its source, and the credit to the extension it grew from.
+ * @use Inside WorkReel, once.
+ * @avoid Dropping Roncho's TASM credit; a bare install number without its source and date.
+ * @behavior Static. Under 600px the captures stack.
+ * @example
+ * <ReelYASM />
+ */
+import { Image } from 'astro:assets';
+import ReelPanel from './ReelPanel.astro';
+import Readout from '../primitives/Readout.astro';
+import { langOf, tx } from '../../lib/i18n';
+import { img, lqStyle } from '../../lib/media';
+const lang = langOf(Astro.url);
+const shots = await Promise.all([
+  { key: 'yasm/autocomplete.webp', alt: { en: 'Autocomplete in VS Code inside an assembly file', th: 'Autocomplete ใน VS Code ในไฟล์ assembly', ja: 'VS Code でアセンブリファイルのオートコンプリートを表示' } },
+  { key: 'yasm/hover.webp', alt: { en: 'Hover card showing a label’s documentation comment', th: 'การ์ด hover แสดง documentation comment ของ label', ja: 'ラベルのドキュメントコメントを表示するホバーカード' } }
+].map(async (s) => { const m = img(s.key); return { ...s, m, lq: await lqStyle(m) }; }));
+---
+<ReelPanel work="yasm" fact={null}>
+  <p class="credit" slot="txt">{tx({ en: 'Extended from Roncho’s TASM extension.', th: 'ต่อยอดจาก extension TASM ของ Roncho', ja: 'Roncho 氏の TASM 拡張を拡張したもの。' }, lang)}</p>
+  <div class="v-yasm">
+    {shots.map((s, i) => (
+      <figure class={`s s${i}`}>
+        <Image src={s.m} alt={tx(s.alt, lang)} style={s.lq} data-lq widths={[480, 872].filter((x) => x <= s.m.width).concat(s.m.width < 480 ? [s.m.width] : [])} sizes="(max-width: 1023px) 80vw, 480px" loading="lazy" />
+      </figure>
+    ))}
+    <div class="read"><Readout value={155} unit={{ en: 'installs', th: 'ครั้ง', ja: '件' }} label={{ en: 'on the VS Code Marketplace', th: 'บน VS Code Marketplace', ja: 'VS Code Marketplace で' }} source={{ en: 'Marketplace · 26 Sep 2026', th: 'Marketplace · 26 ก.ย. 2026', ja: 'Marketplace · 2026年9月26日' }} size="lg" /></div>
+  </div>
+</ReelPanel>
+
+<style>
+  .credit { font-size: 14px; color: var(--ink2); }
+  .v-yasm { position: relative; aspect-ratio: 16 / 10; width: min(100%, calc(var(--rp-vh, 9999px) * 1.6)); margin-left: auto; }
+  .s { position: absolute; margin: 0; border: 1px solid var(--rule); background: var(--chip); }
+  .s :global(img) { display: block; width: 100%; height: auto; }
+  .s0 { left: 0; top: 4%; width: 72%; }
+  .s1 { right: 0; top: 46%; width: 56%; z-index: 2; }
+  .read { position: absolute; left: 0; bottom: 0; }
+  @media (max-width: 600px) {
+    .v-yasm { aspect-ratio: auto; display: grid; gap: 12px; }
+    .s { position: relative; left: 0; right: auto; top: 0; width: 100%; }
+    .read { position: static; }
+  }
+</style>

@@ -1,0 +1,20 @@
+title: MSU Hackathon 2026
+cat: ai
+theme: msu
+year: 2026
+date: "2026-08"
+type: AI PRODUCT · HACKATHON
+idx: "04"
+page: true
+line:
+  en: A two-day hackathon idea for a breakfast shop, shown through a prototype that connects order review, receipts and ingredient planning.
+  th: "ไอเดียสำหรับร้านอาหารเช้าที่พัฒนาในแฮกกาธอนสองวัน และนำเสนอผ่านต้นแบบที่เชื่อมการตรวจออเดอร์ ใบเสร็จ และการวางแผนวัตถุดิบ"
+  ja: 2日間のハッカソンで提案した朝食店向けのアイデア。注文確認、会計、食材計画をつなぐ試作で示した。
+fact: { en: Winner · AI track · Higher Education, th: ชนะเลิศ · สาย AI · ระดับอุดมศึกษา, ja: 優勝 · AI部門 · 高等教育 }
+meta:
+  - { k: result, v: { en: Winner · AI track · Higher Education, th: ชนะเลิศ · สาย AI · ระดับอุดมศึกษา, ja: 優勝 · AI部門 · 高等教育 } }
+  - { k: team, v: ตัวเต็งขอนแก่น }
+  - { k: when, v: { en: 13–14 Aug 2026, th: 13–14 ส.ค. 2026, ja: "2026年8月13〜14日" } }
+related: [whipui, msuq]
+tags: [hackathon, team]
+sources: [portfolio-facts §2.3, §6.1]

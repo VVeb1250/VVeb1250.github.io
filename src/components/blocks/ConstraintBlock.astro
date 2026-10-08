@@ -1,0 +1,35 @@
+---
+/**
+ * @component ConstraintBlock
+ * @group blocks
+ * @summary One constraint that shaped the work, stated big — a rule, a deadline, a limit you did not control — with why it mattered.
+ * @use When a constraint explains the design (e.g. "The maintainer kept check on its fast checksum path."). One or two per page.
+ * @avoid Constraints you invented to sound rigorous; lists of generic requirements.
+ * @example
+ * <ConstraintBlock label={{ en: 'Maintainer constraint' }} statement={{ en: 'The maintainer kept check on its fast checksum path.' }} why={{ en: 'So the stale-output detection had to be a read-only follow-up.' }} source="AgentsMesh PR #99 → #102" />
+ */
+import { langOf, tx, type L } from '../../lib/i18n';
+export interface Props {
+  statement: L;
+  /** Small label, default "Constraint". e.g. Rule, Deadline, Limit. */
+  label?: L;
+  why?: L;
+  source?: L;
+}
+const { statement, label, why, source } = Astro.props;
+const lang = langOf(Astro.url);
+---
+<div class="cons">
+  <span class="eyebrow l10n">{label ? tx(label, lang) : tx({ en: 'Constraint', th: 'ข้อจำกัด', ja: '制約' }, lang)}</span>
+  <p class="st disp">{tx(statement, lang)}</p>
+  {why && <p class="why">{tx(why, lang)}</p>}
+  {source && <p class="src eyebrow l10n">{tx(source, lang)}</p>}
+</div>
+
+<style>
+  .cons { display: grid; gap: 12px; padding-left: clamp(16px, 2vw, 24px); border-left: 3px solid var(--ctxs); max-width: 60ch; }
+  .st { font-weight: 600; font-size: clamp(24px, 3vw, 36px); line-height: 1.18; text-wrap: balance; }
+  :global(:root[lang='th']) .st { line-height: 1.4; }
+  .why { color: var(--ink2); font-size: 16px; }
+  .src { color: var(--ink3); }
+</style>

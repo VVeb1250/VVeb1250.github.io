@@ -1,0 +1,60 @@
+---
+work: cesca
+recipe: free
+summary: CESCa — a camp where high-school students learn university topics and build projects. Academic staff / TA at #20 (Game Design, 2025) and #21 (Networking, 2026), as a volunteer.
+---
+
+import '../../../styles/stories/cesca.css';
+
+{/* Facts §6.5, §6.6. #21's role is self-reported (weaker external evidence than #20): say what he did, no title beyond
+    "academic staff / TA". Photos: the camp's photographers (their marks stay on the pictures), chosen by the owner
+    2026-10-07; the owner blurs the students' faces in the originals and runs `npm run media` (scripts/media-map.json).
+    Owner's folders: 2024 = #20 (April 2025), 2025 = #21 (April 2026), by the camp marks on the pictures.
+    The two camps are one page; the Timeline's #21 row opens #n21. Captions never say who is who.
+    Colors: #20 in cesca20 (the page), #21 in cesca21 (its section). */}
+
+<ProjectHeader work="cesca" layout="stack" roles={['Academic staff / TA', 'Volunteer']}>
+  <MediaFrame slot="media" src="cesca/n20-candles.webp" alt={{ en: 'Campers and staff holding hands in a circle around candles that spell CESCa #20, seen from above' }} width="full" eager
+    caption={{ en: 'CESCa #20 · the candles' }} source={{ en: 'Photo: CESCa #20' }} />
+</ProjectHeader>
+
+<ProjectContext label={{ en: 'What it is' }} lead={{ en: 'High-school students come to learn university topics and build projects.' }}>
+  <p>It runs with 80–120 staff. I was one of them both years, as a volunteer, on the academic side.</p>
+</ProjectContext>
+
+<section id="n20" class="cesca-n">
+  <div class="cesca-txt">
+    <span class="cesca-no disp num">#20</span>
+    <p class="cesca-meta">2025 · Game Design</p>
+    <ul>
+      <li>Supervised the students’ projects.</li>
+      <li>Made slides and documents, and helped make others.</li>
+      <li>Mentored the younger students.</li>
+      <li>Helped design parts of how they learned.</li>
+    </ul>
+  </div>
+  <div class="cesca-ph three">
+    <MediaFrame src="cesca/n20-lab-a.webp" alt={{ en: 'A staff member leaning in to look at a camper’s screen in the computer lab' }} width="wide" source={{ en: 'Photo: CESCa #20' }} />
+    <MediaFrame src="cesca/n20-lab-b.webp" alt={{ en: 'Staff and campers looking at a game project on an iMac in the lab' }} width="wide" source={{ en: 'Photo: CESCa #20' }} />
+    <MediaFrame src="cesca/n20-lab-c.webp" alt={{ en: 'A staff member standing behind a camper at a computer during an evening session' }} width="wide" source={{ en: 'Photo: CESCa #20' }} />
+  </div>
+</section>
+
+<section id="n21" class="cesca-n" data-cat="cesca21">
+  <div class="cesca-txt">
+    <span class="cesca-no disp num">#21</span>
+    <p class="cesca-meta">2026 · Networking</p>
+    <ul>
+      <li>Supervised projects and learning work.</li>
+      <li>Made slides and documents, and helped make others.</li>
+      <li>Mentored the younger students.</li>
+      <li>Helped design parts of how they learned.</li>
+    </ul>
+  </div>
+  <div class="cesca-ph two">
+    <MediaFrame src="cesca/n21-lab-a.webp" alt={{ en: 'Staff pointing at a row of iMacs with network cables while campers type; an IP address and subnet mask on the screen behind' }} width="wide" source={{ en: 'Photo: CESCa #21' }} />
+    <MediaFrame src="cesca/n21-lab-b.webp" alt={{ en: 'A staff member explaining something at a camper’s computer in the lab' }} width="wide" source={{ en: 'Photo: CESCa #21' }} />
+  </div>
+</section>
+
+<OutcomeBlock outcome={{ en: 'Academic staff / TA at two camps: Game Design at #20, Networking at #21.' }} />

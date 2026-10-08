@@ -1,0 +1,77 @@
+---
+/**
+ * @component PatternLines
+ * @group home
+ * @summary The working pattern shown by the works themselves: the six steps once across the top (IDEA / FRICTION → … → KEEP THE TRACE), then one thin line per work, filled as far as that work got, with where it ended — KEEP, CHANGE, KILL, or still OPEN — and one line of what happened.
+ * @use About → "How I work", after the reader has seen the works. 3–5 rows, each a work already on the site; every note is a fact about that work (Facts), and the verdict is the one the work really got.
+ * @avoid Rows for works the reader has not met; a verdict that flatters (a retired project is KILL, not CHANGE); a second copy of the pattern as a manifesto above it; icons.
+ * @behavior Static; the rows' lines fill once when the list scrolls into view (the shared reveal). Each work's name links to its page, or to its row on the Timeline. Under 720px each row keeps its own small line of six steps.
+ * @example
+ * <PatternLines rows={[{ work: 'z80', reached: 'trace', verdict: 'keep', note: { en: 'Fragmented course workflow → one workspace. Complete; still in use.' } }]} />
+ */
+import { langOf, tx, href as hrefOf, type L } from '../../lib/i18n';
+import { PROCESS, VERDICT_LABEL, type Verdict } from '../../lib/vocab';
+import { work, workHref } from '../../lib/works';
+export interface Props {
+  /** `to`: a locale-free path when the work lives elsewhere than its page / Timeline row (e.g. '/timeline/'). */
+  rows: { work: string; name?: L; to?: string; reached: string; verdict: Verdict; note: L }[];
+  base?: string;
+}
+const { rows, base } = Astro.props;
+const lang = langOf(Astro.url);
+const idx = (k: string) => PROCESS.findIndex((s) => s.key === k);
+const decide = idx('decide');
+const items = await Promise.all(rows.map(async (r) => {
+  const w = await work(r.work);
+  const link = r.to ? hrefOf(r.to, lang) : w.data.page ? workHref(r.work, lang, base) : hrefOf(`/timeline/#${r.work}`, lang);
+  return { ...r, title: r.name ? tx(r.name, lang) : w.data.title, cat: w.data.cat, link, at: idx(r.reached) };
+}));
+---
+<div class="ptl" style={`--n:${PROCESS.length}`}>
+  <ol class="ptl-head" aria-hidden="true">
+    {PROCESS.map((s) => <li class="eyebrow l10n">{tx(s.label, lang)}</li>)}
+  </ol>
+  <ul class="ptl-rows" data-reveal="fade">
+    {items.map((r) => (
+      <li class="ptl-row" data-cat={r.cat} data-verdict={r.verdict}>
+        <a class="ptl-name disp" href={r.link}>{r.title}</a>
+        <span class="ptl-track" role="img" aria-label={`${tx(VERDICT_LABEL[r.verdict], lang)} — ${PROCESS.slice(0, r.at + 1).map((s) => tx(s.label, lang)).join(' → ')}`} style={`--at:${r.at}`}>
+          {PROCESS.map((_, i) => <i data-on={i <= r.at ? '' : undefined} style={`--k:${i};grid-column:${i + 1}`}></i>)}
+          <b class:list={['vd', r.verdict]} style={`grid-column:${decide + 1}`}>{tx(VERDICT_LABEL[r.verdict], lang)}</b>
+        </span>
+        <p class="ptl-note">{tx(r.note, lang)}</p>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  /* one grid for the header and every row: the name column, then the six steps */
+  .ptl { --name: clamp(150px, 16vw, 220px); display: grid; gap: 6px; }
+  .ptl-head, .ptl-row { display: grid; grid-template-columns: var(--name) repeat(var(--n), minmax(0, 1fr)); column-gap: 0; }
+  .ptl-head { list-style: none; margin: 0; padding: 0 0 10px; }
+  .ptl-head li { padding-right: 10px; color: var(--ink2); }
+  .ptl-head li:first-child { grid-column: 2; }
+  .ptl-rows { list-style: none; margin: 0; padding: 0; display: grid; }
+  .ptl-row { align-items: center; row-gap: 6px; padding: 16px 0; border-top: 1px solid var(--rule); }
+  .ptl-row:last-child { border-bottom: 1px solid var(--rule); }
+  .ptl-name { grid-column: 1; grid-row: 1 / span 2; align-self: start; font-size: 20px; line-height: 1.15; color: var(--ink); text-decoration: none; padding-right: 16px; }
+  .ptl-name:hover { text-decoration: underline; text-decoration-color: var(--ctxs); text-underline-offset: 0.12em; }
+  /* the line: one segment per step, filled up to where the work got */
+  .ptl-track { grid-column: 2 / -1; grid-row: 1; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); align-items: center; position: relative; height: 22px; }
+  .ptl-track i { grid-row: 1; height: 1px; background: repeating-linear-gradient(90deg, var(--ink3) 0 2px, transparent 2px 6px); position: relative; }
+  .ptl-track i::after { content: ''; position: absolute; left: 0; top: -1px; height: 3px; width: 0; background: var(--ctxs); transition: width var(--t-line) var(--e-enter); transition-delay: calc(var(--k) * var(--t-line) * 0.5); }
+  :global(.is-in) .ptl-track i[data-on]::after, :global(:root:not(.js)) .ptl-track i[data-on]::after { width: 100%; }
+  .ptl-track i[data-on]::before { content: ''; position: absolute; left: 0; top: -4px; width: 9px; height: 9px; background: var(--ctxs); }
+  .ptl-track .vd { grid-row: 1; justify-self: start; position: relative; z-index: 1; font: 600 11px/1 var(--f-mono); letter-spacing: 0.1em; padding: 4px 6px; border: 1.5px solid var(--ink); color: var(--ink); background: var(--bg); }
+  .vd.keep { background: var(--ink); color: var(--bg); }
+  .vd.kill { text-decoration: line-through; }
+  .vd.open { border-style: dashed; }
+  .ptl-note { grid-column: 2 / -1; grid-row: 2; font-size: 15px; color: var(--ink2); max-width: 70ch; }
+  @media (max-width: 720px) {
+    .ptl-head { display: none; }
+    .ptl-row { grid-template-columns: minmax(0, 1fr); }
+    .ptl-name, .ptl-track, .ptl-note { grid-column: 1; grid-row: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ptl-track i::after { transition: none; } }
+</style>
