@@ -69,7 +69,9 @@ const cv = SITE.cv ? `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}${SITE.cv}
   .hc-l { display: block; }
   .hc-l + .hc-l { padding-left: clamp(0px, 9vw, 150px); }
   /* his nickname, in his own hand between quotes, raised after the surname (where the typed “Web” used to sit) */
-  .hc-l :global(.hc-sig) { font-size: 0.4em; margin-left: 0.22em; vertical-align: 1.05em; }
+  /* raised with `top`, not `vertical-align`: a raised inline box stretches its line, and a dragged selection paints the whole
+     line box (it covered the first name's letters above) */
+  .hc-l :global(.hc-sig) { font-size: 0.4em; margin-left: 0.22em; vertical-align: baseline; position: relative; top: -1.05em; }
   .hc-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--ink); }
   .hc-f { display: grid; gap: 10px; align-content: start; padding: 16px clamp(16px, 2vw, 28px) 0 0; }
   .hc-f + .hc-f { padding-left: clamp(16px, 2vw, 28px); border-left: 1px solid var(--rule); }
