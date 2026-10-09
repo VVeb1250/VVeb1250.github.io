@@ -50,12 +50,6 @@ main[tabindex='-1']:focus { outline: none; }
 /* dragging over text: a solid block in the page's signal color (the same block as the transition bar and the .sel rows),
    text in the on-accent ink; pictures swept by a select-all get the same color, half see-through */
 ::selection { background: var(--ctxs); color: var(--acc-ink); text-shadow: none; }
-/* big display lines are set tighter than their font's own height, and a dragged block is as tall as the font, not the line:
-   it would spill over the line above and hide it. There the glyphs take the signal color and a thick underline, no block. */
-:where(h1, .dr-t, .pd-t, .tl-yn, .rb-ref)::selection, :where(h1, .dr-t, .pd-t, .tl-yn, .rb-ref) ::selection {
-  background: transparent; color: var(--ctxs);
-  text-decoration: underline; text-decoration-color: var(--ctxs); text-decoration-thickness: 0.05em; text-underline-offset: 0.1em; text-decoration-skip-ink: none;
-}
 img::selection { background: color-mix(in srgb, var(--ctxs) 55%, transparent); }
 
 /* ---------- type helpers ---------- */
