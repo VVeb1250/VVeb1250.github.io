@@ -47,7 +47,10 @@ button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
 /* <main> takes focus after a page change (scripts/transitions.ts) and from the skip link: no ring around the whole page */
 main[tabindex='-1']:focus { outline: none; }
-::selection { background: var(--ctxp); color: var(--ink); }
+/* dragging over text: a solid block in the page's signal color (the same block as the transition bar and the .sel rows),
+   text in the on-accent ink; pictures swept by a select-all get the same color, half see-through */
+::selection { background: var(--ctxs); color: var(--acc-ink); text-shadow: none; }
+img::selection { background: color-mix(in srgb, var(--ctxs) 55%, transparent); }
 
 /* ---------- type helpers ---------- */
 .disp { font-family: var(--f-disp); font-stretch: var(--disp-stretch); font-weight: var(--disp-w); letter-spacing: -0.005em; }

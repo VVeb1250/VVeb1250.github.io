@@ -25,7 +25,10 @@ const n = (await timeline()).length;
 <style>
   .top { padding-block: clamp(40px, 6vw, 88px) clamp(32px, 4vw, 56px); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px clamp(32px, 6vw, 96px); align-items: end; }
   h1 { font-size: clamp(72px, 13vw, 200px); line-height: 0.84; letter-spacing: -0.02em; display: flex; align-items: flex-start; gap: 0.08em; }
-  .cnt { font: 500 clamp(14px, 1.3vw, 18px)/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink3); margin-top: 0.4em; }
+
+  :global(:root[lang='th']) h1 { font-size: clamp(64px, 10vw, 152px); line-height: 1.1; white-space: nowrap; }
+  :global(:root[lang='ja']) h1 { font-size: clamp(64px, 11vw, 168px); line-height: 1.05; white-space: nowrap; }
+  .cnt { white-space: nowrap; font: 500 clamp(14px, 1.3vw, 18px)/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink3); margin-top: 0.4em; }
   .top p { font-size: clamp(17px, 1.5vw, 20px); color: var(--ink2); max-width: 40ch; }
   @media (max-width: 900px) { .top { grid-template-columns: minmax(0, 1fr); } }
 </style>

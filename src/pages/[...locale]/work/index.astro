@@ -127,7 +127,10 @@ const w = (m: ImageMetadata, list: number[]) => list.filter((x) => x <= m.width)
   /* ---------- top: the word, and the index of what follows ---------- */
   .wk-top { padding-block: clamp(40px, 6vw, 88px) clamp(40px, 5vw, 64px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 32px clamp(32px, 6vw, 96px); align-items: end; }
   .wk-t { font-size: clamp(88px, 17vw, 248px); line-height: 0.82; letter-spacing: -0.02em; display: flex; align-items: flex-start; gap: 0.08em; }
-  .wk-count { font: 500 clamp(14px, 1.3vw, 18px)/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink3); margin-top: 0.4em; }
+
+  :global(:root[lang='th']) .wk-t { font-size: clamp(64px, 10vw, 152px); line-height: 1.1; white-space: nowrap; }
+  :global(:root[lang='ja']) .wk-t { font-size: clamp(64px, 11vw, 168px); line-height: 1.05; white-space: nowrap; }
+  .wk-count { white-space: nowrap; font: 500 clamp(14px, 1.3vw, 18px)/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink3); margin-top: 0.4em; }
   .wk-index { list-style: none; border-top: 1px solid var(--ink); }
   .wk-index a { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 9px 4px; border-bottom: 1px solid var(--rule); text-decoration: none; color: inherit; position: relative; }
   .wi-n { font: 500 12px/1 var(--f-mono); color: var(--ink3); }
