@@ -50,6 +50,10 @@ main[tabindex='-1']:focus { outline: none; }
 /* dragging over text: a solid block in the page's signal color (the same block as the transition bar and the .sel rows),
    text in the on-accent ink; pictures swept by a select-all get the same color, half see-through */
 ::selection { background: var(--ctxs); color: var(--acc-ink); text-shadow: none; }
+/* the big display words get their selection from src/scripts/selection.ts (a band over the lower half of the letters): the native
+   block is as tall as the font and, on lines set this tight, would cover the line above */
+html.js :where(h1, .dr-t, .pd-t, .tl-yn, .rb-ref)::selection, html.js :where(h1, .dr-t, .pd-t, .tl-yn, .rb-ref) ::selection { background: transparent; color: var(--ink); }
+html.js :where(.wk-count, .cnt, .tl-yc, .pd-n, .dr-n)::selection { background: var(--ctxs); color: var(--acc-ink); }
 img::selection { background: color-mix(in srgb, var(--ctxs) 55%, transparent); }
 
 /* ---------- type helpers ---------- */

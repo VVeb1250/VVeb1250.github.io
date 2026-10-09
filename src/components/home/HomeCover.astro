@@ -33,8 +33,8 @@ const cv = SITE.cv ? `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}${SITE.cv}
 ---
 <header class="hc" data-mark={tx({ en: 'Home', th: 'หน้าแรก', ja: 'ホーム' }, lang)}>
   <h1 class="hc-name disp" data-mark-trigger>
-    <span class="hc-l" data-reveal style="--i:0"><span class="hc-t">{first}</span></span>
-    <span class="hc-l" data-reveal style="--i:2"><span class="hc-t">{rest.join(' ')}</span><Signature name="web-quoted" label={`“${SITE.handle}”`} write delay={650} class="hc-sig" /></span>
+    <span class="hc-l" data-reveal style="--i:0">{first}</span>
+    <span class="hc-l" data-reveal style="--i:2">{rest.join(' ')}<Signature name="web-quoted" label={`“${SITE.handle}”`} write delay={650} class="hc-sig" /></span>
   </h1>
   <dl class="hc-facts">
     <div class="hc-f" data-reveal style="--i:5">
@@ -67,10 +67,6 @@ const cv = SITE.cv ? `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}${SITE.cv}
   :global(:root[lang='th']) .hc-name { line-height: 1.05; font-size: clamp(52px, 11vw, 176px); }
   :global(:root[lang='ja']) .hc-name { line-height: 1.1; font-size: clamp(44px, 9.4vw, 150px); }
   .hc-l { display: block; }
-  /* A dragged selection is as tall as the font (Saira: ~1.57em), not the 0.84em line, so on the first name's line it would cover
-     the surname's letters. The words are cut at their own line box (+ room for descenders): the block is then ~1.1em tall and sits
-     under the line above. English only: Thai and Japanese have taller marks and set their own, looser, line-height. */
-  :global(:root:not([lang='th']):not([lang='ja'])) .hc-t { display: inline-block; clip-path: inset(-0.02em -0.12em -0.24em -0.12em); }
   .hc-l + .hc-l { padding-left: clamp(0px, 9vw, 150px); }
   /* his nickname, in his own hand between quotes, raised after the surname (where the typed “Web” used to sit) */
   /* raised with `top`, not `vertical-align`: a raised inline box stretches its line, and a dragged selection paints the whole
