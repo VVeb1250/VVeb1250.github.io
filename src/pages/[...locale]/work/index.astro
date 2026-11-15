@@ -16,7 +16,7 @@ import ReelVaja from '../../../components/showcase/ReelVaja.astro';
 import ReelZ80 from '../../../components/showcase/ReelZ80.astro';
 import ReelOSS from '../../../components/showcase/ReelOSS.astro';
 import ReelMSU from '../../../components/showcase/ReelMSU.astro';
-import ReelMemory from '../../../components/showcase/ReelMemory.astro';
+import ReelCombo from '../../../components/showcase/ReelCombo.astro';
 import ReelWhipUI from '../../../components/showcase/ReelWhipUI.astro';
 import ReelYASM from '../../../components/showcase/ReelYASM.astro';
 import ReelPrep from '../../../components/showcase/ReelPrep.astro';
@@ -32,7 +32,7 @@ const T = { en: 'Work', th: 'ผลงาน', ja: '作品' };
 
 // one panel component per showcase work (src/components/showcase/); the order is SHOWCASE in src/lib/site.ts
 const PANELS = {
-  vaja: ReelVaja, z80: ReelZ80, oss: ReelOSS, msu: ReelMSU, memory: ReelMemory, whipui: ReelWhipUI, yasm: ReelYASM, z80prep: ReelPrep, drawing: ReelDrawing
+  vaja: ReelVaja, z80: ReelZ80, oss: ReelOSS, msu: ReelMSU, combo: ReelCombo, whipui: ReelWhipUI, yasm: ReelYASM, z80prep: ReelPrep, drawing: ReelDrawing
 } satisfies Record<ShowcaseId, unknown>;
 const INDEX = await Promise.all(SHOWCASE.map(async (id, i) => {
   const w = await work(id), d = w.data;

@@ -8,8 +8,9 @@ import { parseDoc, GROUPS } from './docparse.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(d, e.name)) : e.name.endsWith('.astro') ? [join(d, e.name)] : []));
 const files = walk(join(root, 'src/components')).filter((f) => !f.includes(`${sep}kit${sep}`));
-const docs = files.map((f) => parseDoc(readFileSync(f, 'utf8'), relative(root, f))).filter(Boolean);
-const missing = files.filter((f) => !docs.find((d) => d.file === relative(root, f)));
+const docPath = (f) => relative(root, f).split(sep).join('/');
+const docs = files.map((f) => parseDoc(readFileSync(f, 'utf8'), docPath(f))).filter(Boolean);
+const missing = files.filter((f) => !docs.find((d) => d.file === docPath(f)));
 
 const esc = (s = '') => s.replace(/\|/g, '\\|');
 let md = `# Components

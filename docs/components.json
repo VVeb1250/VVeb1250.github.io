@@ -564,7 +564,7 @@
   "use": "Top of Home only, once. Values come from src/lib/site.ts (name, email, GitHub, availability, the CV file) and the props; the `available` / `cv` slots add anything else under those two facts.",
   "avoid": "A tagline, slogan or manifesto (Story §0.3); adjective lists; a second giant name anywhere else; hiding the facts behind a hover or a scroll.",
   "behavior": "The two name lines rise into place one after the other on load (transform + opacity, once), then his nickname writes itself in, raised after the surname, in his own hand between quotes (Signature, identity blue); the facts follow. Reduced motion: everything is simply there. The email copies with one press (CopyText).",
-  "example": "<HomeCover study={{ en: 'Computer Engineering (CoE)' }} school={{ en: 'Khon Kaen University · year 3 · expected 2028' }} looking={{ en: 'A game programming or AI engineering internship.' }} workCount={8} />",
+  "example": "<HomeCover study={{ en: 'Computer Engineering (CoE)' }} school={{ en: 'Khon Kaen University · year 3 · expected 2028' }} looking={{ en: 'An AI engineering internship.' }} workCount={8} />",
   "props": [
    {
     "name": "study",
@@ -3035,6 +3035,30 @@
   "props": []
  },
  {
+  "name": "ComboEntries",
+  "group": "showcase",
+  "file": "src/components/showcase/ComboEntries.astro",
+  "component": "ComboEntries",
+  "summary": "MyCombo's twelve direct task entries and the shared practices they use, drawn as a theme-aware SVG.",
+  "use": "On MyCombo's story and Work reel; entry names come from the current pack.",
+  "avoid": "Treating the shared core as a required router step. The router is a fallback for unclear or cross-workflow requests.",
+  "behavior": "Static and fluid; every entry remains legible at 390px in light and dark mode.",
+  "example": "<div data-cat=\"tool\"><ComboEntries /></div>",
+  "props": []
+ },
+ {
+  "name": "ReelCombo",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelCombo.astro",
+  "component": "ReelCombo",
+  "summary": "MyCombo on the Work reel: twelve direct task entries share one set of practices.",
+  "use": "Inside WorkReel, once; the same ComboEntries diagram also appears on the work page.",
+  "avoid": "Showing the router as a compulsory step or claiming behavioral improvement.",
+  "behavior": "Static; the SVG scales with the reel on desktop and mobile.",
+  "example": "<ReelCombo />",
+  "props": []
+ },
+ {
   "name": "ReelDrawing",
   "group": "showcase",
   "file": "src/components/showcase/ReelDrawing.astro",
@@ -3047,18 +3071,6 @@
   "props": []
  },
  {
-  "name": "ReelMSU",
-  "group": "showcase",
-  "file": "src/components/showcase/ReelMSU.astro",
-  "component": "ReelMSU",
-  "summary": "MSU Informatics Hackathon 2026 on the Work reel: the result as one word, the track, and the four parts of the product that were the owner's.",
-  "use": "Inside WorkReel, once. Values from MSU in src/lib/facts.ts.",
-  "avoid": "Making the win the reason for its place; naming parts the team decided together as his (the product and OCR architecture were team decisions).",
-  "behavior": "Static. The word scales with its column (container units), so it never runs into the next panel.",
-  "example": "<ReelMSU />",
-  "props": []
- },
- {
   "name": "ReelMemory",
   "group": "showcase",
   "file": "src/components/showcase/ReelMemory.astro",
@@ -3068,6 +3080,18 @@
   "avoid": "Presenting the sketch as the final architecture or as a result; any superiority claim.",
   "behavior": "Static; the diagram scrolls sideways inside itself on narrow screens (FlowDiagram).",
   "example": "<ReelMemory />",
+  "props": []
+ },
+ {
+  "name": "ReelMSU",
+  "group": "showcase",
+  "file": "src/components/showcase/ReelMSU.astro",
+  "component": "ReelMSU",
+  "summary": "MSU Informatics Hackathon 2026 on the Work reel: the result as one word, the track, and the four parts of the product that were the owner's.",
+  "use": "Inside WorkReel, once. Values from MSU in src/lib/facts.ts.",
+  "avoid": "Making the win the reason for its place; naming parts the team decided together as his (the product and OCR architecture were team decisions).",
+  "behavior": "Static. The word scales with its column (container units), so it never runs into the next panel.",
+  "example": "<ReelMSU />",
   "props": []
  },
  {

@@ -80,6 +80,7 @@ import WorkNav from '../../../components/project/WorkNav.astro';
 import IntroHero from '../../../components/home/IntroHero.astro';
 import HomeCover from '../../../components/home/HomeCover.astro';
 import ReelOSS from '../../../components/showcase/ReelOSS.astro';
+import ComboEntries from '../../../components/showcase/ComboEntries.astro';
 import Draft from '../../../components/primitives/Draft.astro';
 import { SHOWCASE } from '../../../lib/site';
 import NowBar from '../../../components/home/NowBar.astro';
@@ -601,7 +602,8 @@ export const RECIPE = {
           <SectionHeader index="08" title="Work showcase" description={GROUPS[7].note} />
           <Specimen name="WorkReel" live={false} note="The track on /work/: scroll down on a desktop and the works travel sideways; on touch, narrow screens or reduced motion they stack. Not repeated here — a second pinned track would fight this page's scroll." />
           <Specimen name="ReelPanel"><ReelOSS /></Specimen>
-          {['ReelVaja', 'ReelZ80', 'ReelOSS', 'ReelMSU', 'ReelMemory', 'ReelWhipUI', 'ReelYASM', 'ReelPrep', 'ReelDrawing'].map((n, i) => (
+          <Specimen name="ComboEntries"><div data-cat="tool" style="width:min(100%,500px)"><ComboEntries /></div></Specimen>
+          {['ReelVaja', 'ReelZ80', 'ReelOSS', 'ReelMSU', 'ReelCombo', 'ReelWhipUI', 'ReelYASM', 'ReelPrep', 'ReelDrawing'].map((n, i) => (
             <Specimen name={n} live={false} note={`Panel ${String(i + 1).padStart(2, '0')} on /work/ (order: SHOWCASE in src/lib/site.ts).`} />
           ))}
         </section>

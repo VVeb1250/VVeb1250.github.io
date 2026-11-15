@@ -1,0 +1,27 @@
+---
+/**
+ * @component ReelCombo
+ * @group showcase
+ * @summary MyCombo on the Work reel: twelve direct task entries share one set of practices.
+ * @use Inside WorkReel, once; the same ComboEntries diagram also appears on the work page.
+ * @avoid Showing the router as a compulsory step or claiming behavioral improvement.
+ * @behavior Static; the SVG scales with the reel on desktop and mobile.
+ * @example
+ * <ReelCombo />
+ */
+import ReelPanel from './ReelPanel.astro';
+import ComboEntries from './ComboEntries.astro';
+---
+<ReelPanel work="combo" aim>
+  <div class="route">
+    <div class="top"><span>12 DIRECT ENTRIES</span><span>CODEX + CLAUDE CODE</span></div>
+    <div class="diagram"><ComboEntries /></div>
+    <p>Task-specific entry points · a shared set of practices</p>
+  </div>
+</ReelPanel>
+<style>
+  .route { width: 100%; padding: clamp(8px,2vw,28px) 0; display: grid; gap: clamp(16px,2vw,28px); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+  .top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font: 11px var(--f-mono); letter-spacing: .08em; color: var(--ink2); }
+  .diagram { width: min(100%, 500px); margin-inline: auto; }
+  p { margin: 0; font: 12px/1.5 var(--f-mono); color: var(--ink2); }
+</style>

@@ -16,7 +16,7 @@
 - **Lists** — [ArchiveList](#archivelist), [ArchiveRow](#archiverow), [EvidenceRow](#evidencerow), [LabItem](#labitem), [MilestoneItem](#milestoneitem), [RelatedWork](#relatedwork), [TimelineList](#timelinelist), [TimelineRow](#timelinerow), [TrailRow](#trailrow)
 - **Project page** — [NextWork](#nextwork), [PRCard](#prcard), [ProjectContext](#projectcontext), [ProjectHeader](#projectheader), [RefBoard](#refboard), [WorkNav](#worknav)
 - **Home compositions** — [ContactCard](#contactcard), [HomeCover](#homecover), [IntroHero](#introhero), [NowBar](#nowbar), [OSSFeature](#ossfeature), [PatternLines](#patternlines), [SelectedWork](#selectedwork), [VajaFeature](#vajafeature), [Z80Feature](#z80feature)
-- **Work showcase** — [WorkReel](#workreel), [ReelDrawing](#reeldrawing), [ReelMSU](#reelmsu), [ReelMemory](#reelmemory), [ReelOSS](#reeloss), [ReelPanel](#reelpanel), [ReelPrep](#reelprep), [ReelVaja](#reelvaja), [ReelWhipUI](#reelwhipui), [ReelYASM](#reelyasm), [ReelZ80](#reelz80)
+- **Work showcase** — [WorkReel](#workreel), [ComboEntries](#comboentries), [ReelCombo](#reelcombo), [ReelDrawing](#reeldrawing), [ReelMemory](#reelmemory), [ReelMSU](#reelmsu), [ReelOSS](#reeloss), [ReelPanel](#reelpanel), [ReelPrep](#reelprep), [ReelVaja](#reelvaja), [ReelWhipUI](#reelwhipui), [ReelYASM](#reelyasm), [ReelZ80](#reelz80)
 
 ---
 
@@ -1672,7 +1672,7 @@ The first screen of Home: the name, very large, and under it the plain facts a h
 | `featured` | `number` | How many Selected work blocks follow on Home. |
 
 ```astro
-<HomeCover study={{ en: 'Computer Engineering (CoE)' }} school={{ en: 'Khon Kaen University · year 3 · expected 2028' }} looking={{ en: 'A game programming or AI engineering internship.' }} workCount={8} />
+<HomeCover study={{ en: 'Computer Engineering (CoE)' }} school={{ en: 'Khon Kaen University · year 3 · expected 2028' }} looking={{ en: 'An AI engineering internship.' }} workCount={8} />
 ```
 
 ### IntroHero
@@ -1831,6 +1831,34 @@ Z80 Workspace on Home: the workspace leads on the left, its purpose sits beside 
 ## Work showcase
 
 The Work page reel: ReelPanel is the frame every work shares (number, text, click); each Reel* panel is one work's own composition. Not templates for other pages.
+
+### ComboEntries
+
+`src/components/showcase/ComboEntries.astro`
+
+MyCombo's twelve direct task entries and the shared practices they use, drawn as a theme-aware SVG.
+
+- **Use:** On MyCombo's story and Work reel; entry names come from the current pack.
+- **Avoid:** Treating the shared core as a required router step. The router is a fallback for unclear or cross-workflow requests.
+- **Behavior:** Static and fluid; every entry remains legible at 390px in light and dark mode.
+
+```astro
+<div data-cat="tool"><ComboEntries /></div>
+```
+
+### ReelCombo
+
+`src/components/showcase/ReelCombo.astro`
+
+MyCombo on the Work reel: twelve direct task entries share one set of practices.
+
+- **Use:** Inside WorkReel, once; the same ComboEntries diagram also appears on the work page.
+- **Avoid:** Showing the router as a compulsory step or claiming behavioral improvement.
+- **Behavior:** Static; the SVG scales with the reel on desktop and mobile.
+
+```astro
+<ReelCombo />
+```
 
 ### ReelDrawing
 

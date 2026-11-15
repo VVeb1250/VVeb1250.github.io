@@ -51,11 +51,12 @@ import FlowDiagram from '../components/media/FlowDiagram.astro';
 import ScrubFrames from '../components/media/ScrubFrames.astro';
 import Inspector from '../components/blocks/Inspector.astro';
 import ScrollStepper from '../components/blocks/ScrollStepper.astro';
+import ComboEntries from '../components/showcase/ComboEntries.astro';
 
 export const storyComponents = {
   CategoryTick, CopyText, Counter, Draft, EvidenceLink, ExternalLink, GoLink, Mark, MetaLine, MetaList, Quote, RoleTag, StatusTag, Callout,
   MediaFrame, ImageCaption, VideoEmbed, Figure, FrameStepper, BeforeAfter, Stage, Plate,
   AttributionBlock, ContributionBlock, ConstraintBlock, OutcomeBlock, ProcessLine, Timeline, Retrospective, ClaimLedger, Trace, CodeExcerpt, SplitScroll,
   ProjectHeader, ProjectContext, Section, SectionHeader, PhotoCard, IsoObject, SketchReveal, PRCard, RefBoard, FallbackNotice,
-  Readout, FlowDiagram, ScrubFrames, Inspector, ScrollStepper
+  Readout, FlowDiagram, ScrubFrames, Inspector, ScrollStepper, ComboEntries
 };

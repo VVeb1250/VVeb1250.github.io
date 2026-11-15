@@ -1,0 +1,66 @@
+---
+work: combo
+recipe: build-log
+summary: MyCombo routes requests to task guidance and shared practices for Codex and Claude Code.
+---
+
+import '../../../styles/stories/combo.css';
+
+<ProjectHeader work="combo" layout="text" roles={['Workflow design', 'Agent tooling', 'Verification']} />
+
+<div class="combo-story">
+  <div class="lead">
+    <span class="eyebrow">WHY I MADE IT</span>
+    <p>My requests to an AI assistant do not all need the same process. A bug needs diagnosis; a feature needs implementation and checks; a review needs a stopping point before edits.</p>
+    <p>MyCombo grew through repeated revisions of that idea. I use the pack in my own work on Codex and Claude Code.</p>
+  </div>
+
+  <section class="choice" aria-labelledby="choice-title">
+    <div class="choice-head"><span>THE FIRST STRUCTURAL DECISION</span><h2 id="choice-title">How much should a request have to find?</h2></div>
+    <div class="arms" aria-label="Two compared ways to organize the same workflow content">
+      <div class="arm-a"><span>A / ONE ENTRY</span><strong>One<br />router</strong><p>One place to decide what guidance to load.</p></div>
+      <div class="arm-b"><span>B / SELECTED</span><strong>12 task entries</strong><div class="entry-map"><ComboEntries /></div><p>Direct entry for known tasks. The router remains available when the request is unclear.</p></div>
+    </div>
+    <div class="choice-note"><p>I compared both shapes on matched tasks. I kept B because the broader set of work was easier to discover and maintain. In eight initial pairs that both finished, B used about 10.5% more uncached input tokens. It was a maintainability decision, not a measured cost saving.</p><a href="https://github.com/VVeb1250/my-combo-skills/blob/main/audit/ab/DECISION.md">Read the A/B decision ↗</a></div>
+  </section>
+
+  <section class="evolution" aria-labelledby="evolution-title">
+    <header><span>01 / EVOLUTION</span><h2 id="evolution-title">Then the rules had to change</h2></header>
+    <div class="rounds">
+      <article><div class="round-meta"><span>START</span><small>COMBINE</small></div><div><h3>Four sources, one set of responsibilities</h3><p>I began with ideas from Karpathy, Ponytail, Matt Pocock and ECC. Simply loading four packs together would leave overlapping instructions about planning, testing, reviews and when to ask the user. I kept the useful procedures, assigned each a job and removed automatic ceremonies that did not fit every task.</p><a href="https://github.com/VVeb1250/my-combo-skills/blob/main/DESIGN.md">Architecture decision ↗</a></div></article>
+      <article><div class="round-meta"><span>OCT 2026</span><small>TRIM + TEST</small></div><div><h3>Question what newer models still need</h3><p>I audited the pack against newer model behavior, context cost and overlapping guidance. Easy evaluation cases reached a ceiling, so they could not prove a quality gain. Revisions kept the rules about owning the requested outcome and checking actual results, while making the rest of the context more selective. Project knowledge became opt-in, with accepted specs and evidence kept in the project that owns them.</p><a href="https://github.com/VVeb1250/my-combo-skills/tree/main/audit/phase1-20261021">October audit ↗</a></div></article>
+      <article><div class="round-meta"><span>NOV 2026</span><small>INTEGRATE</small></div><div><h3>Make the pack easier to use and maintain</h3><p>The next revision made outcome ownership and decision triage shared rules, added bounded research, implementation and verification roles for delegated work, and improved navigation through project knowledge. A later installation check found that the validator rejected adapters already accepted by the installer. That mismatch was fixed with regression coverage before the pack was installed on both hosts.</p><a href="https://github.com/VVeb1250/my-combo-skills/tree/main/skills/combo/practices">Current practices ↗</a></div></article>
+    </div>
+  </section>
+
+  <section class="route-section" aria-labelledby="route-title">
+    <header><span>02 / TODAY</span><h2 id="route-title">A request takes a task path</h2></header>
+    <div class="route-grid">
+      <div class="request"><small>EXAMPLE REQUEST</small><strong>“Fix this bug”</strong><p>A known task can start at its own entry.</p></div>
+      <ol class="flow">
+        <li><i>01</i><b>combo-debug</b><small>Diagnosis and repair workflow</small></li>
+        <li><i>02</i><b>Shared practices</b><small>Context, decisions and outcome evidence</small></li>
+      </ol>
+    </div>
+    <p class="caption">The router handles requests that span workflows or have no clear entry. This example shows the direct path.</p>
+  </section>
+
+  <section class="hosts" aria-labelledby="hosts-title">
+    <header><span>03 / TWO HOSTS</span><h2 id="hosts-title">One source, two installations</h2></header>
+    <p>Codex and Claude Code use the same task guidance. Each has its own adapter. The installers can plan changes, apply them and verify that managed files match the source.</p>
+    <div class="host-grid"><div><small>HOST / 01</small><strong>Codex</strong><span>Skills and agent adapters</span></div><div><small>HOST / 02</small><strong>Claude Code</strong><span>Native skills and agent adapters</span></div></div>
+    <p>Project knowledge is opt-in. A project can keep accepted specs and evidence in its own <code>.combo/</code> area.</p>
+  </section>
+
+  <section class="checks" aria-labelledby="checks-title">
+    <header><span>04 / CHECKING</span><h2 id="checks-title">What the checks established</h2></header>
+    <div class="check-grid"><div><small>VERIFIED</small><p>In the November 2026 update, a validator was brought into line with the installer’s supported adapters. Regression checks and the full test suite passed. Installation on both hosts was verified against the source.</p></div><div><small>STILL OPEN</small><p>A behavioral pilot produced incomplete comparisons, and visual review found quality gaps. It did not establish that MyCombo makes agents perform better.</p></div></div>
+  </section>
+
+<AttributionBlock rows={[
+  { who: 'me', did: { en: 'The problem, direction, workflow boundaries, review and acceptance.' } },
+  { who: 'ai', did: { en: 'Helped write and revise the pack, adapters and verification code under my direction and review.' } }
+]} />
+
+<EvidenceLink href="https://github.com/VVeb1250/my-combo-skills" label="GitHub · MyCombo" kind="page" shows={{ en: 'Source and project documentation' }} />
+</div>
